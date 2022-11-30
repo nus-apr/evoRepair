@@ -5,9 +5,11 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 RUN apt-get install -y --no-install-recommends  \
+       ant \
        git \
        nano \
        ninja-build \
+       openjdk-8-jdk \
        pkg-config \
        protobuf-compiler-grpc \
        python \
@@ -31,9 +33,14 @@ RUN python3 -m pip --disable-pip-version-check --no-cache-dir install six
 RUN python3 -m pip --disable-pip-version-check --no-cache-dir install wllvm; return 0;
 RUN python3 -m pip --disable-pip-version-check --no-cache-dir install sympy
 
-ADD . /opt/evoRepair
-WORKDIR /opt/evoRepair
+ADD . /opt/EvoRepair
+WORKDIR /opt/EvoRepair
 RUN git submodule update --init --recursive
-RUN ln -s /opt/evoRepair/bin/evorepair /usr/bin/evorepair
+RUN ln -s /opt/EvoRepair/bin/evorepair /usr/bin/evorepair
 RUN evorepair --help
 
+# Build ARJA
+WORKDIR /opt/EvoRepair/extern/arja
+RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
+WORKDIR /opt/EvoRepair/extern/arja/external
+RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
