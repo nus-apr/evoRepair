@@ -1,16 +1,12 @@
+[submodule "extern/arja"]
+	path = extern/arja
+	url = https://github.com/yyxhdy/arja.git
+[submodule "extern/evosuite"]
+	path = extern/evosuite
+	url = https://github.com/EvoSuite/evosuite.git
+[submodule "extern/seer"]
+	path = extern/seer
+	url = https://github.com/Intelligent-CAT-Lab/SEER.git
 [submodule "extern/nlohmann_json"]
 	path = extern/nlohmann_json
 	url = https://github.com/nlohmann/json
-[submodule "extern/z3"]
-	path = extern/z3
-	url = https://github.com/Z3Prover/z3
-[submodule "extern/seer"]
-    path = extern/seer
-    url = https://github.com/Intelligent-CAT-Lab/SEER.git
-[submodule "extern/evosuite"]
-    path = extern/evosuite
-    url = https://github.com/EvoSuite/evosuite.git
-[submodule "extern/arja"]
-    path = extern/arja
-    url = https://github.com/yyxhdy/arja.git
-
