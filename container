@@ -1,11 +1,11 @@
 #!/bin/bash
 BASEDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-TOOL_NAME="evoRepair"
-IMAGE_NAME="$(TOOL_NAME):experiments"
-CONTAINER_NAME="$(TOOL_NAME)_container"
+TOOL_NAME="evorepair"
+IMAGE_NAME="evorepair"
+CONTAINER_NAME="evorepair_container"
 
 if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" == ""  ]]; then
-  echo "Docker Image $(TOOL_NAME):experiments not found"
+  echo "Docker Image $TOOL_NAME:experiments not found"
   exit 1
 fi
 
