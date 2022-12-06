@@ -5,7 +5,7 @@ IMAGE_NAME="evorepair"
 CONTAINER_NAME="evorepair_container"
 
 if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" == ""  ]]; then
-  echo "Docker Image $TOOL_NAME:experiments not found"
+  echo "Docker Image $TOOL_NAME not found"
   exit 1
 fi
 
@@ -14,7 +14,7 @@ if [ ! "$(docker ps -q -f name=$CONTAINER_NAME)"  ]; then
     if [ ! "$(docker ps -aq -f status=exited -f name=$CONTAINER_NAME)"  ]; then
         docker rm $TOOL_NAME
     fi
-    docker run -d -ti --name $CONTAINER_NAME -v $BASEDIR:/opt/EvoRepair --cap-add=SYS_PTRACE --security-opt seccomp=unconfined $IMAGE_NAME
+    docker run -d -ti --name $CONTAINER_NAME -v $BASEDIR/app:/opt/EvoRepair/app --cap-add=SYS_PTRACE --security-opt seccomp=unconfined $IMAGE_NAME
 fi
 
 docker exec -it $CONTAINER_NAME bash
