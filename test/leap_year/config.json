@@ -1,8 +1,0 @@
-{
-  "project": {
-    "name": "test"
-  },
-  "name": "leap_year",
-  "source-directory": "src",
-  "fix_location": "main/java/LeapYear/LeapYear.java:7"
-}
