@@ -1,9 +1,9 @@
 [submodule "extern/arja"]
 	path = extern/arja
-	url = https://github.com/yyxhdy/arja.git
+	url = https://github.com/nus-apr/arja
 [submodule "extern/evosuite"]
 	path = extern/evosuite
-	url = https://github.com/EvoSuite/evosuite.git
+	url = https://github.com/nus-apr/evosuite
 [submodule "extern/seer"]
 	path = extern/seer
 	url = https://github.com/Intelligent-CAT-Lab/SEER.git
