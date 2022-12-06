@@ -44,3 +44,6 @@ WORKDIR /opt/EvoRepair/extern/arja
 RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
 WORKDIR /opt/EvoRepair/extern/arja/external
 RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
+
+
+WORKDIR /opt/EvoRepair
