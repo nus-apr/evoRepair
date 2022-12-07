@@ -4,7 +4,7 @@ import sys
 import signal
 import random
 from contextlib import contextmanager
-from app import logger, emitter, values, definitions
+from app import logger, emitter, values
 import base64
 import hashlib
 import time
@@ -14,7 +14,7 @@ def execute_command(command, show_output=True):
     # Print executed command and execute it in console
     command = command.encode().decode('ascii', 'ignore')
     emitter.command(command)
-    command = "{ " + command + " ;} 2> " + definitions.FILE_ERROR_LOG
+    command = "{ " + command + " ;} 2> " + values.file_log_error
     if not show_output:
         command += " > /dev/null"
     # print(command)
@@ -35,7 +35,7 @@ def clean_files():
     # Remove other residual files stored in ./output/
     emitter.information("Removing other residual files...")
     if os.path.isdir("output"):
-        clean_command = "rm -rf " + definitions.DIRECTORY_OUTPUT
+        clean_command = "rm -rf " + values.dir_output
         execute_command(clean_command)
 
 
@@ -71,21 +71,21 @@ def raise_timeout(signum, frame):
     raise TimeoutError
 
 
-def check_budget(time_budget):
-    if values.DEFAULT_ITERATION_LIMIT >= 0:
-        if values.ITERATION_NO < values.DEFAULT_ITERATION_LIMIT:  # Only for testing purpose.
-            return False
-        else:
+def have_budget(time_budget):
+    if values.iteration_limit >= 0:
+        if values.iteration_no < values.iteration_limit:  # Only for testing purpose.
             return True
+        else:
+            return False
     else:
-        if values.CONF_TIME_CHECK is None:
-            values.CONF_TIME_CHECK = time.time()
+        if values.timestamp_check is None:
+            values.timestamp_check = time.time()
             return False
         else:
-            time_start = values.CONF_TIME_CHECK
+            time_start = values.timestamp_check
             duration = float(format((time.time() - time_start) / 60, '.3f'))
             if int(duration) > int(time_budget):
-                values.CONF_TIME_CHECK = None
-                return True
-        return False
+                values.timestamp_check = None
+                return False
+        return True
 

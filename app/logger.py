@@ -3,140 +3,98 @@
 import time
 import datetime
 import os
-from app import definitions, values
+import logging
+from app import values
 from shutil import copyfile
+import logging
+
+_logger_error:logging
+_logger_command:logging
+_logger_main:logging
+_logger_build:logging
+
+def setup_logger(name, log_file, level=logging.INFO, formatter=None):
+    """To setup as many loggers as you want"""
+    if formatter is None:
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
 
 
-def create():
+def create_log_files():
+    global  _logger_main, _logger_build, _logger_command, _logger_error
     log_file_name = "log-" + str(time.time())
-    log_file_path = definitions.DIRECTORY_LOG_BASE + "/" + log_file_name
-    definitions.FILE_MAIN_LOG = log_file_path
-    with open(definitions.FILE_MAIN_LOG, 'w+') as log_file:
-        log_file.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
-    if os.path.exists(definitions.FILE_LAST_LOG):
-        os.remove(definitions.FILE_LAST_LOG)
-    if os.path.exists(definitions.FILE_ERROR_LOG):
-        os.remove(definitions.FILE_ERROR_LOG)
-    if os.path.exists(definitions.FILE_COMMAND_LOG):
-        os.remove(definitions.FILE_COMMAND_LOG)
-    with open(definitions.FILE_LAST_LOG, 'w+') as last_log:
-        last_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
-    with open(definitions.FILE_ERROR_LOG, 'w+') as error_log:
-        error_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
-    with open(definitions.FILE_COMMAND_LOG, 'w+') as command_log:
-        command_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
+    log_file_path = values.dir_log_base + "/" + log_file_name
+    values.file_log_main = log_file_path
 
+    _logger_main = setup_logger("main", values.file_log_main)
+    _logger_error = setup_logger("error", values.file_log_error)
+    _logger_command = setup_logger("command", values.file_log_cmd)
+    _logger_build = setup_logger("build", values.file_log_build)
 
 def store_log_file(log_file_path):
     if os.path.isfile(log_file_path):
-        copyfile(log_file_path, definitions.DIRECTORY_LOG + "/" + log_file_path.split("/")[-1])
+        copyfile(log_file_path, values.dir_log + "/" + log_file_path.split("/")[-1])
 
 
 def store_logs():
-    copyfile(definitions.FILE_MAIN_LOG, definitions.DIRECTORY_LOG + "/log-latest")
-    store_log_file(definitions.FILE_COMMAND_LOG)
-    store_log_file(definitions.FILE_ERROR_LOG)
-    store_log_file(definitions.FILE_MAKE_LOG)
-    store_log_file(definitions.FILE_CRASH_LOG)
-
-
-def log(log_message):
-    log_message = "[" + str(time.asctime()) + "]" + log_message
-    if "COMMAND" in log_message:
-        with open(definitions.FILE_COMMAND_LOG, 'a') as log_file:
-            log_file.write(log_message)
-    with open(definitions.FILE_MAIN_LOG, 'a') as log_file:
-        log_file.write(log_message)
-    with open(definitions.FILE_LAST_LOG, 'a') as log_file:
-        log_file.write(log_message)
+    if os.path.isfile(values.file_log_main):
+        copyfile(values.file_log_main, values.dir_log + "/log-latest")
+    log_file_list = [
+        values.file_log_cmd,
+        values.file_log_build,
+        values.file_log_cmd,
+        values.file_log_main,
+        values.file_log_crash
+    ]
+    for log_f in log_file_list:
+        store_log_file(log_f)
 
 
 def information(message):
-    message = str(message).strip()
-    message = "[INFO]: " + str(message) + "\n"
-    log(message)
+    _logger_main.info(message)
 
-
-def trace(function_name, arguments):
-    message = "[TRACE]: " + function_name + ": " + str(arguments.keys()) + "\n"
-    log(message)
-
-
-def track_localization(log_message):
-    log_output = "[{}]: {}\n".format(time.asctime(), log_message)
-    with open(definitions.FILE_LOCALIZE_LOG, 'a') as log_file:
-        log_file.write(log_output)
 
 
 def command(message):
     message = str(message).strip().replace("[command]", "")
     message = "[COMMAND]: " + str(message) + "\n"
-    log(message)
-
-
-def data(message, data=None, is_patch=False):
-    if values.DEBUG or is_patch:
-        message = str(message).strip()
-        message = "[DATA]: " + str(message) + "\n"
-        log(message)
-        if data:
-            data = "[DATA]: " + str(data) + "\n"
-            log(data)
-
+    _logger_main.info(message)
+    _logger_command.info(message)
 
 def debug(message):
     message = str(message).strip()
-    message = "[DEBUG]: " + str(message) + "\n"
-    log(message)
+    _logger_main.debug(message)
 
 
 def error(message):
-    with open(definitions.FILE_ERROR_LOG, 'a') as last_log:
-        last_log.write(str(message) + "\n")
-    message = str(message).strip().lower().replace("[error]", "")
-    message = "[ERROR]: " + str(message) + "\n"
-    log(message)
+    _logger_main.error(message)
+    _logger_error.error(message)
 
 
 def note(message):
     message = str(message).strip().lower().replace("[note]", "")
-    message = "[NOTE]: " + str(message) + "\n"
-    log(message)
+    _logger_main.info(message)
 
 
 def configuration(message):
     message = str(message).strip().lower().replace("[config]", "")
     message = "[CONFIGURATION]: " + str(message) + "\n"
-    log(message)
+    _logger_main.info(message)
 
 
 def output(message):
     message = str(message).strip()
-    message = "[LOG]: " + message
-    log(message + "\n")
+    message = "[OUTPUT]: " + message
+    _logger_main.info(message)
 
 
 def warning(message):
     message = str(message).strip().lower().replace("[warning]", "")
-    message = "[WARNING]: " + str(message) + "\n"
-    log(message)
-
-
-def end(time_duration, is_error=False):
-    output("\nTime duration\n----------------------\n\n")
-    output("Startup: " + str(time_duration[definitions.KEY_DURATION_BOOTSTRAP]) + " minutes")
-    output("Build: " + str(time_duration[definitions.KEY_DURATION_BUILD]) + " minutes")
-    output("Analysis: " + str(time_duration[definitions.KEY_DURATION_ANALYSIS]) + " minutes")
-    output("Localization: " + str(time_duration[definitions.KEY_DURATION_LOCALIZATION]) + " minutes")
-    output("Repair: " + str(time_duration[definitions.KEY_DURATION_REPAIR]) + " minutes")
-
-
-    if is_error:
-        output(values.TOOL_NAME + " exited with an error after " + time_duration[
-            definitions.KEY_DURATION_TOTAL] + " minutes")
-    else:
-        output(values.TOOL_NAME + " finished successfully after " + time_duration[
-            definitions.KEY_DURATION_TOTAL] + " minutes")
-    log("[END] " + values.TOOL_NAME + " ended at  " + str(datetime.datetime.now()) + "\n\n")
-
-
+    _logger_main.warning(message)

@@ -1,8 +1,20 @@
 {
   "project": {
-    "name": "test"
+    "name": "test",
+    "tag": "leap_year",
+    "source-directory": "src"
   },
-  "name": "leap_year",
-  "source-directory": "src",
-  "fix_location": "main/java/LeapYear/LeapYear.java:7"
+  "build": {
+    "directory": "src",
+    "commands": {
+      "pre-build": "exit 0",
+      "clean": "mvn clean",
+      "build": "mvn compile"
+    }
+  },
+  "localization": {
+    "fix-locations": [
+      "main/java/LeapYear/LeapYear.java:7"
+    ]
+  }
 }

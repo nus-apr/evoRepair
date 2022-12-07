@@ -1,4 +1,4 @@
-from app import definitions, values, emitter, extractor, utilities
+from app import values, emitter, extractor, utilities
 from pysmt.smtlib.parser import SmtLibParser
 from six.moves import cStringIO
 from pysmt.typing import BV32, BV8, ArrayType, BV64

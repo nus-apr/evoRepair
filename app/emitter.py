@@ -2,7 +2,7 @@
 
 import sys
 import os
-from app import definitions, values, logger
+from app import values, logger
 import textwrap
 import pty
 
@@ -42,85 +42,85 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
         sys.stdout.flush()
 
 
-def header(header):
-    write("\n" + "="*100 + "\n\n\t" + header + "\n" + "="*100+"\n", CYAN)
-    logger.information(title)
+def header(text):
+    write("\n" + "="*100 + "\n\n\t" + text + "\n" + "="*100+"\n", CYAN)
+    logger.information(text)
 
 
-def title(title):
-    write("\n\n\t" + title + "\n" + "="*100+"\n", CYAN)
-    logger.information(title)
+def title(text):
+    write("\n\n\t" + text + "\n" + "="*100+"\n", CYAN)
+    logger.information(text)
 
 
-def sub_title(subtitle):
-    write("\n\t" + subtitle + "\n\t" + "_"*90+"\n", CYAN)
-    logger.information(subtitle)
+def sub_title(text):
+    write("\n\t" + text + "\n\t" + "_"*90+"\n", CYAN)
+    logger.information(text)
 
 
-def sub_sub_title(sub_title):
-    write("\n\t\t" + sub_title + "\n\t\t" + "-"*90+"\n", CYAN)
-    logger.information(sub_title)
+def sub_sub_title(text):
+    write("\n\t\t" + text + "\n\t\t" + "-"*90+"\n", CYAN)
+    logger.information(text)
 
 
-def command(message):
-    if values.DEBUG:
+def command(text):
+    if values.is_debug:
         prefix = "\t\t[command] "
-        write(message, ROSE, prefix=prefix, indent_level=2)
-    logger.command(message)
+        write(text, ROSE, prefix=prefix, indent_level=2)
+    logger.command(text)
 
 
-def debug(message):
-    if values.DEBUG:
+def debug(text):
+    if values.is_debug:
         prefix = "\t\t[debug] "
-        write(message, GREY, prefix=prefix, indent_level=2)
-    logger.debug(message)
+        write(text, GREY, prefix=prefix, indent_level=2)
+    logger.debug(text)
 
 
-def data(message, info=None):
-    if values.DEBUG:
+def data(text, info=None):
+    if values.is_debug:
         prefix = "\t\t[data] "
-        write(message, GREY, prefix=prefix, indent_level=2)
+        write(text, GREY, prefix=prefix, indent_level=2)
         if info:
             write(info, GREY, prefix=prefix, indent_level=2)
-    logger.data(message, info)
+    logger.data(text, info)
 
 
-def normal(message, jump_line=True):
-    write(message, BLUE, jump_line)
-    logger.output(message)
+def normal(text, jump_line=True):
+    write(text, BLUE, jump_line)
+    logger.output(text)
 
 
-def highlight(message, jump_line=True):
-    indent_length = message.count("\t")
+def highlight(text, jump_line=True):
+    indent_length = text.count("\t")
     prefix = "\t" * indent_length
-    message = message.replace("\t", "")
-    write(message, WHITE, jump_line, indent_level=indent_length, prefix=prefix)
-    logger.note(message)
+    text = text.replace("\t", "")
+    write(text, WHITE, jump_line, indent_level=indent_length, prefix=prefix)
+    logger.note(text)
 
 
-def information(message, jump_line=True):
-    write(message, WHITE, jump_line)
-    logger.information(message)
+def information(text, jump_line=True):
+    write(text, WHITE, jump_line)
+    logger.information(text)
 
 
-def statistics(message):
-    write(message, WHITE)
-    logger.output(message)
+def statistics(text):
+    write(text, WHITE)
+    logger.output(text)
 
 
-def error(message):
-    write(message, RED)
-    logger.error(message)
+def error(text):
+    write(text, RED)
+    logger.error(text)
 
 
-def success(message):
-    write(message, GREEN)
-    logger.output(message)
+def success(text):
+    write(text, GREEN)
+    logger.output(text)
 
 
-def special(message):
-    write(message, ROSE)
-    logger.note(message)
+def special(text):
+    write(text, ROSE)
+    logger.note(text)
 
 
 def program_output(output_message):
@@ -131,27 +131,14 @@ def program_output(output_message):
     else:
         write("\t\t\t" + output_message, PROG_OUTPUT_COLOR)
 
-
-def emit_var_map(var_map):
-    write("\t\tVar Map:", WHITE)
-    for var_a in var_map:
-        highlight("\t\t\t " + var_a + " ==> " + var_map[var_a])
+def warning(text):
+    write(text, YELLOW)
+    logger.warning(text)
 
 
-def emit_ast_script(ast_script):
-    write("\t\tAST Script:", WHITE)
-    for line in ast_script:
-        special("\t\t\t " + line.strip())
-
-
-def warning(message):
-    write(message, YELLOW)
-    logger.warning(message)
-
-
-def note(message):
-    write(message, WHITE)
-    logger.note(message)
+def note(text):
+    write(text, WHITE)
+    logger.note(text)
 
 
 def configuration(setting, value):
@@ -161,25 +148,19 @@ def configuration(setting, value):
 
 
 def end(time_info, is_error=False):
-    if values.CONF_ARG_PASS:
+    if values.arg_parsed:
         statistics("\nRun time statistics:\n-----------------------\n")
-        statistics("Startup: " + str(time_info[definitions.KEY_DURATION_BOOTSTRAP].format()) + " minutes")
-        statistics("Build: " + str(time_info[definitions.KEY_DURATION_BUILD]) + " minutes")
-        statistics("Analysis: " + str(time_info[definitions.KEY_DURATION_ANALYSIS]) + " minutes")
-        statistics("Localization: " + str(time_info[definitions.KEY_DURATION_LOCALIZATION]) + " minutes")
-        statistics("Repair: " + str(time_info[definitions.KEY_DURATION_REPAIR]) + " minutes")
+        statistics("Startup: " + str(time_info["initialization"].format()) + " minutes")
+        statistics("Build: " + str(time_info["build"]) + " minutes")
+        statistics("Testing: " + str(time_info["testing"]) + " minutes")
+        statistics("Localization: " + str(time_info["localization"]) + " minutes")
+        statistics("Patch Generation: " + str(time_info["patch-generation"]) + " minutes")
+        statistics("Test Generation: " + str(time_info["test-generation"]) + " minutes")
+        statistics("Validation: " + str(time_info["validation"]) + " minutes")
 
         if is_error:
-            error("\n" + values.TOOL_NAME + " exited with an error after " + time_info[
-                definitions.KEY_DURATION_TOTAL] + " minutes \n")
+            error("\n" + values.tool_name + " exited with an error after " + time_info[
+                values.time_duration_total] + " minutes \n")
         else:
-            success("\n" + values.TOOL_NAME + " finished successfully after " + time_info[
-                definitions.KEY_DURATION_TOTAL] + " minutes \n")
-
-
-def emit_help():
-    write("Usage: cpr [OPTIONS] " + definitions.ARG_CONF_FILE + "$FILE_PATH", WHITE)
-    write("Options are:", WHITE)
-    write("\t" + definitions.ARG_DEBUG + "\t| " + "enable debugging information", WHITE)
-
-
+            success("\n" + values.tool_name + " finished successfully after " + time_info[
+                values.time_duration_total] + " minutes \n")

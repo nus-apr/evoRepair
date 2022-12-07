@@ -1,5 +1,5 @@
 import multiprocessing as mp
-from app import emitter, oracle, definitions, values, logger
+from app import emitter, oracle, values, logger
 from multiprocessing import TimeoutError
 from functools import partial
 from multiprocessing.dummy import Pool as ThreadPool

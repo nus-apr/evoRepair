@@ -16,3 +16,7 @@ bash container
 evoRepair --help
 ```
 
+#### Running test example
+```commandline
+evorepair --config test/leap_year/config.json
+```

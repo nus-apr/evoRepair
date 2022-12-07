@@ -1,5 +1,5 @@
 import os
-from app import definitions, values, emitter, extractor, logger, utilities
+from app import values, emitter, logger, utilities
 from pysmt.shortcuts import is_sat, Not, And, is_unsat
 from pysmt.smtlib.parser import SmtLibParser
 from six.moves import cStringIO

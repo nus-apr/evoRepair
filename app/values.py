@@ -2,74 +2,59 @@
 # -*- coding: utf-8 -*-
 import os
 
-TOOL_NAME = "EvoRepair"
-DEBUG = False
-ITERATION_NO = 0
-COUNT_PATCH_GEN = 0
-COUNT_PATCH_START = 0
-COUNT_PATCH_END_SEED = 0
-COUNT_PATCH_END = 0
-COUNT_PATCHES_EXPLORED = 0
-COUNT_TEMPLATES_EXPLORED = 0
-COUNT_TEMPLATE_GEN = 0
-COUNT_TEMPLATE_START = 0
-COUNT_TEMPLATE_END_SEED = 0
-COUNT_TEMPLATE_END = 0
-
-TIME_TO_GENERATE = 0
-TIME_TO_EXPLORE = 0
-TIME_TO_REDUCE = 0
-
-
-# ------------------ File Path Values ---------------
-
-FILE_POC_SYM = ""
-FILE_POC_GEN = ""
-FILE_POC_SEED = ""
-
-
-# ------------------ Default Values ---------------
-DEFAULT_DEPTH = 3
-DEFAULT_ITERATION_LIMIT = -1
-DEFAULT_PATCH_RANK_LIMIT = 5
-DEFAULT_STACK_SIZE = 15000
-DEFAULT_TIMEOUT_UNSAT = 10
-DEFAULT_TIMEOUT_SAT = 10
-DEFAULT_TIME_DURATION = 60
-DEFAULT_USE_CACHE = False
-
-
-# ------------------ Configuration Values ---------------
-CONF_ARG_PASS = False
-CONF_DIR_EXPERIMENT = ""
-CONF_PATH_SPECIFICATION = ""
-CONF_PATH_PROGRAM = ""
-CONF_COMMAND_CONFIG = None
-CONF_COMMAND_BUILD = None
-CONF_DEPTH_VALUE = ""
-FILE_CONFIGURATION = ""
+# ------------------- Configuration Values --------------------
+depth = 3
+tag_id = ""
+dir_exp = ""
+dir_src = None
+dir_build = None
+cmd_build = None
+cmd_clean = None
+cmd_pre_build = None
+config_file = None
+iteration_limit = -1
+patch_rank_limit = -1
+stack_size = 100
+time_out = {
+    "solver_unsat": None,  # seconds
+    "solver_sat": None,  # seconds
+    "total": None,  # minutes
+}
+use_cache = None
+is_debug = False
 silence_emitter = False
-CONF_MAX_BOUND = ""
-CONF_TAG_ID = ""
-CONF_STATIC = False
-CONF_SKIP_BUILD = False
-CONF_SKIP_GEN = False
-CONF_SKIP_TEST = False
-CONF_ONLY_TEST = False
-CONF_ONLY_GEN = False
-CONF_STACK_SIZE = ""
-CONF_TIME_DURATION = 0
-CONF_TIME_SPLIT = None
-CONF_TIME_CHECK = None
-CONF_TIMEOUT_SAT = None
-CONF_RANK_LIMIT = -1
-CONF_USE_CACHE = None
+arg_parsed = False
 
-# ------------------ Global Values ---------------
+# ------------------- Directories --------------------
+_dir_root = "/".join(os.path.realpath(__file__).split("/")[:-2])
+dir_log_base = _dir_root + "/logs"
+dir_output_base = _dir_root + "/output"
+dir_test = _dir_root + "/tests"
+dir_output = ""
+dir_log = ""
+dir_tmp = _dir_root + "/tmp"
+dir_backup = _dir_root + "/backup"
+dir_tools = _dir_root + "/tools"
+dir_data = _dir_root + "/data"
 
-MEMORY_TRACK = dict()
-AST_OFFSET_MAP = dict()
-COMPILE_COMMANDS = dict()
-ARGUMENT_LIST = []
-SOURCE_LINE_MAP = dict()
+# ------------------- Files --------------------
+file_log_main = ""
+file_log_error = dir_log_base + "/log-error"
+file_log_last = dir_log_base + "/log-latest"
+file_log_build = dir_log_base + "/log-build"
+file_log_crash = dir_log_base + "/log-crash"
+file_log_cmd = dir_log_base + "/log-command"
+file_patch_set = ""
+
+# ------------------- Global Values --------------------
+tool_name = "EvoRepair"
+iteration_no = 0
+count_patch_gen = 0
+
+# ------------------- Time Durations --------------------
+time_duration_generate = 0
+time_duration_explore = 0
+time_duration_reduce = 0
+time_duration_total = 0
+timestamp_check = None
 
