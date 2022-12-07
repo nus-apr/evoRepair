@@ -33,9 +33,15 @@ RUN python3 -m pip --disable-pip-version-check --no-cache-dir install six
 RUN python3 -m pip --disable-pip-version-check --no-cache-dir install wllvm; return 0;
 RUN python3 -m pip --disable-pip-version-check --no-cache-dir install sympy
 
+# Install Maven
+RUN cd /opt && wget https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz && \
+    tar -xvf apache-maven-3.6.3-bin.tar.gz && mv apache-maven-3.6.3
+ENV M2_HOME '/opt/apache-maven-3.6.3'
+ENV PATH "$M2_HOME/bin:${PATH}"
+
 ADD . /opt/EvoRepair
 WORKDIR /opt/EvoRepair
-RUN git submodule update --init --recursive
+# RUN git submodule update --init --recursive
 RUN ln -s /opt/EvoRepair/bin/evorepair /usr/bin/evorepair
 RUN evorepair --help
 
