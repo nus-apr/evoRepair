@@ -1,13 +1,6 @@
-[submodule "extern/arja"]
-	path = extern/arja
-	url = https://github.com/nus-apr/arja
 [submodule "extern/evosuite"]
 	path = extern/evosuite
-	url = https://github.com/nus-apr/evosuite
-[submodule "extern/seer"]
-	path = extern/seer
-	url = https://github.com/Intelligent-CAT-Lab/SEER.git
-[submodule "extern/nlohmann_json"]
-	path = extern/nlohmann_json
-	url = https://github.com/nlohmann/json
-
+	url = git@github.com:nus-apr/evosuite
+[submodule "extern/arja"]
+	path = extern/arja
+	url = git@github.com:nus-apr/arja
