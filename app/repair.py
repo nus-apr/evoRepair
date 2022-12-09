@@ -57,4 +57,4 @@ def generate():
     if not exists(dir_output_patches):
         return []
 
-    return [patch.path for patch in os.scandir(dir_output_patches)]
+    return [f"{patch.path}/diff" for patch in os.scandir(dir_output_patches) if patch.is_dir()]
