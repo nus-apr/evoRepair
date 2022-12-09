@@ -45,7 +45,7 @@ def generate():
                     f' -DsrcJavaDir "{dir_src}" -DbinJavaDir "{dir_bin}"'
                     f' -DbinTestDir "{dir_test_bin}" -Ddependences "{dir_deps}"'
                     f' -DpatchOutputRoot "{dir_output_patches}"'
-                    f' -DdiffFormat -DmaxGenerations 10'
+                    f' -DdiffFormat true -DmaxGenerations 10'
                     f' -DexternalProjRoot {values._dir_root}/extern/arja/external'
                     )
     arja_return_code = utilities.execute_command(arja_command)
