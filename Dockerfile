@@ -51,5 +51,25 @@ RUN mvn clean package
 WORKDIR /opt/EvoRepair/extern/arja/external
 RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
 
+# Build Defects4J (adapted from https://github.com/rjust/defects4j/blob/master/Dockerfile)
+RUN \
+  apt-get update -y && \
+  apt-get install software-properties-common -y && \
+  apt-get update -y && \
+  apt-get install -y openjdk-8-jdk \
+                git \
+                build-essential \
+				subversion \
+				perl \
+				curl \
+				unzip \
+				cpanminus \
+				make
+
+RUN cd /opt && git clone https://github.com/rjust/defects4j.git
+WORKDIR /opt/defects4j
+RUN cpanm --installdeps .
+RUN ./init.sh
+ENV PATH="/opt/defects4j/framework/bin:${PATH}"
 
 WORKDIR /opt/EvoRepair
