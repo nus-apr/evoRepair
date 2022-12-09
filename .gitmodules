@@ -4,3 +4,4 @@
 [submodule "extern/arja"]
 	path = extern/arja
 	url = git@github.com:nus-apr/arja
+	branch = master
