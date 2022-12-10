@@ -5,7 +5,7 @@
     "source-directory": "src"
   },
   "build": {
-    "directory": "src",
+    "directory": ".",
     "commands": {
       "pre-build": "exit 0",
       "clean": "mvn clean",
