@@ -52,12 +52,19 @@ def generate_additional_test(class_name, class_path, output_dir):
     package_prefix = str(os.path.sep).join(class_name.split(".")[:-1])
     generated_tests_path = os.path.join(output_dir, "evosuite-tests", package_prefix)
 
-    list_tests = []
-    for r, _, f in os.walk(generated_tests_path):
-        for file in f:
-            if '.java' in file:
-                list_tests.append(os.path.join(r, file))
+    short_class_name = class_name.split(".")[-1]
+    estest = f"{generated_tests_path}/{short_class_name}_ESTest.java"
+    estest_scaffold = f"{generated_tests_path}/{short_class_name}_ESTest_scaffolding.java"
 
-    return list_tests
+    assert os.path.exists(estest), os.path.exists(estest_scaffold)
 
+    compile_command = f'javac -cp "{evosuite_jar_path}:{class_path}" {estest} {estest_scaffold}'
+    return_code = utilities.execute_command(compile_command)
 
+    if return_code != 0:
+        utilities.error_exit(f"ADDITIONAL TEST COMPILATION FAILED!!\nExit Code: {return_code}")
+
+    estest_bin = f"{os.path.splitext(estest)[0]}.class"
+    assert os.path.exists(estest_bin)
+
+    return [estest_bin]
