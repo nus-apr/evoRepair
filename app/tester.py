@@ -27,7 +27,6 @@ def generate_additional_test(class_name, class_path, output_dir):
     class_path = f"{values._dir_root}/test/chart_1_buggy/build/"
     now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     output_dir = f"{values.dir_output}/evosuite_chart_1_buggy_{now.strftime('%d%b%H:%M:%S')}"
-    return []
 
     dir_evosuite = f"{values._dir_root}/extern/evosuite"
     evosuite_version = '1.2.1-SNAPSHOT'
