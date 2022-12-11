@@ -40,13 +40,14 @@ def generate():
             return []
 
     emitter.normal("\trunning ARJA")
-    arja_command = (f'java -cp extern/arja/target/Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar'
+    dir_arja = f"{values._dir_root}/extern/arja"
+    arja_command = (f'java -cp {dir_arja}/target/Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar'
                     f' us.msu.cse.repair.Main Arja'
                     f' -DsrcJavaDir "{dir_src}" -DbinJavaDir "{dir_bin}"'
                     f' -DbinTestDir "{dir_test_bin}" -Ddependences "{dir_deps}"'
                     f' -DpatchOutputRoot "{dir_output_patches}"'
                     f' -DdiffFormat true -DmaxGenerations 10'
-                    f' -DexternalProjRoot {values._dir_root}/extern/arja/external'
+                    f' -DexternalProjRoot {dir_arja}/external'
                     )
     arja_return_code = utilities.execute_command(arja_command)
 

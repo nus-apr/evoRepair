@@ -23,8 +23,10 @@ def generate_additional_test(class_name, class_path, output_dir):
 
     emitter.normal("\trunning evosuite")
     return []
+
+    dir_evosuite = f"{values._dir_root}/extern/evosuite"
     evosuite_version = '1.2.1-SNAPSHOT'
-    evosuite_jar_path = f"../extern/evosuite/master/target/evosuite-master-{evosuite_version}.jar"
+    evosuite_jar_path = f"{dir_evosuite}/master/target/evosuite-master-{evosuite_version}.jar"
 
     # Create output dir if not already existing
     if not os.path.exists(output_dir):
