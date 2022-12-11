@@ -51,7 +51,7 @@ def generate_additional_test(class_name, class_path, output_dir):
     # Get directory structure from class name,  e.g. 'some.package.prefix.MyClass' -> 'some/package/prefix'
     # TODO: This assumes that we only have one test class or all test classes are in the same package. Is this the case?
     package_prefix = str(os.path.sep).join(class_name.split(".")[:-1])
-    generated_tests_path = os.path.join(output_dir, package_prefix)
+    generated_tests_path = os.path.join(output_dir, "evosuite-tests", package_prefix)
 
     list_tests = []
     for r, _, f in os.walk(generated_tests_path):
