@@ -35,7 +35,6 @@ RUN apt-get install -y --no-install-recommends  \
        git \
        nano \
        ninja-build \
-       openjdk-8-jdk \
        pkg-config \
        protobuf-compiler-grpc \
        python \
@@ -47,6 +46,9 @@ RUN apt-get install -y --no-install-recommends  \
        wget \
        zlib1g \
        zlib1g-dev
+# instead of openjdk-8-jdk, install zulu jdk 8.0 to accomodate Defects4J version 1.5.0 and older
+RUN wget -O /tmp/zulu8.deb https://cdn.azul.com/zulu/bin/zulu8.66.0.15-ca-jdk8.0.352-linux_amd64.deb
+RUN apt install -y /tmp/zulu8.deb
 
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip --disable-pip-version-check --no-cache-dir install setuptools
@@ -79,11 +81,12 @@ WORKDIR /opt/EvoRepair/extern/arja/external
 RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
 
 # Build Defects4J (adapted from https://github.com/rjust/defects4j/blob/master/Dockerfile)
+# JDK already set up above, so dont install JDK here
 RUN \
   apt-get update -y && \
   apt-get install software-properties-common -y && \
   apt-get update -y && \
-  apt-get install -y openjdk-8-jdk \
+  apt-get install -y \
                 git \
                 build-essential \
 				subversion \
