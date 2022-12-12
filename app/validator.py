@@ -6,6 +6,7 @@ from pathlib import Path
 import time
 import subprocess
 from subprocess import PIPE
+import textwrap
 
 """
 This is the function to implement the interfacing with UniAPR (optimized validation)
@@ -48,8 +49,27 @@ def validate(patches, tests):
 
     return failed_patches
 
+
 def write_uniapr_pom(out_dir):
-    pass
+    s = textwrap.dedent("""\
+        <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>foo</groupId>
+            <artifactId>bar</artifactId>
+            <version>baz</version>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.uniapr</groupId>
+                        <artifactId>uniapr-plugin</artifactId>
+                        <version>1.0-SNAPSHOT</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </project>
+    """)
+    with open(Path(out_dir, "pom.xml"), 'w') as f:
+        f.write(s)
 
 
 def parse_uniapr_output(out):
