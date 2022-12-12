@@ -6,6 +6,8 @@ ARG SSH_KEY
 RUN mkdir ~/.ssh
 RUN echo "${SSH_KEY}" > ~/.ssh/id_rsa
 RUN chmod 600 ~/.ssh/id_rsa
+ARG SSH_PASS
+RUN ssh-add ~/.ssh/id_rsa < "${SSH_PASS}"
 RUN printf "%s" "github.com ssh-rsa " \
     "AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDB" \
     "fOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8" \
@@ -14,7 +16,7 @@ RUN printf "%s" "github.com ssh-rsa " \
     && printf "\n" >> ~/.ssh/known_hosts
 
 # University firewall blocks SSH, so use SSH over HTTPS
-RUN printf "%s" "ssh.github.com ecdsa-sha2-nistp256 " \
+RUN printf "%s" "ssh.github.com ecdsa-sha2-site256 " \
     "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT" \
     "/y6v0mKV0U2w0WZ2YB/++Tpockg=" >> ~/.ssh/known_hosts \
     && printf "\n" >> ~/.ssh/known_hosts

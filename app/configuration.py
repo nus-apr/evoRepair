@@ -47,6 +47,9 @@ class Configurations:
             self.__runtime_config_values["subject"] = project_info["name"]
             self.__runtime_config_values["tag-id"] = project_info["tag"]
             self.__runtime_config_values["src-dir"] = project_info["source-directory"]
+            self.__runtime_config_values["test-dir"] = project_info["test-directory"]
+            self.__runtime_config_values["deps-dir"] = project_info["deps-directory"]
+            self.__runtime_config_values["classes-dir"] = project_info["class-directory"]
 
             localization_info = config_json["localization"]
             self.__runtime_config_values["fix-locations"] = localization_info["fix-locations"]
@@ -92,6 +95,14 @@ class Configurations:
         values.time_duration_total = self.get_value("time-duration")
         values.iteration_limit = self.get_value("iteration-limit")
         sys.setrecursionlimit(values.stack_size)
+
+        # update bug information
+        values.dir_info["source"] = self.__runtime_config_values["src-dir"]
+        values.dir_info["classes"] =  self.__runtime_config_values["classes-dir"]
+        values.dir_info["tests"] = self.__runtime_config_values["test-dir"]
+        values.dir_info["deps"] = self.__runtime_config_values["deps-dir"]
+        values.dir_info["patches"] = self.__runtime_config_values["work-dir"] + "/patches"
+        values.dir_info["gen-test"] = self.__runtime_config_values["work-dir"] + "/gen-test"
 
     def prepare_experiment(self):
         if not values.use_cache:

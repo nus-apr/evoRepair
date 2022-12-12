@@ -13,15 +13,17 @@ def generate_test_diagnostic():
 """
 This is the interface for EvoSuite
 # Expected Input
-# @arg class_name: fully-qualified target class name for testing
+# @arg list_classes: list of fully-qualified target class name for testing (modified/patches classes)
 # @arg class_path: absolute path for the target build files
 # @arg output_dir: (absolute or relative) path to directory in which EvoSuite will place the tests and reports
 # Expected Output
 # @output list of test-cases JSON format
 """
-def generate_additional_test(class_name, class_path, output_dir):
+def generate_additional_test(list_patches, output_dir):
     emitter.sub_sub_title("Generating Test Cases")
 
+    # TODO: extract from list_patches
+    list_classes = list()
     emitter.normal("\trunning evosuite")
     class_name = "org.jfree.chart.renderer.category.AbstractCategoryItemRenderer"
     class_path = f"{values._dir_root}/test/chart_1_buggy/build/"

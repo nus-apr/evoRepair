@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 
+
 # ------------------- Configuration Values --------------------
 depth = 3
 tag_id = ""
@@ -50,6 +51,7 @@ file_patch_set = ""
 tool_name = "EvoRepair"
 iteration_no = 0
 count_patch_gen = 0
+dir_info = dict()
 
 # ------------------- Time Durations --------------------
 time_duration_generate = 0
