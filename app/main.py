@@ -90,25 +90,25 @@ def run(arg_list):
     tester.generate_test_diagnostic()
     duration = format((time.time() - time_check) / 60, '.3f')
     time_info["testing"] = str(duration)
-    dir_info = dict()
+
     while utilities.have_budget(values.time_duration_total):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
         time_check = time.time()
 
         list_patches = repair.generate(
-            dir_info["source"],
-            dir_info["classes"],
-            dir_info["tests"],
-            dir_info["deps"],
-            dir_info["patches"]
+            values.dir_info["source"],
+            values.dir_info["classes"],
+            values.dir_info["tests"],
+            values.dir_info["deps"],
+            values.dir_info["patches"]
         )
 
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["patch-generation"] = str(duration)
 
         time_check = time.time()
-        list_test = tester.generate_additional_test(list_patches, dir_info["gen_test"])
+        list_test = tester.generate_additional_test(list_patches, values.dir_info["gen-test"])
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["test-generation"] = str(duration)
 

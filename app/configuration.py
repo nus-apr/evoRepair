@@ -97,12 +97,13 @@ class Configurations:
         sys.setrecursionlimit(values.stack_size)
 
         # update bug information
-        values.dir_info["source"] = self.__runtime_config_values["src-dir"]
-        values.dir_info["classes"] =  self.__runtime_config_values["classes-dir"]
-        values.dir_info["tests"] = self.__runtime_config_values["test-dir"]
-        values.dir_info["deps"] = self.__runtime_config_values["deps-dir"]
-        values.dir_info["patches"] = self.__runtime_config_values["work-dir"] + "/patches"
-        values.dir_info["gen-test"] = self.__runtime_config_values["work-dir"] + "/gen-test"
+        work_dir = self.__runtime_config_values["work-dir"]
+        values.dir_info["source"] = Path(work_dir, self.__runtime_config_values["src-dir"])
+        values.dir_info["classes"] = Path(work_dir, self.__runtime_config_values["classes-dir"])
+        values.dir_info["tests"] = Path(work_dir, self.__runtime_config_values["test-dir"])
+        values.dir_info["deps"] = Path(work_dir, self.__runtime_config_values["deps-dir"])
+        values.dir_info["patches"] = Path(work_dir, self.__runtime_config_values["work-dir"], "patches")
+        values.dir_info["gen-test"] = Path(work_dir, self.__runtime_config_values["work-dir"], "/gen-test")
 
     def prepare_experiment(self):
         if not values.use_cache:
