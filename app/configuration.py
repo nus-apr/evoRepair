@@ -98,6 +98,7 @@ class Configurations:
 
         # update bug information
         work_dir = self.__runtime_config_values["work-dir"]
+        values.dir_info["project"] = work_dir
         values.dir_info["source"] = Path(work_dir, self.__runtime_config_values["src-dir"])
         values.dir_info["classes"] = Path(work_dir, self.__runtime_config_values["classes-dir"])
         values.dir_info["tests"] = Path(work_dir, self.__runtime_config_values["test-dir"])
