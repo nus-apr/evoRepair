@@ -103,7 +103,7 @@ class Configurations:
         values.dir_info["tests"] = Path(work_dir, self.__runtime_config_values["test-dir"])
         values.dir_info["deps"] = Path(work_dir, self.__runtime_config_values["deps-dir"])
         values.dir_info["patches"] = Path(work_dir, self.__runtime_config_values["work-dir"], "patches")
-        values.dir_info["gen-test"] = Path(work_dir, self.__runtime_config_values["work-dir"], "/gen-test")
+        values.dir_info["gen-test"] = Path(work_dir, self.__runtime_config_values["work-dir"], "gen-test")
 
     def prepare_experiment(self):
         if not values.use_cache:
