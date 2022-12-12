@@ -1,8 +1,11 @@
 from app import emitter, utilities, values
+from app.patch import Patch
 
 from os.path import exists, isdir
 import os
 import datetime
+from pathlib import Path
+import glob
 
 """
 This is the function to implement the interface with EvoRepair and ARJA(APR Tool)
@@ -56,5 +59,25 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches):
     if not exists(dir_patches):
         return []
 
-    return [f"{patch.path}/diff" for patch in os.scandir(dir_patches) if patch.is_dir()]
+    result = []
+
+    path_parts = os.path.normpath(dir_src).split(os.path.sep)
+    # empty strings can occur when dir_src has consecutive separators, e.g., "//a/b//c"
+    # filter these out
+    path_parts = [x for x in path_parts if x]
+    strip = len(path_parts) + 1
+    for entry in os.scandir(dir_patches):
+        if not entry.is_dir():
+            continue
+        diff_file = Path(entry.path, "diff")
+        patched_dir = Path(entry.path, "patched")
+        changed_files = glob.glob(os.path.join(patched_dir, "**", "*.java"), recursive=True)
+        changed_classes = []
+        for file in changed_files:
+            path = Path(file).relative_to(patched_dir).with_suffix("")
+            changed_classes.append(".".join(path.parts))
+        key = Path(entry.path).name.split("_")[1]
+        result.append(Patch(diff_file, strip, changed_classes, key))
+
+    return result
 
