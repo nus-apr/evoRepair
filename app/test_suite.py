@@ -12,3 +12,6 @@ class TestSuite():
 
     def __repr__(self):
         return f"TestSuite[src: {self.dir_src}, junits: {self.junit_classes}]"
+
+    def compile(self, out_dir):
+        pass

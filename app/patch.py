@@ -7,3 +7,6 @@ class Patch():
 
     def __repr__(self):
         return f"Patch@{self.key}[diff={self.diff_file}, strip={self.strip}, classes={self.changed_classes}]"
+
+    def compile(self, out_dir):
+        pass
