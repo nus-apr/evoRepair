@@ -69,5 +69,9 @@ RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
 WORKDIR /opt/EvoRepair/extern/evosuite
 RUN mvn clean; mvn package -DskipTests
 
+# Set up UniAPR
+RUN git clone https://github.com/lingming/UniAPR.git /tmp/UniAPR
+WORKDIR /tmp/UniAPR
+RUN ./install.sh
 
 WORKDIR /opt/EvoRepair
