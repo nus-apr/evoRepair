@@ -9,6 +9,7 @@ from subprocess import PIPE
 import textwrap
 import xml.dom.minidom
 import itertools
+import re
 
 """
 This is the function to implement the interfacing with UniAPR (optimized validation)
@@ -74,9 +75,9 @@ def validate(patches, tests):
     if process.returncode != 0:
         utilities.error_exit(f"UniAPR EXECUTION FAILED!!\nExit Code: {process.returncode}")
 
-    failed_patches = parse_uniapr_output(process.stdout.decode("utf-8"))
+    result = parse_uniapr_output(process.stdout.decode("utf-8"))
 
-    return failed_patches
+    return result
 
 
 def write_uniapr_pom(out_dir):
@@ -180,5 +181,45 @@ def common_package_prefix(classnames):
     return ".".join(os.path.commonprefix(splits))
 
 
-def parse_uniapr_output(out):
-    return []
+def parse_uniapr_output(s):
+    """Parse output of UniAPR
+
+    :param str s: standard output of UniAPR run
+    :return: list of tuples of form ("patch_id", ["pass_method1", ...], ["fail_method1", ...])
+    """
+    patch_id = None
+    test = None
+    passing_tests = []
+    failing_tests = []
+    started = False
+    in_stacktrace = False
+    result = []
+    for line in s.splitlines():
+        if line == "Profiler is DONE!":
+            started = True
+            continue
+        if not started:
+            continue
+
+        if patch_id is None:
+            match = re.fullmatch(r">>Validating patchID: (.*)", line)
+            if match:
+                in_stacktrace = False
+                patch_id = match.group(1)
+                continue
+
+        test_match = re.fullmatch(r"RUNNING:.(\S+)\.\.\.\s*", line)
+        if test_match:
+            if test is not None:
+                passing_tests.append(test)
+            test = test_match.group(1)
+            continue
+
+        if (not in_stacktrace) and re.fullmatch(r"\s+at \S+\(\S+\.java:\d+\)", line):
+            in_stacktrace = True
+            assert test is not None, line
+            failing_tests.append(test)
+            result.append((patch_id, passing_tests, failing_tests))
+            patch_id, test = None, None
+            passing_tests, failing_tests = [], []
+    return result
