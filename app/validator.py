@@ -35,6 +35,8 @@ def validate(patches, tests):
     for t in tests:
         t.compile(test_bin_dir)
 
+    # set up a local maven repo
+    # see https://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them
     deps_repo_dir = Path(out_dir, "validation-maven-repo")
     os.makedirs(deps_repo_dir)
     dependency = []
