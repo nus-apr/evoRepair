@@ -53,6 +53,7 @@ def generate_tests_for_class(classname, dir_bin, output_dir):
 
     generate_command = (f"java -jar {evosuite_jar_path} -class {classname} -projectCP {dir_bin}"
                         f" -base_dir {output_dir} -Dassertions=false"
+                        f" -Dsearch_budget=20 -Dstopping_condition=MaxTime"
                         )
     return_code = utilities.execute_command(generate_command)
     if return_code != 0:
