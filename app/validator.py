@@ -35,7 +35,17 @@ def validate(patches, tests):
     for t in tests:
         t.compile(test_bin_dir)
 
-    write_uniapr_pom(out_dir)
+    deps_repo_dir = Path(out_dir, "validation-maven-repo")
+    os.makedirs(deps_repo_dir)
+    dependency = []
+    for entry in os.scandir(values.dir_info["deps"]):
+        assert entry.name.endswith(".jar")
+        dependency.append(symlink_jar_to_repo(entry.path, deps_repo_dir))
+
+    pom = make_uniapr_pom(dependency, deps_repo_dir.as_uri())
+    with open(Path(out_dir, "pom.xml"), 'w') as f:
+        f.write(pom)
+
 
     uniapr_command = f"mvn org.uniapr:uniapr-plugin:validate -DresetJVM=true -DpatchesPool={patch_bin_dir}"
 
@@ -70,6 +80,21 @@ def write_uniapr_pom(out_dir):
     """)
     with open(Path(out_dir, "pom.xml"), 'w') as f:
         f.write(s)
+
+
+def symlink_jar_to_repo(jar, repo):
+    """
+    Install a jar file to a local maven repo. Jar is not copied but symlinked into the repo.
+
+    :param jar: path of jar file
+    :param repo: path of repo
+    :return: str, the dependency tag of this jar ("<dependency>...</dependency>")
+    """
+    pass
+
+
+def make_uniapr_pom(dependency: list, repo_uri):
+    pass
 
 
 def parse_uniapr_output(out):
