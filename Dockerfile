@@ -1,31 +1,3 @@
-FROM ubuntu:18.04 as intermediate
-RUN apt-get update
-RUN apt-get install -y git
-
-ARG SSH_KEY
-RUN mkdir ~/.ssh
-RUN echo "${SSH_KEY}" > ~/.ssh/id_rsa
-RUN chmod 600 ~/.ssh/id_rsa
-ARG SSH_PASS
-RUN ssh-add ~/.ssh/id_rsa < "${SSH_PASS}"
-RUN printf "%s" "github.com ssh-rsa " \
-    "AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDB" \
-    "fOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8" \
-    "xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3" \
-    "skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==" >> ~/.ssh/known_hosts \
-    && printf "\n" >> ~/.ssh/known_hosts
-
-# University firewall blocks SSH, so use SSH over HTTPS
-RUN printf "%s" "ssh.github.com ecdsa-sha2-site256 " \
-    "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT" \
-    "/y6v0mKV0U2w0WZ2YB/++Tpockg=" >> ~/.ssh/known_hosts \
-    && printf "\n" >> ~/.ssh/known_hosts
-RUN printf "Host github.com\n\tHostname ssh.github.com\n\tPort 443\n\tUser git\n" >> ~/.ssh/config
-
-ADD . /opt/EvoRepair
-WORKDIR /opt/EvoRepair
-RUN git submodule update --init --recursive --remote
-
 FROM ubuntu:18.04
 MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
 ARG DEBIAN_FRONTEND=noninteractive
@@ -69,8 +41,7 @@ RUN cd /opt && wget https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/b
 ENV M2_HOME '/opt/apache-maven-3.6.3'
 ENV PATH "$M2_HOME/bin:${PATH}"
 
-#ADD . /opt/EvoRepair
-COPY --from=intermediate /opt/EvoRepair /opt/EvoRepair
+ADD . /opt/EvoRepair
 WORKDIR /opt/EvoRepair
 # RUN git submodule update --init --recursive
 RUN ln -s /opt/EvoRepair/bin/evorepair /usr/bin/evorepair
