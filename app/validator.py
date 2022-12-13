@@ -6,7 +6,6 @@ from pathlib import Path
 import time
 import subprocess
 from subprocess import PIPE
-import textwrap
 import xml.dom.minidom
 import itertools
 import re
@@ -23,6 +22,8 @@ Expected Output
 @output sorted list of plausible patches
 @output ranked list of test-cases and their mutation score
 """
+
+
 def validate(patches, tests):
     emitter.sub_sub_title("Validating Generated Patches")
     emitter.normal("\trunning UniAPR")
@@ -76,30 +77,8 @@ def validate(patches, tests):
         utilities.error_exit(f"UniAPR EXECUTION FAILED!!\nExit Code: {process.returncode}")
 
     result = parse_uniapr_output(process.stdout.decode("utf-8"))
-
+    icecream.ic(result)
     return result
-
-
-def write_uniapr_pom(out_dir):
-    s = textwrap.dedent("""\
-        <project>
-            <modelVersion>4.0.0</modelVersion>
-            <groupId>foo</groupId>
-            <artifactId>bar</artifactId>
-            <version>baz</version>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.uniapr</groupId>
-                        <artifactId>uniapr-plugin</artifactId>
-                        <version>1.0-SNAPSHOT</version>
-                    </plugin>
-                </plugins>
-            </build>
-        </project>
-    """)
-    with open(Path(out_dir, "pom.xml"), 'w') as f:
-        f.write(s)
 
 
 def symlink_jar_to_repo(jar, repo):
@@ -110,7 +89,6 @@ def symlink_jar_to_repo(jar, repo):
     :param repo: path of repo
     :return: a 3-tuple of str: (groupId, artifactId, version)
     """
-    pass
     assert os.path.exists(repo)
     group_id = "foo"
     artifact_id = Path(jar).stem
