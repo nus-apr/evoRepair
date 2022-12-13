@@ -4,7 +4,7 @@
     "tag": "chart_1_buggy",
     "source-directory": "source",
     "test-directory": "build-tests",
-    "deps-directory": "",
+    "deps-directory": "lib",
     "class-directory": "build"
   },
   "build": {
