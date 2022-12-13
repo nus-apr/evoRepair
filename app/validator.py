@@ -41,6 +41,11 @@ def validate(patches, tests):
     for entry in os.scandir(values.dir_info["deps"]):
         assert entry.name.endswith(".jar")
         dependency.append(symlink_jar_to_repo(entry.path, deps_repo_dir))
+    evosuite_runtime_jar = Path(values._dir_root, "extern", "evosuite", "standalone_runtime",
+                                "target", "evosuite-standalone-runtime-1.2.1-SNAPSHOT.jar")
+    dependency.append(symlink_jar_to_repo(evosuite_runtime_jar, deps_repo_dir))
+    junit_jar = Path(values._dir_root, "extern", "arja", "external", "lib", "junit-4.11.jar")
+    dependency.append(symlink_jar_to_repo(junit_jar, deps_repo_dir))
 
     pom = make_uniapr_pom(dependency, deps_repo_dir.as_uri())
     with open(Path(out_dir, "pom.xml"), 'w') as f:
