@@ -8,6 +8,7 @@ import subprocess
 from subprocess import PIPE
 import textwrap
 import xml.dom.minidom
+import itertools
 
 """
 This is the function to implement the interfacing with UniAPR (optimized validation)
@@ -59,8 +60,13 @@ def validate(patches, tests):
     with open(Path(out_dir, "pom.xml"), 'w') as f:
         f.write(pom)
 
+    changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
+    prefix = common_package_prefix(changed_classes)
+    assert prefix
 
-    uniapr_command = f"mvn org.uniapr:uniapr-plugin:validate -DresetJVM=true -DpatchesPool={patch_bin_dir}"
+    uniapr_command = (f"mvn org.uniapr:uniapr-plugin:validate -DresetJVM=true"
+                      f" -DpatchesPool={patch_bin_dir} -DwhiteListPrefix={prefix}"
+                      )
 
     emitter.command(uniapr_command)
 
@@ -166,6 +172,12 @@ def make_deps_str(group_id, artifact_id, version):
             <version>{version}</version>
         </dependency>
     """
+
+
+def common_package_prefix(classnames):
+    assert len(classnames)
+    splits = [cls.split(".") for cls in classnames]
+    return ".".join(os.path.commonprefix(splits))
 
 
 def parse_uniapr_output(out):
