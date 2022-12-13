@@ -7,6 +7,7 @@ import time
 import subprocess
 from subprocess import PIPE
 import textwrap
+import xml.dom.minidom
 
 """
 This is the function to implement the interfacing with UniAPR (optimized validation)
@@ -95,13 +96,71 @@ def symlink_jar_to_repo(jar, repo):
 
     :param jar: path of jar file
     :param repo: path of repo
-    :return: str, the dependency tag of this jar ("<dependency>...</dependency>")
+    :return: a 3-tuple of str: (groupId, artifactId, version)
     """
     pass
+    assert os.path.exists(repo)
+    group_id = "foo"
+    artifact_id = Path(jar).stem
+    version = "foo"
+
+    path = Path(repo, *group_id.split("."), artifact_id, version, f"{artifact_id}-{version}.jar")
+    assert not path.exists()
+    os.makedirs(path.parent, exist_ok=True)
+    os.symlink(jar, path)
+
+    return (group_id, artifact_id, version)
 
 
 def make_uniapr_pom(dependency: list, repo_uri):
-    pass
+    deps_str = "".join([make_deps_str(*x) for x in dependency])
+    s = f"""\
+        <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>foo</groupId>
+            <artifactId>bar</artifactId>
+            <version>baz</version>
+            <dependencies>{deps_str}</dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.uniapr</groupId>
+                        <artifactId>uniapr-plugin</artifactId>
+                        <version>1.0-SNAPSHOT</version>
+                    </plugin>
+                </plugins>
+            </build>
+            <repositories>
+                <repository>
+                    <id>repo</id>
+                    <releases>
+                        <enabled>true</enabled>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <url>{repo_uri}</url>
+                </repository>
+            </repositories>
+        </project>
+        """
+    return prettify_xml_str(s)
+
+
+def prettify_xml_str(s):
+    # still ugly, but I don't want to use lxml (external library) or xmllint
+    return xml.dom.minidom.parseString(s).toprettyxml(indent="  ", newl="")
+
+
+def make_deps_str(group_id, artifact_id, version):
+    return f"""
+        <dependency>
+            <groupId>{group_id}</groupId>
+            <artifactId>{artifact_id}</artifactId>
+            <version>{version}</version>
+        </dependency>
+    """
 
 
 def parse_uniapr_output(out):
