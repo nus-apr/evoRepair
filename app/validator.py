@@ -26,19 +26,21 @@ Expected Output
 """
 
 
-def validate(patches, tests, work_dir):
+def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
     assert os.path.exists(work_dir)
 
     emitter.sub_sub_title("Validating Generated Patches")
     emitter.normal("\trunning UniAPR")
 
     patch_bin_dir = Path(work_dir, "patches_bin")
-    for p in patches:
-        p.compile(Path(patch_bin_dir, p.key))
+    if compile_patches:
+        for p in patches:
+            p.compile(Path(patch_bin_dir, p.key))
 
     test_bin_dir = Path(work_dir, "target", "test-classes")  # UniAPR accepts maven directory structure
-    for t in tests:
-        t.compile(test_bin_dir)
+    if compile_tests:
+        for t in tests:
+            t.compile(test_bin_dir)
 
     # link the original class files to mock a maven directory layout
     mock_bin_dir = Path(work_dir, "target", "classes")
@@ -71,16 +73,17 @@ def validate(patches, tests, work_dir):
                       f" -DpatchesPool={patch_bin_dir} -DwhiteListPrefix={prefix}"
                       )
 
-    emitter.command(uniapr_command)
+    if execute_tests:
+        emitter.command(uniapr_command)
 
-    process = subprocess.run(shlex.split(uniapr_command), stdout=PIPE, stderr=PIPE, env=os.environ, cwd=work_dir)
-    if process.returncode != 0:
-        emitter.warning(f"UniAPR did not exit normally")
-    with open(Path(values.dir_log_base, "uniapr.out"), 'w') as f:
-        f.write(process.stdout.decode("utf8"))
-
-    result = parse_uniapr_output(process.stdout.decode("utf-8"))
-    return result
+        process = subprocess.run(shlex.split(uniapr_command), stdout=PIPE, stderr=PIPE, env=os.environ, cwd=work_dir)
+        if process.returncode != 0:
+            emitter.warning(f"UniAPR did not exit normally")
+        with open(Path(values.dir_log_base, "uniapr.out"), 'w') as f:
+            f.write(process.stdout.decode("utf8"))
+        return parse_uniapr_output(process.stdout.decode("utf-8"))
+    else:
+        return []
 
 
 def symlink_jar_to_repo(jar, repo):
