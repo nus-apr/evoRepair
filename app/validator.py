@@ -45,7 +45,7 @@ def validate(patches, tests):
     # link the original class files to mock a maven directory layout
     mock_bin_dir = Path(out_dir, "target", "classes")
     os.makedirs(mock_bin_dir.parent, exist_ok=True)  # may already exist because of test compilation
-    os.symlink(values.dir_info["classes"], mock_bin_dir)
+    os.symlink(os.path.abspath(values.dir_info["classes"]), os.path.abspath(mock_bin_dir))
 
     # set up a local maven repo
     # see https://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them
