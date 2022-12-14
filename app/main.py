@@ -95,33 +95,34 @@ def run(arg_list):
     while utilities.have_budget(values.time_duration_total):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
+
+        # avoid colons in dir names because they disturb classpaths
+        now = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
+
+        dir_patches = values.dir_info["patches"]
+        dir_tests = values.dir_info["gen-test"]
+        dir_validation = Path(values.dir_output, f"validate-{now}")
+
+        if not values.is_debug:
+            assert not dir_validation.exists(), f"{dir_validation.absolute()} already exists"
+            os.makedirs(dir_validation)
+        else:
+            os.makedirs(dir_validation, exist_ok=True)
+
         time_check = time.time()
-
-        list_patches = repair.generate(
-            values.dir_info["source"],
-            values.dir_info["classes"],
-            values.dir_info["tests"],
-            values.dir_info["deps"],
-            values.dir_info["patches"]
+        list_patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
+            values.dir_info["tests"], values.dir_info["deps"], dir_patches
         )
-
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["patch-generation"] = str(duration)
 
         time_check = time.time()
-        list_test = tester.generate_additional_test(list_patches, values.dir_info["gen-test"])
+        list_test = tester.generate_additional_test(list_patches, dir_tests)
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["test-generation"] = str(duration)
 
         time_check = time.time()
-
-        # avoid colons in dir names because they disturb classpaths
-        now = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
-        validation_work_dir = Path(values.dir_output, f"validate-{now}")
-        assert not validation_work_dir.exists(), f"{validation_work_dir.absolute()} already exists"
-        os.makedirs(validation_work_dir)
-
-        validator.validate(list_patches, list_test, validation_work_dir)
+        _ = validator.validate(list_patches, list_test, dir_validation)
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["validation"] = str(duration)
 
