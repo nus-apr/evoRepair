@@ -1,7 +1,7 @@
 {
   "project": {
     "name": "chart_1_buggy",
-    "tag": "chart_1_buggy",
+    "tag": "raw",
     "source-directory": "source",
     "test-directory": "build-tests",
     "deps-directory": "lib",
