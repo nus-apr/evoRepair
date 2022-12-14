@@ -93,7 +93,11 @@ def symlink_jar_to_repo(jar, repo):
     :param repo: path of repo
     :return: a 3-tuple of str: (groupId, artifactId, version)
     """
+    assert os.path.exists(jar)
     assert os.path.exists(repo)
+    jar = os.path.abspath(jar)
+    repo = os.path.abspath(repo)
+
     group_id = "foo"
     artifact_id = Path(jar).stem
     version = "foo"
