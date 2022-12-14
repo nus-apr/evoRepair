@@ -27,8 +27,7 @@ class TestSuite():
         deps = ":".join(self.compile_deps)
         classpath = f"{self.dir_src}:{deps}:{values.dir_info['classes']}"
 
-        assert not os.path.exists(out_dir)
-        os.makedirs(out_dir)
+        os.makedirs(out_dir, exist_ok=True)
 
         compile_command = f'javac -cp "{classpath}" -d {out_dir} {files}'
         return_code = utilities.execute_command(compile_command, True)
