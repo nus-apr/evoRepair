@@ -26,7 +26,7 @@ This is the interface for EvoSuite
 # Expected Output
 # @output list of test-cases JSON format
 """
-def generate_additional_test(patches: List[Patch], output_dir):
+def generate_additional_test(patches: List[Patch], output_dir, dry_run=False):
     emitter.sub_sub_title("Generating Test Cases")
 
     classes = set()
@@ -35,12 +35,14 @@ def generate_additional_test(patches: List[Patch], output_dir):
 
     result = []
     for classname in classes:
-        result.append(generate_tests_for_class(classname, values.dir_info["classes"], Path(output_dir, classname)))
+        result.append(
+            generate_tests_for_class(classname, values.dir_info["classes"], Path(output_dir, classname), dry_run)
+        )
 
     return result
 
 
-def generate_tests_for_class(classname, dir_bin, output_dir):
+def generate_tests_for_class(classname, dir_bin, output_dir, dry_run=False):
     dir_bin = abspath(dir_bin)
     output_dir = abspath(output_dir)
 
@@ -59,9 +61,11 @@ def generate_tests_for_class(classname, dir_bin, output_dir):
                         f" -base_dir {output_dir} -Dassertions=false"
                         f" -Dsearch_budget=20 -Dstopping_condition=MaxTime"
                         )
-    return_code = utilities.execute_command(generate_command)
-    if return_code != 0:
-        utilities.error_exit(f"FAILED TO GENERATE TEST SUITE FOR CLASS {classname}!!\nExit Code: {return_code}")
+
+    if not dry_run:
+        return_code = utilities.execute_command(generate_command)
+        if return_code != 0:
+            utilities.error_exit(f"FAILED TO GENERATE TEST SUITE FOR CLASS {classname}!!\nExit Code: {return_code}")
 
     test_src = Path(output_dir, "evosuite-tests").resolve()
     junit_classes = [f"{classname}_ESTest"]

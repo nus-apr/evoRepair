@@ -26,7 +26,7 @@ Each patch objects has the following
 """
 
 
-def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches):
+def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, dry_run=False):
     emitter.sub_sub_title("Generating Patches")
 
     dir_src = abspath(dir_src)
@@ -57,11 +57,13 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches):
                     f' -DdiffFormat true -DmaxGenerations 10'
                     f' -DexternalProjRoot {dir_arja}/external'
                     )
-    arja_return_code = utilities.execute_command(arja_command)
 
-    if arja_return_code != 0:
-        emitter.error("\tARJA did not exit normally; no patch generated")
-        return []
+    if not dry_run:
+        arja_return_code = utilities.execute_command(arja_command)
+
+        if arja_return_code != 0:
+            emitter.error("\tARJA did not exit normally; no patch generated")
+            return []
 
     if not exists(dir_patches):
         return []
