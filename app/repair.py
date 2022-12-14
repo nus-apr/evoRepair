@@ -38,13 +38,14 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, dry_run=Fals
     now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     dir_chart_1_buggy = f"{values._dir_root}/test/chart_1_buggy"
 
-    if exists(dir_patches):
-        if not isdir(dir_patches):
-            emitter.error(f"{dir_patches} is not a directory")
-            return []
-        elif os.listdir(dir_patches):
-            emitter.warning(f"Output directory {dir_patches} is not empty; patch generation aborted")
-            return []
+    if not values.is_debug:
+        if exists(dir_patches):
+            if not isdir(dir_patches):
+                emitter.error(f"{dir_patches} is not a directory")
+                return []
+            elif os.listdir(dir_patches):
+                emitter.warning(f"Output directory {dir_patches} is not empty; patch generation aborted")
+                return []
 
     emitter.normal("\trunning ARJA")
     #dir_arja = f"{values._dir_root}/extern/arja"
