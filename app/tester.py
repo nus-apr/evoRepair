@@ -5,6 +5,7 @@ from app.test_suite import TestSuite
 from app.patch import Patch
 
 import os
+from os.path import abspath
 import datetime
 from pathlib import Path
 
@@ -40,9 +41,12 @@ def generate_additional_test(patches: List[Patch], output_dir):
 
 
 def generate_tests_for_class(classname, dir_bin, output_dir):
-    dir_evosuite = f"{values._dir_root}/extern/evosuite"
+    dir_bin = abspath(dir_bin)
+    output_dir = abspath(output_dir)
+
+    dir_evosuite = abspath(Path(values._dir_root, "extern", "evosuite"))
     evosuite_version = '1.2.1-SNAPSHOT'
-    evosuite_jar_path = f"{dir_evosuite}/master/target/evosuite-master-{evosuite_version}.jar"
+    evosuite_jar_path = abspath(Path(dir_evosuite, "master", "target", f"evosuite-master-{evosuite_version}.jar"))
 
     emitter.normal(f"\trunning evosuite for {classname}")
 
@@ -59,7 +63,7 @@ def generate_tests_for_class(classname, dir_bin, output_dir):
     if return_code != 0:
         utilities.error_exit(f"FAILED TO GENERATE TEST SUITE FOR CLASS {classname}!!\nExit Code: {return_code}")
 
-    test_src = Path(output_dir, "evosuite-tests")
+    test_src = Path(output_dir, "evosuite-tests").resolve()
     junit_classes = [f"{classname}_ESTest"]
     compile_deps = [evosuite_jar_path]
     evosuite_runtime_path = (f"{dir_evosuite}/master/target/standalone_runtime/"

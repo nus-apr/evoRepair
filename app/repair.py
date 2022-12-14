@@ -29,6 +29,12 @@ Each patch objects has the following
 def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches):
     emitter.sub_sub_title("Generating Patches")
 
+    dir_src = abspath(dir_src)
+    dir_bin = abspath(dir_bin)
+    dir_test_bin = abspath(dir_test_bin)
+    dir_deps = abspath(dir_deps)
+    dir_patches = abspath(dir_patches)
+
     now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     dir_chart_1_buggy = f"{values._dir_root}/test/chart_1_buggy"
 
@@ -41,12 +47,13 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches):
             return []
 
     emitter.normal("\trunning ARJA")
-    dir_arja = f"{values._dir_root}/extern/arja"
+    #dir_arja = f"{values._dir_root}/extern/arja"
+    dir_arja = abspath(Path(values._dir_root, "extern", "arja"))
     arja_command = (f'java -cp {dir_arja}/target/Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar'
                     f' us.msu.cse.repair.Main Arja'
-                    f' -DsrcJavaDir "{abspath(dir_src)}" -DbinJavaDir "{abspath(dir_bin)}"'
-                    f' -DbinTestDir "{abspath(dir_test_bin)}" -Ddependences "{abspath(dir_deps)}"'
-                    f' -DpatchOutputRoot "{abspath(dir_patches)}"'
+                    f' -DsrcJavaDir "{dir_src}" -DbinJavaDir "{dir_bin}"'
+                    f' -DbinTestDir "{dir_test_bin}" -Ddependences "{dir_deps}"'
+                    f' -DpatchOutputRoot "{dir_patches}"'
                     f' -DdiffFormat true -DmaxGenerations 10'
                     f' -DexternalProjRoot {dir_arja}/external'
                     )
