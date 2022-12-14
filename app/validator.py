@@ -80,7 +80,6 @@ def validate(patches, tests):
         utilities.error_exit(f"UniAPR EXECUTION FAILED!!\nExit Code: {process.returncode}")
 
     result = parse_uniapr_output(process.stdout.decode("utf-8"))
-    icecream.ic(result)
     return result
 
 
