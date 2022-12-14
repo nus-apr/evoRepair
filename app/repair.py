@@ -1,7 +1,7 @@
 from app import emitter, utilities, values
 from app.patch import Patch
 
-from os.path import exists, isdir
+from os.path import exists, isdir, abspath
 import os
 import datetime
 from pathlib import Path
@@ -44,9 +44,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches):
     dir_arja = f"{values._dir_root}/extern/arja"
     arja_command = (f'java -cp {dir_arja}/target/Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar'
                     f' us.msu.cse.repair.Main Arja'
-                    f' -DsrcJavaDir "{dir_src}" -DbinJavaDir "{dir_bin}"'
-                    f' -DbinTestDir "{dir_test_bin}" -Ddependences "{dir_deps}"'
-                    f' -DpatchOutputRoot "{dir_patches}"'
+                    f' -DsrcJavaDir "{abspath(dir_src)}" -DbinJavaDir "{abspath(dir_bin)}"'
+                    f' -DbinTestDir "{abspath(dir_test_bin)}" -Ddependences "{abspath(dir_deps)}"'
+                    f' -DpatchOutputRoot "{abspath(dir_patches)}"'
                     f' -DdiffFormat true -DmaxGenerations 10'
                     f' -DexternalProjRoot {dir_arja}/external'
                     )
