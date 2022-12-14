@@ -7,7 +7,8 @@ import multiprocessing as mp
 import app.utilities
 from app import emitter, logger, values, repair, builder, tester, validator, utilities
 from app.configuration import  Configurations
-
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 start_time = 0
 time_info = {
@@ -113,7 +114,14 @@ def run(arg_list):
         time_info["test-generation"] = str(duration)
 
         time_check = time.time()
-        validator.validate(list_patches, list_test)
+
+        # avoid colons in dir names because they disturb classpaths
+        now = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
+        validation_work_dir = Path(values.dir_output, f"validate-{now}")
+        assert not validation_work_dir.exists(), f"{validation_work_dir.absolute()} already exists"
+        os.makedirs(validation_work_dir)
+
+        validator.validate(list_patches, list_test, validation_work_dir)
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["validation"] = str(duration)
 

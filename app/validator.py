@@ -17,6 +17,7 @@ This is the function to implement the interfacing with UniAPR (optimized validat
 Expected Input
 @arg list of patches
 @arg list of test cases
+@arg work_dir: a directory to which this function can write (but not overwrite) things
 
 Expected Output
 @output matrix of result for each test x patch
@@ -25,31 +26,28 @@ Expected Output
 """
 
 
-def validate(patches, tests):
+def validate(patches, tests, work_dir):
+    assert os.path.exists(work_dir)
+
     emitter.sub_sub_title("Validating Generated Patches")
     emitter.normal("\trunning UniAPR")
 
-    # avoid colons in dir names because they disturb classpaths
-    time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
-    out_dir = Path(values.dir_output, f"validate-{time}")
-    assert not out_dir.exists()
-
-    patch_bin_dir = Path(out_dir, "patches_bin")
+    patch_bin_dir = Path(work_dir, "patches_bin")
     for p in patches:
         p.compile(Path(patch_bin_dir, p.key))
 
-    test_bin_dir = Path(out_dir, "target", "test-classes")  # UniAPR accepts maven directory structure
+    test_bin_dir = Path(work_dir, "target", "test-classes")  # UniAPR accepts maven directory structure
     for t in tests:
         t.compile(test_bin_dir)
 
     # link the original class files to mock a maven directory layout
-    mock_bin_dir = Path(out_dir, "target", "classes")
+    mock_bin_dir = Path(work_dir, "target", "classes")
     os.makedirs(mock_bin_dir.parent, exist_ok=True)  # may already exist because of test compilation
     os.symlink(os.path.abspath(values.dir_info["classes"]), os.path.abspath(mock_bin_dir))
 
     # set up a local maven repo
     # see https://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them
-    deps_repo_dir = Path(out_dir, "validation-maven-repo")
+    deps_repo_dir = Path(work_dir, "validation-maven-repo")
     os.makedirs(deps_repo_dir)
     dependency = []
     for entry in os.scandir(values.dir_info["deps"]):
@@ -62,7 +60,7 @@ def validate(patches, tests):
     dependency.append(symlink_jar_to_repo(junit_jar, deps_repo_dir))
 
     pom = make_uniapr_pom(dependency, deps_repo_dir.as_uri())
-    with open(Path(out_dir, "pom.xml"), 'w') as f:
+    with open(Path(work_dir, "pom.xml"), 'w') as f:
         f.write(pom)
 
     changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
@@ -75,7 +73,7 @@ def validate(patches, tests):
 
     emitter.command(uniapr_command)
 
-    process = subprocess.run(shlex.split(uniapr_command), stdout=PIPE, stderr=PIPE, env=os.environ, cwd=out_dir)
+    process = subprocess.run(shlex.split(uniapr_command), stdout=PIPE, stderr=PIPE, env=os.environ, cwd=work_dir)
     if process.returncode != 0:
         emitter.warning(f"UniAPR did not exit normally")
     with open(Path(values.dir_log_base, "uniapr.out"), 'w') as f:
