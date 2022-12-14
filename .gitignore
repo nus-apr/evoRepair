@@ -10,3 +10,4 @@ extern
 venv
 *.DS_Store
 .devcontainer
+/tmp
