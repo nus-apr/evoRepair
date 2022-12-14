@@ -6,6 +6,7 @@ import argparse
 from pathlib import Path
 from app import emitter, logger, values, reader
 from app.utilities import error_exit
+from datetime import datetime, timezone, timedelta
 
 class Configurations:
     __config_file = None
@@ -89,7 +90,12 @@ class Configurations:
         values.cmd_pre_build = self.__runtime_config_values["pre-build-cmd"]
         values.is_debug = self.get_value("is-debug")
         values.use_cache = self.get_value("use-cache")
-        values.dir_output = "/".join([values.dir_output_base, values.tag_id])
+
+        subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
+        # avoid colons in dir names because they disturb classpaths
+        time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
+        values.dir_output = Path(values.dir_output_base, f"{subject_id}_{time}")
+
         values.dir_log = "/".join([values.dir_log_base, values.tag_id])
         values.stack_size = self.get_value("stack-size")
         values.time_duration_total = self.get_value("time-duration")
@@ -103,8 +109,8 @@ class Configurations:
         values.dir_info["classes"] = Path(work_dir, self.__runtime_config_values["classes-dir"])
         values.dir_info["tests"] = Path(work_dir, self.__runtime_config_values["test-dir"])
         values.dir_info["deps"] = Path(work_dir, self.__runtime_config_values["deps-dir"])
-        values.dir_info["patches"] = Path(work_dir, self.__runtime_config_values["work-dir"], "patches")
-        values.dir_info["gen-test"] = Path(work_dir, self.__runtime_config_values["work-dir"], "gen-test")
+        values.dir_info["patches"] = Path(values.dir_output, "patches")
+        values.dir_info["gen-test"] = Path(values.dir_output, "gen-test")
 
     def prepare_experiment(self):
         if not values.use_cache:

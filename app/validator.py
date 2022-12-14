@@ -9,6 +9,7 @@ from subprocess import PIPE
 import xml.dom.minidom
 import itertools
 import re
+from datetime import datetime, timezone, timedelta
 
 """
 This is the function to implement the interfacing with UniAPR (optimized validation)
@@ -28,7 +29,9 @@ def validate(patches, tests):
     emitter.sub_sub_title("Validating Generated Patches")
     emitter.normal("\trunning UniAPR")
 
-    out_dir = Path(values.dir_tmp, f"{time.time()}")
+    # avoid colons in dir names because they disturb classpaths
+    time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
+    out_dir = Path(values.dir_output, f"validate_{time}")
     assert not out_dir.exists()
 
     patch_bin_dir = Path(out_dir, "patches_bin")
