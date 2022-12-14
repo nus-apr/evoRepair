@@ -12,14 +12,15 @@ RUN apt-get install -y --no-install-recommends  \
        pkg-config \
        protobuf-compiler-grpc \
        python \
-       python3 \
-       python3-pip \
+       python3.8 \
        software-properties-common \
        unzip \
        vim \
        wget \
        zlib1g \
        zlib1g-dev
+
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
 
 # Install Maven
 RUN cd /opt && wget https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz && \
