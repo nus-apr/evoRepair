@@ -31,7 +31,7 @@ def validate(patches, tests):
 
     # avoid colons in dir names because they disturb classpaths
     time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
-    out_dir = Path(values.dir_output, f"validate_{time}")
+    out_dir = Path(values.dir_output, f"validate-{time}")
     assert not out_dir.exists()
 
     patch_bin_dir = Path(out_dir, "patches_bin")

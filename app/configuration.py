@@ -94,7 +94,7 @@ class Configurations:
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths
         time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
-        values.dir_output = Path(values.dir_output_base, f"{subject_id}_{time}")
+        values.dir_output = Path(values.dir_output_base, f"{subject_id}-{time}")
 
         values.dir_log = "/".join([values.dir_log_base, values.tag_id])
         values.stack_size = self.get_value("stack-size")
