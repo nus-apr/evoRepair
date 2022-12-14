@@ -1,6 +1,7 @@
 from app import emitter, utilities, values
 
 import os
+from os.path import abspath
 from pathlib import Path
 
 class TestSuite():
@@ -25,7 +26,7 @@ class TestSuite():
         files = " ".join(junit_files)
 
         deps = ":".join(self.compile_deps)
-        classpath = f"{self.dir_src}:{deps}:{values.dir_info['classes']}"
+        classpath = f"{self.dir_src}:{deps}:{abspath(values.dir_info['classes'])}"
 
         os.makedirs(out_dir, exist_ok=True)
 
