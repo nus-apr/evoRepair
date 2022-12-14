@@ -77,7 +77,9 @@ def validate(patches, tests):
 
     process = subprocess.run(shlex.split(uniapr_command), stdout=PIPE, stderr=PIPE, env=os.environ, cwd=out_dir)
     if process.returncode != 0:
-        utilities.error_exit(f"UniAPR EXECUTION FAILED!!\nExit Code: {process.returncode}")
+        emitter.warning(f"UniAPR did not exit normally")
+    with open(Path(values.dir_log_base, "uniapr.out"), 'w') as f:
+        f.write(process.stdout.decode("utf8"))
 
     result = parse_uniapr_output(process.stdout.decode("utf-8"))
     return result
