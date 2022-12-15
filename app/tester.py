@@ -20,9 +20,10 @@ def generate_test_diagnostic():
 """
 This is the interface for EvoSuite
 # Expected Input
-# @arg list_classes: list of fully-qualified target class name for testing (modified/patches classes)
-# @arg class_path: absolute path for the target build files
+# @arg classname: fully-qualified target class name for testing (modified/patches classes)
+# @arg dir_bin: absolute path for the target build files
 # @arg output_dir: (absolute or relative) path to directory in which EvoSuite will place the tests and reports
+# @arg target_lines_path: path to JSON specifying the patched classes + line numbers
 # Expected Output
 # @output list of test-cases JSON format
 """
@@ -42,7 +43,7 @@ def generate_additional_test(patches: List[Patch], output_dir, dry_run=False):
     return result
 
 
-def generate_tests_for_class(classname, dir_bin, output_dir, dry_run=False):
+def generate_tests_for_class(classname, dir_bin, output_dir, dry_run=False, target_lines_path=None):
     dir_bin = abspath(dir_bin)
     output_dir = abspath(output_dir)
 
@@ -61,6 +62,10 @@ def generate_tests_for_class(classname, dir_bin, output_dir, dry_run=False):
                         f" -base_dir {output_dir} -Dassertions=false"
                         f" -Dsearch_budget=20 -Dstopping_condition=MaxTime"
                         )
+
+    if target_lines_path is not None:
+        target_lines_path = abspath(target_lines_path)
+        generate_command += f" -targetLines {target_lines_path}"
 
     if not dry_run:
         return_code = utilities.execute_command(generate_command)
