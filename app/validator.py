@@ -179,7 +179,6 @@ def parse_uniapr_output(s):
     passing_tests = []
     failing_tests = []
     started = False
-    in_stacktrace = False
     result = []
     for line in s.splitlines():
         if line == "Profiler is DONE!":
@@ -191,20 +190,21 @@ def parse_uniapr_output(s):
         if patch_id is None:
             match = re.fullmatch(r">>Validating patchID: (.*)", line)
             if match:
-                in_stacktrace = False
                 patch_id = match.group(1)
                 continue
 
         test_match = re.fullmatch(r"RUNNING:.(\S+)\.\.\.\s*", line)
         if test_match:
+            assert patch_id is not None, line
             if test is not None:
                 passing_tests.append(test)
             test = test_match.group(1)
             continue
 
-        if (not in_stacktrace) and re.fullmatch(r"\s+at \S+\(\S+\.java:\d+\)", line):
-            in_stacktrace = True
+        # do not use fullmatch() for this, because the warning may be entangled in stacktrace
+        if re.search(r"WARNING: Running test cases is terminated", line):
             assert test is not None, line
+            assert patch_id is not None, line
             failing_tests.append(test)
             result.append((patch_id, passing_tests, failing_tests))
             patch_id, test = None, None
