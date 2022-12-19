@@ -1,6 +1,2 @@
 logs/*
 output/*
-tmp/*
-.dockerignore
-Dockerfile
-**/.git
