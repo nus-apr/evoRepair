@@ -1,3 +1,4 @@
+import re
 from typing import List
 
 from app import emitter, utilities, values
@@ -9,6 +10,7 @@ from os.path import abspath
 import datetime
 from pathlib import Path
 
+import xml.etree.ElementTree as ET
 
 """
 This function implements the developer testing to generate test-diagnostics for the repair 
@@ -48,8 +50,7 @@ def generate_tests_for_class(classname, dir_bin, output_dir, dry_run=False, targ
     output_dir = abspath(output_dir)
 
     dir_evosuite = abspath(Path(values._dir_root, "extern", "evosuite"))
-    evosuite_version = '1.2.1-SNAPSHOT'
-    evosuite_jar_path = abspath(Path(dir_evosuite, "master", "target", f"evosuite-master-{evosuite_version}.jar"))
+    evosuite_jar_path = abspath(Path(dir_evosuite, "master", "target", f"evosuite-master-{read_evosuite_version()}.jar"))
 
     emitter.normal(f"\trunning evosuite for {classname}")
 
@@ -76,8 +77,16 @@ def generate_tests_for_class(classname, dir_bin, output_dir, dry_run=False, targ
     junit_classes = [f"{classname}_ESTest"]
     compile_deps = [evosuite_jar_path]
     evosuite_runtime_path = (f"{dir_evosuite}/master/target/standalone_runtime/"
-                             f"target/evosuite-standalone-runtime-{evosuite_version}.jar")
+                             f"target/evosuite-standalone-runtime-{read_evosuite_version()}.jar")
     junit_path = f"{values._dir_root}/extern/arja/extern/lib/junit-4.11.jar"
     runtime_deps = [evosuite_runtime_path, junit_path]
 
     return TestSuite(test_src, classname, junit_classes, compile_deps, runtime_deps, str(test_src))
+
+
+def read_evosuite_version():
+    pom_path = Path(values._dir_root, "extern", "evosuite", "pom.xml")
+    root = ET.parse(pom_path).getroot()
+    xmlns = re.search(r"(\{.*\})project", root.tag).group(1)
+    version = root.find(f"{xmlns}version").text
+    return version

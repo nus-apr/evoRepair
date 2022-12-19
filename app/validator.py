@@ -1,4 +1,5 @@
 from app import emitter, utilities, values
+from app.tester import read_evosuite_version
 
 import shlex
 import os
@@ -10,6 +11,7 @@ import xml.dom.minidom
 import itertools
 import re
 from datetime import datetime, timezone, timedelta
+
 
 """
 This is the function to implement the interfacing with UniAPR (optimized validation)
@@ -56,7 +58,7 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
         assert entry.name.endswith(".jar")
         dependency.append(symlink_jar_to_repo(entry.path, deps_repo_dir))
     evosuite_runtime_jar = Path(values._dir_root, "extern", "evosuite", "standalone_runtime",
-                                "target", "evosuite-standalone-runtime-1.2.1-SNAPSHOT.jar")
+                                "target", f"evosuite-standalone-runtime-{read_evosuite_version()}.jar")
     dependency.append(symlink_jar_to_repo(evosuite_runtime_jar, deps_repo_dir))
     junit_jar = Path(values._dir_root, "extern", "arja", "external", "lib", "junit-4.11.jar")
     dependency.append(symlink_jar_to_repo(junit_jar, deps_repo_dir))
