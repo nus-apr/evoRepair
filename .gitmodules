@@ -6,3 +6,7 @@
 	path = extern/arja
 	url = git@github.com:nus-apr/arja
 	branch = master
+[submodule "extern/uniapr"]
+	path = extern/uniapr
+	url = git@github.com:nus-apr/UniAPR.git
+	branch = master
