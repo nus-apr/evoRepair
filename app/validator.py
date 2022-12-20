@@ -6,11 +6,16 @@ import os
 from pathlib import Path
 import time
 import subprocess
-from subprocess import PIPE
+from subprocess import PIPE, DEVNULL
 import xml.dom.minidom
 import itertools
 import re
 from datetime import datetime, timezone, timedelta
+import socket
+import json
+import glob
+import asyncio
+import shutil
 
 
 """
@@ -48,7 +53,7 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
         changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
         return run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests)
     else:
-        raise NotImplementedError("validation without hotswap has not been implemented")
+        return plain_validate(patch_bin_dir, test_bin_dir, execute_tests)
 
 
 def run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests):
@@ -229,3 +234,57 @@ def parse_uniapr_output(s):
             patch_id, test = None, None
             passing_tests, failing_tests = [], []
     return result
+
+
+def plain_validate(patches_bin_dir, tests_bin_dir, execute_tests):
+    if not execute_tests:
+        return []
+
+    test_class_files = glob.glob(os.path.join(tests_bin_dir, "**", "*_ESTest.class"), recursive=True)
+    test_classes = []
+    for file in test_class_files:
+        path = Path(file).relative_to(tests_bin_dir).with_suffix("")
+        test_classes.append(".".join(path.parts))
+
+    result = []
+    for entry in os.scandir(patches_bin_dir):
+        key = entry.name
+        message = asyncio.run(run_plain_validator(entry.path, tests_bin_dir, test_classes))
+        obj = json.loads(message)
+        result.append((key, obj["passingTests"], obj["failingTests"]))
+    return result
+
+
+async def run_plain_validator(patch_dir, test_bin_dir, test_classes):
+    result = []
+
+    async def plain_validator_connected(reader, _):
+        result.append((await reader.read()).decode("utf-8"))
+
+    server_socket = socket.socket()
+    server_socket.bind(("localhost", 0))
+    _, port = server_socket.getsockname()
+    server = await asyncio.start_server(plain_validator_connected, sock=server_socket)
+    async with server:
+        await server.start_serving()
+        evosuite_runtime_jar = Path(values._dir_root, "extern", "evosuite", "standalone_runtime",
+                                    "target", f"evosuite-standalone-runtime-{read_evosuite_version()}.jar")
+        junit_jar = Path(values._dir_root, "extern", "arja", "external", "lib", "junit-4.11.jar")
+        plain_validator_jar = Path(values._dir_root, "extern", "plain-validator", "target",
+                                   "plain-validator-1.0-SNAPSHOT-jar-with-dependencies.jar")
+
+        # must put patch_dir before values.dir_info["classes"]
+        classpath = [patch_dir, values.dir_info["classes"], evosuite_runtime_jar,
+                     junit_jar, plain_validator_jar, test_bin_dir]
+        for entry in os.scandir(values.dir_info["deps"]):
+            assert entry.name.endswith(".jar")
+            classpath.append(entry.path)
+        classpath = [os.path.abspath(p) for p in classpath]
+        command = (f'{shutil.which("java")} -cp "{":".join(classpath)}" evorepair.PlainValidator {port}'
+                   f' {" ".join(test_classes)}')
+
+        emitter.command(command)
+
+        process = await asyncio.create_subprocess_shell(command, stdout=DEVNULL, stderr=DEVNULL)
+        await process.wait()
+    return result[0]
