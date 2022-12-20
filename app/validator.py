@@ -44,6 +44,14 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
         for t in tests:
             t.compile(test_bin_dir)
 
+    if values.use_hotswap:
+        changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
+        return run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests)
+    else:
+        raise NotImplementedError("validation without hotswap has not been implemented")
+
+
+def run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests):
     # link the original class files to mock a maven directory layout
     mock_bin_dir = Path(work_dir, "target", "classes")
     os.makedirs(mock_bin_dir.parent, exist_ok=True)  # may already exist because of test compilation
@@ -67,7 +75,6 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
     with open(Path(work_dir, "pom.xml"), 'w') as f:
         f.write(pom)
 
-    changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
     prefix = common_package_prefix(changed_classes)
     assert prefix
 

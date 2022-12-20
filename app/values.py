@@ -25,6 +25,7 @@ use_cache = None
 is_debug = False
 silence_emitter = False
 arg_parsed = False
+use_hotswap = True
 
 # ------------------- Directories --------------------
 _dir_root = "/".join(os.path.realpath(__file__).split("/")[:-2])
