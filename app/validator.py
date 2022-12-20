@@ -16,6 +16,7 @@ import json
 import glob
 import asyncio
 import shutil
+import pprint
 
 
 """
@@ -51,9 +52,11 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
 
     if values.use_hotswap:
         changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
-        return run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests)
+        result = run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests)
     else:
-        return plain_validate(patch_bin_dir, test_bin_dir, execute_tests)
+        result = plain_validate(patch_bin_dir, test_bin_dir, execute_tests)
+    emitter.debug(f"(patch_id, passing, failing): {pprint.pformat(result, indent=4)}")
+    return result
 
 
 def run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests):
