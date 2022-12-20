@@ -55,12 +55,19 @@ def run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests):
     # link the original class files to mock a maven directory layout
     mock_bin_dir = Path(work_dir, "target", "classes")
     os.makedirs(mock_bin_dir.parent, exist_ok=True)  # may already exist because of test compilation
-    os.symlink(os.path.abspath(values.dir_info["classes"]), os.path.abspath(mock_bin_dir))
+
+    class_dir = os.path.abspath(values.dir_info["classes"])
+    link_path = os.path.abspath(mock_bin_dir)
+    if os.path.exists(link_path):
+        target = os.path.join(os.path.dirname(link_path), os.readlink(link_path))
+        assert target == class_dir
+    else:
+        os.symlink(class_dir, link_path)
 
     # set up a local maven repo
     # see https://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them
     deps_repo_dir = Path(work_dir, "validation-maven-repo")
-    os.makedirs(deps_repo_dir)
+    os.makedirs(deps_repo_dir, exist_ok=True)
     dependency = []
     for entry in os.scandir(values.dir_info["deps"]):
         assert entry.name.endswith(".jar")
@@ -113,9 +120,12 @@ def symlink_jar_to_repo(jar, repo):
     version = "foo"
 
     path = Path(repo, *group_id.split("."), artifact_id, version, f"{artifact_id}-{version}.jar")
-    assert not path.exists()
     os.makedirs(path.parent, exist_ok=True)
-    os.symlink(jar, path)
+    if not path.exists():
+        os.symlink(jar, path)
+    else:
+        target = os.path.join(os.path.dirname(path), os.readlink(path))
+        assert target == jar
 
     return (group_id, artifact_id, version)
 
