@@ -33,7 +33,7 @@ def create_log_files():
     log_file_path = values.dir_log_base + "/" + log_file_name
     values.file_log_main = log_file_path
 
-    _logger_main = setup_logger("main", values.file_log_main)
+    _logger_main = setup_logger("main", values.file_log_main, level=logging.DEBUG)
     _logger_error = setup_logger("error", values.file_log_error)
     _logger_command = setup_logger("command", values.file_log_cmd)
     _logger_build = setup_logger("build", values.file_log_build)
