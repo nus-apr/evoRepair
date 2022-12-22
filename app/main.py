@@ -92,6 +92,8 @@ def run(arg_list):
     duration = format((time.time() - time_check) / 60, '.3f')
     time_info["testing"] = str(duration)
 
+    dry_run_repair = False
+
     while utilities.have_budget(values.time_duration_total):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
@@ -110,8 +112,11 @@ def run(arg_list):
             os.makedirs(dir_validation, exist_ok=True)
 
         time_check = time.time()
+        os.makedirs(dir_patches, exist_ok=True)
+        if not dry_run_repair:
+            utilities.check_is_empty_dir(dir_patches)
         list_patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
-            values.dir_info["tests"], values.dir_info["deps"], dir_patches
+            values.dir_info["tests"], values.dir_info["deps"], dir_patches, dry_run=dry_run_repair
         )
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["patch-generation"] = str(duration)
