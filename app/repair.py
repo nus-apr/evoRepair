@@ -1,3 +1,6 @@
+import shlex
+import time
+
 from app import emitter, utilities, values
 from app.patch import Patch
 
@@ -6,6 +9,8 @@ from pathlib import Path
 import glob
 import shutil
 import re
+import subprocess
+from subprocess import PIPE, DEVNULL
 
 """
 This is the function to implement the interface with EvoRepair and ARJA(APR Tool)
@@ -26,7 +31,8 @@ Each patch objects has the following
 """
 
 
-def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, dry_run=False):
+def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
+             num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False):
     for x in dir_src, dir_bin, dir_test_bin, dir_deps:
         assert os.path.isabs(x), x
         assert utilities.is_nonempty_dir(x), x
@@ -47,23 +53,18 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, dry_run=Fals
     arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
     assert os.path.isfile(arja_jar), arja_jar
 
+    arja_default_population_size = 40
+    max_generations = 2000000  # use a large one to keep ARJA running forever
+    # there is `populationSize * maxGenerations` as an `int` in ARJA; do not overflow
+    assert arja_default_population_size * max_generations <= 0x7fffffff
     arja_command = (f'{java_executable} -cp {str(arja_jar)}'
                     f' us.msu.cse.repair.Main Arja'
                     f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
                     f' -DbinTestDir "{str(dir_test_bin)}" -Ddependences "{str(dir_deps)}"'
                     f' -DpatchOutputRoot "{str(dir_patches)}"'
-                    f' -DdiffFormat true -DmaxGenerations 10'
+                    f' -DdiffFormat true -DmaxGenerations {max_generations}'
                     f' -DexternalProjRoot {str(dir_arja)}/external'
                     )
-
-    if not dry_run:
-        emitter.normal("\trunning ARJA")
-
-        arja_return_code = utilities.execute_command(arja_command)
-        if arja_return_code != 0:
-            utilities.error_exit("ARJA did not exit normally")
-
-    result = []
 
     # Output directory of ARJA (`patchOutputRoot`) looks like:
     #
@@ -86,6 +87,52 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, dry_run=Fals
     # Patch_{n1}.txt is ARJA's custom description of the patch;
     # diff is a unified diff file; when applying patch in `srcJavaDir`, strip level is `len(Path(dir_src).parts)`;
     # patched/ holds patched versions of all changed source files, with the original package structure.
+
+    if not dry_run:
+        emitter.normal(f"\trunning ARJA, waiting for {num_patches_wanted} plausible patches")
+
+        emitter.command(arja_command)
+        popen = subprocess.Popen(shlex.split(arja_command), stdout=DEVNULL, stderr=PIPE)
+
+        time_to_stop = time.time() + timeout_in_seconds
+        stopped_early = False
+        while time.time() < time_to_stop or not timeout_in_seconds:
+            return_code = popen.poll()
+
+            num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_dir()])
+
+            if return_code == 0:
+                stopped_early = True
+                emitter.normal(f"\tARJA terminated normally after {max_generations} generations; got {num_patches} patches")
+                break
+            elif return_code is not None:
+                utilities.error_exit("ARJA did not exit normally",
+                                    popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
+            elif num_patches >= num_patches_wanted:
+                stopped_early = True
+                popen.terminate()
+                try:
+                    timeout = 10
+                    popen.wait(timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    utilities.error_exit(
+                        f"ARJA did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
+                        f" repair aborted")
+                emitter.normal(f"\tTerminated ARJA because there are enough patches; got {num_patches} patches")
+                break
+        if not stopped_early:
+            popen.terminate()
+            try:
+                timeout = 10
+                popen.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                utilities.error_exit(
+                    f"ARJA did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
+                    f" repair aborted")
+            num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_dir()])
+            emitter.normal(f"\tARJA stopped due to timeout; got {num_patches} patches")
+
+    result = []
 
     strip = len(Path(dir_src).parts)
 

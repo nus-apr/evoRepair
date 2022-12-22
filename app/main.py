@@ -98,6 +98,9 @@ def run(arg_list):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
+        num_patches_wanted = 5
+        patch_gen_timeout_in_secs = 1200
+
         # avoid colons in dir names because they disturb classpaths
         now = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
 
@@ -116,7 +119,8 @@ def run(arg_list):
         if not dry_run_repair:
             utilities.check_is_empty_dir(dir_patches)
         list_patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
-            values.dir_info["tests"], values.dir_info["deps"], dir_patches, dry_run=dry_run_repair
+            values.dir_info["tests"], values.dir_info["deps"], dir_patches,
+            num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
         )
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["patch-generation"] = str(duration)
