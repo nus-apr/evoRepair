@@ -89,3 +89,43 @@ def have_budget(time_budget):
                 return False
         return True
 
+
+def __dir_is_empty(path):
+    assert os.path.isdir(path)
+    return not any(os.scandir(path))
+
+
+def is_empty_dir(path):
+    return os.path.isdir(path) and __dir_is_empty(path)
+
+
+def is_nonempty_dir(path):
+    return os.path.isdir(path) and not __dir_is_empty(path)
+
+
+def check_is_abspath(path, message=None):
+    if message is None:
+        message = f"{path} is not an absolute path"
+    if not os.path.isabs(path):
+        raise ValueError(message)
+
+
+def check_is_dir(path, message=None):
+    if message is None:
+        message = f"{path} is not an existing directory"
+    if not os.path.isdir(path):
+        raise ValueError(message)
+
+
+def check_is_nonempty_dir(path, message=None):
+    if message is None:
+        message = f"{path} is not a non-empty directory"
+    if not is_nonempty_dir(path):
+        raise ValueError(message)
+
+
+def check_is_empty_dir(path, message=None):
+    if message is None:
+        message = f"{path} is not an empty directory"
+    if not is_empty_dir(path):
+        raise ValueError(message)
