@@ -1,5 +1,4 @@
 from app import emitter, utilities, values
-from app.tester import read_evosuite_version
 from app.uniapr import run_uniapr
 
 import os
@@ -59,12 +58,18 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
         changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
         result = run_uniapr(work_dir, dir_patches_bin, changed_classes, execute_tests)
     else:
-        result = plain_validate(dir_patches_bin, dir_tests_bin, execute_tests)
+        tests_runtime_deps = set()
+        for suite in tests:
+            tests_runtime_deps.update((str(Path(x).resolve()) for x in suite.runtime_deps))
+
+        result = plain_validate(dir_patches_bin, dir_tests_bin, tests_runtime_deps, execute_tests)
+
     emitter.debug(f"(patch_id, passing, failing): {pprint.pformat(result, indent=4)}")
+
     return result
 
 
-def plain_validate(patches_bin_dir, tests_bin_dir, execute_tests):
+def plain_validate(patches_bin_dir, tests_bin_dir, tests_runtime_deps, execute_tests):
     for x in patches_bin_dir, tests_bin_dir:
         assert os.path.isabs(x), str(x)
         assert os.path.isdir(x), str(x)
@@ -83,7 +88,7 @@ def plain_validate(patches_bin_dir, tests_bin_dir, execute_tests):
     result = []
 
     for entry in os.scandir(patches_bin_dir):
-        message = asyncio.run(run_plain_validator(entry.path, tests_bin_dir, test_classes))
+        message = asyncio.run(run_plain_validator(entry.path, tests_bin_dir, tests_runtime_deps, test_classes))
 
         obj = json.loads(message)
 
@@ -93,7 +98,7 @@ def plain_validate(patches_bin_dir, tests_bin_dir, execute_tests):
     return result
 
 
-async def run_plain_validator(patch_bin_dir, tests_bin_dir, test_classes):
+async def run_plain_validator(patch_bin_dir, tests_bin_dir, tests_runtime_deps, test_classes):
     assert os.path.isabs(patch_bin_dir), str(patch_bin_dir)
     assert os.path.isabs(tests_bin_dir), str(tests_bin_dir)
     assert utilities.is_nonempty_dir(patch_bin_dir), str(patch_bin_dir)
@@ -115,28 +120,25 @@ async def run_plain_validator(patch_bin_dir, tests_bin_dir, test_classes):
         if java_executable is None:
             raise RuntimeError("java executable not found")
 
-        evosuite_runtime_jar = Path(values._dir_root, "extern", "evosuite", "standalone_runtime",
-                                    "target", f"evosuite-standalone-runtime-{read_evosuite_version()}.jar")
-        assert evosuite_runtime_jar.is_file(), str(evosuite_runtime_jar)
-
-        junit_jar = Path(values._dir_root, "extern", "arja", "external", "lib", "junit-4.11.jar")
-        assert junit_jar.is_file(), str(junit_jar)
-
         plain_validator_jar = Path(values._dir_root, "extern", "plain-validator", "target",
                                    "plain-validator-1.0-SNAPSHOT-jar-with-dependencies.jar")
         assert plain_validator_jar.is_file(), str(plain_validator_jar)
 
         # must put patch_bin_dir before values.dir_info["classes"]
-        classpath = [patch_bin_dir, values.dir_info["classes"], evosuite_runtime_jar,
-                     junit_jar, plain_validator_jar, tests_bin_dir]
+        classpath = [plain_validator_jar
+                     , patch_bin_dir
+                     , values.dir_info["classes"]
+                     , tests_bin_dir
+                     , *tests_runtime_deps
+                     ]
 
         for entry in os.scandir(values.dir_info["deps"]):
             assert entry.name.endswith(".jar"), f"the dependency {entry.path} is not jar file"
             classpath.append(entry.path)
 
-        classpath = ":".join((str(x) for x in classpath))
+        cp_str = ":".join((str(x) for x in classpath))
 
-        command = (f'{java_executable} -cp "{classpath}" evorepair.PlainValidator {port}'
+        command = (f'{java_executable} -cp "{cp_str}" evorepair.PlainValidator {port}'
                    f' {" ".join(test_classes)}')
 
         emitter.command(command)
