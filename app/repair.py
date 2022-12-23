@@ -90,6 +90,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     if not dry_run:
         emitter.normal(f"\trunning ARJA, waiting for {num_patches_wanted} plausible patches")
+        emitter.normal(f"\toutput directory: {str(dir_patches)}")
 
         emitter.command(arja_command)
         popen = subprocess.Popen(shlex.split(arja_command), stdout=DEVNULL, stderr=PIPE)
