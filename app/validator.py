@@ -65,6 +65,12 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
 
 
 def plain_validate(patches_bin_dir, tests_bin_dir, execute_tests):
+    for x in patches_bin_dir, tests_bin_dir:
+        assert os.path.isabs(x), str(x)
+        assert os.path.isdir(x), str(x)
+        if not execute_tests:
+            utilities.check_is_nonempty_dir(x)
+
     if not execute_tests:
         return []
 
@@ -75,15 +81,24 @@ def plain_validate(patches_bin_dir, tests_bin_dir, execute_tests):
         test_classes.append(".".join(path.parts))
 
     result = []
+
     for entry in os.scandir(patches_bin_dir):
-        key = entry.name
         message = asyncio.run(run_plain_validator(entry.path, tests_bin_dir, test_classes))
+
         obj = json.loads(message)
-        result.append((key, obj["passingTests"], obj["failingTests"]))
+
+        patch_key = entry.name
+        result.append((patch_key, obj["passingTests"], obj["failingTests"]))
+
     return result
 
 
-async def run_plain_validator(patch_dir, test_bin_dir, test_classes):
+async def run_plain_validator(patch_bin_dir, tests_bin_dir, test_classes):
+    assert os.path.isabs(patch_bin_dir), str(patch_bin_dir)
+    assert os.path.isabs(tests_bin_dir), str(tests_bin_dir)
+    assert utilities.is_nonempty_dir(patch_bin_dir), str(patch_bin_dir)
+    assert utilities.is_nonempty_dir(tests_bin_dir), str(tests_bin_dir)
+
     result = []
 
     async def plain_validator_connected(reader, _):
@@ -95,24 +110,42 @@ async def run_plain_validator(patch_dir, test_bin_dir, test_classes):
     server = await asyncio.start_server(plain_validator_connected, sock=server_socket)
     async with server:
         await server.start_serving()
+
+        java_executable = shutil.which("java")
+        if java_executable is None:
+            raise RuntimeError("java executable not found")
+
         evosuite_runtime_jar = Path(values._dir_root, "extern", "evosuite", "standalone_runtime",
                                     "target", f"evosuite-standalone-runtime-{read_evosuite_version()}.jar")
+        assert evosuite_runtime_jar.is_file(), str(evosuite_runtime_jar)
+
         junit_jar = Path(values._dir_root, "extern", "arja", "external", "lib", "junit-4.11.jar")
+        assert junit_jar.is_file(), str(junit_jar)
+
         plain_validator_jar = Path(values._dir_root, "extern", "plain-validator", "target",
                                    "plain-validator-1.0-SNAPSHOT-jar-with-dependencies.jar")
+        assert plain_validator_jar.is_file(), str(plain_validator_jar)
 
-        # must put patch_dir before values.dir_info["classes"]
-        classpath = [patch_dir, values.dir_info["classes"], evosuite_runtime_jar,
-                     junit_jar, plain_validator_jar, test_bin_dir]
+        # must put patch_bin_dir before values.dir_info["classes"]
+        classpath = [patch_bin_dir, values.dir_info["classes"], evosuite_runtime_jar,
+                     junit_jar, plain_validator_jar, tests_bin_dir]
+
         for entry in os.scandir(values.dir_info["deps"]):
-            assert entry.name.endswith(".jar")
+            assert entry.name.endswith(".jar"), f"the dependency {entry.path} is not jar file"
             classpath.append(entry.path)
-        classpath = [os.path.abspath(p) for p in classpath]
-        command = (f'{shutil.which("java")} -cp "{":".join(classpath)}" evorepair.PlainValidator {port}'
+
+        classpath = ":".join((str(x) for x in classpath))
+
+        command = (f'{java_executable} -cp "{classpath}" evorepair.PlainValidator {port}'
                    f' {" ".join(test_classes)}')
 
         emitter.command(command)
 
-        process = await asyncio.create_subprocess_shell(command, stdout=DEVNULL, stderr=DEVNULL)
-        await process.wait()
+        process = await asyncio.create_subprocess_shell(command, stdout=DEVNULL, stderr=PIPE)
+        return_code = await process.wait()
+        if return_code != 0:
+            stderr = await process.stderr.read()
+            utilities.error_exit("PlainValidator did not exit normally", stderr.decode("utf-8"),
+                                 f"exit code is {return_code}")
+
     return result[0]
