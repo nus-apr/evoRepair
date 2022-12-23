@@ -8,9 +8,10 @@ from pathlib import Path
 import time
 
 class Patch():
-    def __init__(self, diff_file, strip: int, changed_classes, key):
+    def __init__(self, diff_file, strip: int, changed_files, changed_classes, key):
         self.diff_file = diff_file
         self.strip = strip
+        self.changed_files = changed_files
         self.changed_classes = changed_classes
         self.key = key
 

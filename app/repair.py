@@ -148,14 +148,14 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         diff_file = Path(entry.path, "diff")
 
         patched_dir = Path(entry.path, "patched")
-        changed_files = glob.glob(os.path.join(patched_dir, "**", "*.java"), recursive=True)
-        changed_classes = []
-        for file in changed_files:
-            path = Path(file).relative_to(patched_dir).with_suffix("")
-            changed_classes.append(".".join(path.parts))
+
+        changed_files = [Path(x).relative_to(patched_dir) for x in
+                         glob.glob(os.path.join(patched_dir, "**", "*.java"), recursive=True)]
+
+        changed_classes = [".".join(file.with_suffix("").parts) for file in changed_files]
 
         key = Path(entry.path).name.split("_")[1]
 
-        result.append(Patch(diff_file, strip, changed_classes, key))
+        result.append(Patch(diff_file, strip, changed_files, changed_classes, key))
 
     return result
