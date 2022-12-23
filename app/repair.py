@@ -132,6 +132,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f" repair aborted")
             num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_dir()])
             emitter.normal(f"\tARJA stopped due to timeout; got {num_patches} patches")
+    else:
+        num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_dir()])
+        emitter.normal(f"\tDry run; will reuse the {num_patches} patches in {dir_patches}")
 
     result = []
 
