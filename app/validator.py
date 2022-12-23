@@ -35,31 +35,37 @@ Expected Output
 
 
 def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
-    assert os.path.exists(work_dir)
+    assert os.path.isabs(work_dir)
+    assert os.path.isdir(work_dir)
+    if compile_patches or compile_tests:
+        utilities.check_is_empty_dir(work_dir)
 
     emitter.sub_sub_title("Validating Generated Patches")
     emitter.normal("\trunning UniAPR")
 
-    patch_bin_dir = Path(work_dir, "patches_bin")
-    os.makedirs(patch_bin_dir, exist_ok=True)
+    dir_patches_bin = Path(work_dir, "patches_bin")
+
+    dir_tests_bin = Path(work_dir, "target", "test-classes")  # UniAPR accepts maven directory structure
+
+    os.makedirs(dir_patches_bin, exist_ok=True)
     if compile_patches:
         for p in patches:
-            out_dir = Path(patch_bin_dir, p.key)
-            os.makedirs(out_dir, exist_ok=True)
-            assert utilities.is_empty_dir(out_dir), out_dir
+            out_dir = Path(dir_patches_bin, p.key)
+
+            os.makedirs(out_dir)
+
             p.compile(out_dir)
 
-    test_bin_dir = Path(work_dir, "target", "test-classes")  # UniAPR accepts maven directory structure
-    os.makedirs(test_bin_dir, exist_ok=True)
+    os.makedirs(dir_tests_bin, exist_ok=True)
     if compile_tests:
         for t in tests:
-            t.compile(test_bin_dir)
+            t.compile(dir_tests_bin)
 
     if values.use_hotswap:
         changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
-        result = run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests)
+        result = run_uniapr(work_dir, dir_patches_bin, changed_classes, execute_tests)
     else:
-        result = plain_validate(patch_bin_dir, test_bin_dir, execute_tests)
+        result = plain_validate(dir_patches_bin, dir_tests_bin, execute_tests)
     emitter.debug(f"(patch_id, passing, failing): {pprint.pformat(result, indent=4)}")
     return result
 
