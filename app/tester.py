@@ -74,8 +74,6 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
     if not dry_run:
         assert utilities.is_empty_dir(dir_output)
 
-    emitter.normal(f"\trunning evosuite for {classname}")
-
     java_executable = shutil.which("java")
     if java_executable is None:
         raise RuntimeError("Java executable not found")
@@ -96,6 +94,8 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
     dir_test_src = Path(dir_output, "evosuite-tests")
 
     if not dry_run:
+        emitter.normal(f"\trunning evosuite for {classname}")
+
         popen = subprocess.Popen(shlex.split(evosuite_command), stdout=DEVNULL, stderr=PIPE)
 
         emitter.command(evosuite_command)
@@ -121,6 +121,8 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
                 raise RuntimeError(f"EvoSuite exited normally without generating expected file {x}")
 
         emitter.normal("\tEvoSuite terminated normally")
+    else:
+        emitter.normal(f"\tDry run; will reuse tests in {dir_test_src}")
 
     junit_classes = [f"{classname}_ESTest"]
 
