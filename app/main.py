@@ -93,6 +93,7 @@ def run(arg_list):
     time_info["testing"] = str(duration)
 
     dry_run_repair = False
+    dry_run_test_gen = False
 
     while utilities.have_budget(values.time_duration_total):
         values.iteration_no = values.iteration_no + 1
@@ -100,6 +101,7 @@ def run(arg_list):
 
         num_patches_wanted = 5
         patch_gen_timeout_in_secs = 1200
+        test_gen_timeout_per_class_in_secs = 20
 
         # avoid colons in dir names because they disturb classpaths
         now = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
@@ -126,7 +128,12 @@ def run(arg_list):
         time_info["patch-generation"] = str(duration)
 
         time_check = time.time()
-        list_test = tester.generate_additional_test(list_patches, dir_tests)
+        os.makedirs(dir_tests, exist_ok=True)
+        if not dry_run_test_gen:
+            utilities.check_is_empty_dir(dir_tests)
+        list_test = tester.generate_additional_test(list_patches, dir_tests,
+                                                    timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
+                                                    dry_run=dry_run_test_gen)
         duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
         time_info["test-generation"] = str(duration)
 
