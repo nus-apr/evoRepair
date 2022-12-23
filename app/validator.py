@@ -41,9 +41,13 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
     emitter.normal("\trunning UniAPR")
 
     patch_bin_dir = Path(work_dir, "patches_bin")
+    os.makedirs(patch_bin_dir, exist_ok=True)
     if compile_patches:
         for p in patches:
-            p.compile(Path(patch_bin_dir, p.key))
+            out_dir = Path(patch_bin_dir, p.key)
+            os.makedirs(out_dir, exist_ok=True)
+            assert utilities.is_empty_dir(out_dir), out_dir
+            p.compile(out_dir)
 
     test_bin_dir = Path(work_dir, "target", "test-classes")  # UniAPR accepts maven directory structure
     if compile_tests:
