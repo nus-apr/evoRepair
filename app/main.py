@@ -172,7 +172,10 @@ def run(arg_list):
                 utilities.check_is_empty_dir(directory)
 
         phase = "Patch Generation"
-        timer.start_phase(phase)
+        if values.iteration_no == 1:
+            timer.start_phase(phase)
+        else:
+            timer.resume_phase(phase)
 
         list_patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
@@ -181,7 +184,10 @@ def run(arg_list):
 
         timer.pause_phase(phase)
         phase = "Test Generation"
-        timer.start_phase(phase)
+        if values.iteration_no == 1:
+            timer.start_phase(phase)
+        else:
+            timer.resume_phase(phase)
 
         list_test = tester.generate_additional_test(list_patches, dir_tests,
                                                     timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
@@ -189,7 +195,10 @@ def run(arg_list):
 
         timer.pause_phase(phase)
         phase = "Validation"
-        timer.start_phase(phase)
+        if values.iteration_no == 1:
+            timer.start_phase(phase)
+        else:
+            timer.resume_phase(phase)
 
         _ = validator.validate(list_patches, list_test, dir_validation, compile_patches=compile_patches,
                                compile_tests=compile_tests, execute_tests=execute_tests)
