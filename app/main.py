@@ -9,21 +9,66 @@ from app import emitter, logger, values, repair, builder, tester, validator, uti
 from app.configuration import  Configurations
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from collections import OrderedDict
 
-start_time = 0
-time_info = {
-    "initialization": '0',
-    "build": '0',
-    "bootstrap": '0',
-    "testing": '0',
-    "evolution": '0',
-    "localization": '0',
-    "patch-generation": '0',
-    "test-generation": '0',
-    "validation": '0',
-    "verify": '0',
-    "total": '0'
-    }
+
+class Interval:
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
+
+class Timer:
+    def __init__(self):
+        self.time_intervals = OrderedDict()
+
+    def start_phase(self, phase):
+        if self.__exists(phase):
+            raise ValueError(f"Phase {phase} already exists")
+
+        self.time_intervals[phase] = [Interval(time.time(), None)]
+
+    def pause_phase(self, phase):
+        if not self.__exists(phase):
+            raise ValueError(f"Phase {phase} does not exist")
+        if not self.__is_running(phase):
+            raise ValueError(f"Phase {phase} is already paused")
+
+        self.time_intervals[phase][-1].end = time.time()
+
+    def pause_all(self):
+        end_time = time.time()
+        for intervals in self.time_intervals.values():
+            intervals[-1].end = end_time
+
+    def resume_phase(self, phase):
+        if not self.__exists(phase):
+            raise ValueError(f"Phase {phase} does not exist")
+        if self.__is_running(phase):
+            raise ValueError(f"Phase {phase} is already running")
+
+        self.time_intervals[phase].append(Interval(time.time(), None))
+
+    def summarize(self):
+        for phase, intervals in self.time_intervals.items():
+            if intervals[-1].end is None:
+                raise RuntimeError(f"Phase {phase} is still running; cannot summarize.")
+
+        return OrderedDict([
+            (phase, sum(map(lambda interval: interval.end - interval.start, intervals)))
+            for phase, intervals in self.time_intervals.items()
+        ])
+
+    def __exists(self, phase):
+        return phase in self.time_intervals
+
+    def __is_running(self, phase):
+        assert self.__exists(phase)
+
+        return self.time_intervals[phase][-1].end is None
+
+
+timer = Timer()
 
 stop_event = mp.Event()
 
@@ -66,31 +111,36 @@ def bootstrap(arg_list):
 
 
 def run(arg_list):
-    global start_time, time_info
-    start_time = time.time()
+    global timer
+    phase = "Startup"
+    timer.start_phase(phase)
+
     create_directories()
     logger.create_log_files()
-    duration = format((time.time() - start_time) / 60, '.3f')
-    time_info["initialization"] = str(duration)
 
-    time_check = time.time()
+    timer.pause_phase(phase)
+    phase = "Bootstrap"
+    timer.start_phase(phase)
+
     bootstrap(arg_list)
-    duration = format((time.time() - time_check) / 60, '.3f')
-    time_info["bootstrap"] = str(duration)
 
-    time_check = time.time()
+    timer.pause_phase(phase)
+    phase = "Build"
+    timer.start_phase(phase)
+
     emitter.sub_title("Build Project")
     builder.clean_project(values.dir_exp, values.cmd_clean)
     builder.config_project(values.dir_exp, values.cmd_pre_build)
     builder.build_project(values.dir_exp, values.cmd_build)
-    duration = format((time.time() - time_check) / 60, '.3f')
-    time_info["analysis"] = str(duration)
 
-    time_check = time.time()
+    timer.pause_phase(phase)
+    phase = "Testing"
+    timer.start_phase(phase)
+
     emitter.sub_title("Test Diagnostics")
     tester.generate_test_diagnostic()
-    duration = format((time.time() - time_check) / 60, '.3f')
-    time_info["testing"] = str(duration)
+
+    timer.pause_phase(phase)
 
     while utilities.have_budget(values.time_duration_total):
         values.iteration_no = values.iteration_no + 1
@@ -120,25 +170,30 @@ def run(arg_list):
             if not condition:
                 utilities.check_is_empty_dir(directory)
 
-        time_check = time.time()
+        phase = "Patch Generation"
+        timer.start_phase(phase)
+
         list_patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
             num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
         )
-        duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
-        time_info["patch-generation"] = str(duration)
 
-        time_check = time.time()
+        timer.pause_phase(phase)
+        phase = "Test Generation"
+        timer.start_phase(phase)
+
         list_test = tester.generate_additional_test(list_patches, dir_tests,
                                                     timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
                                                     dry_run=dry_run_test_gen)
-        duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
-        time_info["test-generation"] = str(duration)
 
-        time_check = time.time()
+        timer.pause_phase(phase)
+        phase = "Validation"
+        timer.start_phase(phase)
+
         _ = validator.validate(list_patches, list_test, dir_validation)
-        duration = format(((time.time() - time_check) / 60 - float(values.time_duration_generate)), '.3f')
-        time_info["validation"] = str(duration)
+
+        timer.pause_phase(phase)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(prog=values.tool_name, usage='%(prog)s [options]')
@@ -166,27 +221,15 @@ def main():
     signal.signal(signal.SIGTERM, shutdown)
     try:
         run(parsed_args)
-    except SystemExit as e:
-        total_duration = format((time.time() - start_time) / 60, '.3f')
-        time_info[values.time_duration_total] = str(total_duration)
-        emitter.end(time_info, is_error)
-        logger.store_logs()
-    except KeyboardInterrupt as e:
-        total_duration = format((time.time() - start_time) / 60, '.3f')
-        time_info[values.time_duration_total] = str(total_duration)
-        emitter.end(time_info, is_error)
-        logger.store_logs()
     except Exception as e:
+        timer.pause_all()
+
         is_error = True
         emitter.error("Runtime Error")
         emitter.error(str(e))
         logger.error(traceback.format_exc())
     finally:
-        # Final running time and exit message
-        total_duration = format((time.time() - start_time) / 60, '.3f')
-        time_info[values.time_duration_total] = str(total_duration)
-        emitter.end(time_info, is_error)
+        emitter.end(timer, is_error)
         logger.store_logs()
         if is_error:
             exit(1)
-        exit(0)

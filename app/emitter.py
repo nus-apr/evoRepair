@@ -147,20 +147,18 @@ def configuration(setting, value):
     logger.configuration(setting + ":" + str(value))
 
 
-def end(time_info, is_error=False):
+def end(timer, is_error=False):
+    summary = timer.summarize()
+
+    SECONDS_IN_MINUTE = 60
+
     if values.arg_parsed:
         statistics("\nRun time statistics:\n-----------------------\n")
-        statistics("Startup: " + str(time_info["initialization"].format()) + " minutes")
-        statistics("Build: " + str(time_info["build"]) + " minutes")
-        statistics("Testing: " + str(time_info["testing"]) + " minutes")
-        statistics("Localization: " + str(time_info["localization"]) + " minutes")
-        statistics("Patch Generation: " + str(time_info["patch-generation"]) + " minutes")
-        statistics("Test Generation: " + str(time_info["test-generation"]) + " minutes")
-        statistics("Validation: " + str(time_info["validation"]) + " minutes")
+        for phase, duration in summary.items():
+            statistics(f"{phase}: {duration / SECONDS_IN_MINUTE:.3f} minutes")
 
-        if is_error:
-            error("\n" + values.tool_name + " exited with an error after " + time_info[
-                values.time_duration_total] + " minutes \n")
-        else:
-            success("\n" + values.tool_name + " finished successfully after " + time_info[
-                values.time_duration_total] + " minutes \n")
+    total = f"{sum(summary.values()) / SECONDS_IN_MINUTE: .3f}"
+    if is_error:
+        error(f"\n{values.tool_name} exited with an error after {total} minutes\n")
+    else:
+        success(f"\n{values.tool_name} finished successfully after {total} minutes\n")
