@@ -73,7 +73,7 @@ def plain_validate(patches_bin_dir, tests_bin_dir, tests_runtime_deps, execute_t
     for x in patches_bin_dir, tests_bin_dir:
         assert os.path.isabs(x), str(x)
         assert os.path.isdir(x), str(x)
-        if not execute_tests:
+        if execute_tests:
             utilities.check_is_nonempty_dir(x)
 
     if not execute_tests:
