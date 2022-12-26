@@ -157,11 +157,9 @@ def run(arg_list):
         compile_tests = True
         execute_tests = True
 
-        dir_patches = values.dir_info["patches"]
-        dir_tests = values.dir_info["gen-test"]
-        # avoid colons in dir names because they disturb classpaths
-        now = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
-        dir_validation = Path(values.dir_output, f"validate-{now}")
+        dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
+        dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
+        dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
 
         directories = (dir_patches, dir_tests, dir_validation)
         non_empty_conditions = (dry_run_repair, dry_run_test_gen, not compile_patches and not compile_tests)
