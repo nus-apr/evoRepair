@@ -92,34 +92,35 @@ def run(arg_list):
     duration = format((time.time() - time_check) / 60, '.3f')
     time_info["testing"] = str(duration)
 
-    dry_run_repair = False
-    dry_run_test_gen = False
-
     while utilities.have_budget(values.time_duration_total):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
+        dry_run_repair = False
         num_patches_wanted = 5
         patch_gen_timeout_in_secs = 1200
+
+        dry_run_test_gen = False
         test_gen_timeout_per_class_in_secs = 20
 
-        # avoid colons in dir names because they disturb classpaths
-        now = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
+        compile_patches = True
+        compile_tests = True
 
         dir_patches = values.dir_info["patches"]
         dir_tests = values.dir_info["gen-test"]
+        # avoid colons in dir names because they disturb classpaths
+        now = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
         dir_validation = Path(values.dir_output, f"validate-{now}")
 
-        if not values.is_debug:
-            assert not dir_validation.exists(), f"{dir_validation.absolute()} already exists"
-            os.makedirs(dir_validation)
-        else:
-            os.makedirs(dir_validation, exist_ok=True)
+        directories = (dir_patches, dir_tests, dir_validation)
+        non_empty_conditions = (dry_run_repair, dry_run_test_gen, not compile_patches and not compile_tests)
+        for directory in directories:
+            os.makedirs(directory, exist_ok=True)
+        for condition, directory in zip(non_empty_conditions, directories):
+            if not condition:
+                utilities.check_is_empty_dir(directory)
 
         time_check = time.time()
-        os.makedirs(dir_patches, exist_ok=True)
-        if not dry_run_repair:
-            utilities.check_is_empty_dir(dir_patches)
         list_patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
             num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
@@ -128,9 +129,6 @@ def run(arg_list):
         time_info["patch-generation"] = str(duration)
 
         time_check = time.time()
-        os.makedirs(dir_tests, exist_ok=True)
-        if not dry_run_test_gen:
-            utilities.check_is_empty_dir(dir_tests)
         list_test = tester.generate_additional_test(list_patches, dir_tests,
                                                     timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
                                                     dry_run=dry_run_test_gen)
