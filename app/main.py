@@ -155,6 +155,7 @@ def run(arg_list):
 
         compile_patches = True
         compile_tests = True
+        execute_tests = True
 
         dir_patches = values.dir_info["patches"]
         dir_tests = values.dir_info["gen-test"]
@@ -190,7 +191,8 @@ def run(arg_list):
         phase = "Validation"
         timer.start_phase(phase)
 
-        _ = validator.validate(list_patches, list_test, dir_validation)
+        _ = validator.validate(list_patches, list_test, dir_validation, compile_patches=compile_patches,
+                               compile_tests=compile_tests, execute_tests=execute_tests)
 
         timer.pause_phase(phase)
 
