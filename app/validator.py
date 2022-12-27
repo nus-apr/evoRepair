@@ -28,7 +28,7 @@ Expected Output
 """
 
 
-def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
+def validate(indexed_patches, tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
     assert os.path.isabs(work_dir)
     assert os.path.isdir(work_dir)
     if compile_patches or compile_tests:
@@ -40,14 +40,19 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
 
     dir_tests_bin = Path(work_dir, "target", "test-classes")  # UniAPR accepts maven directory structure
 
+    indexed_patch_to_bin_dir_name = {}
+
     os.makedirs(dir_patches_bin, exist_ok=True)
     if compile_patches:
-        for p in patches:
-            out_dir = Path(dir_patches_bin, p.key)
+        for p in indexed_patches:
+            patch_index = p.get_index()
+            out_dir = Path(dir_patches_bin, f"gen{patch_index.generation}_{patch_index.key}")
 
             os.makedirs(out_dir)
 
-            p.compile(out_dir)
+            p.patch.compile(out_dir)
+
+            indexed_patch_to_bin_dir_name[p] = out_dir.name
 
     os.makedirs(dir_tests_bin, exist_ok=True)
     if compile_tests:
@@ -55,14 +60,18 @@ def validate(patches, tests, work_dir, compile_patches=True, compile_tests=True,
             t.compile(dir_tests_bin)
 
     if values.use_hotswap:
-        changed_classes = list(itertools.chain(*(p.changed_classes for p in patches)))
-        result = run_uniapr(work_dir, dir_patches_bin, changed_classes, execute_tests)
+        raise NotImplementedError("UniAPR validation for indexed patches has not been implemented")
+        # changed_classes = list(itertools.chain(*(p.patch.changed_classes for p in indexed_patches)))
+        # result = run_uniapr(work_dir, dir_patches_bin, changed_classes, execute_tests)
     else:
         tests_runtime_deps = set()
         for suite in tests:
             tests_runtime_deps.update((str(Path(x).resolve()) for x in suite.runtime_deps))
 
-        result = plain_validate(dir_patches_bin, dir_tests_bin, tests_runtime_deps, execute_tests)
+        bin_dir_name_to_indexed_patch = dict(((v, k) for k, v in indexed_patch_to_bin_dir_name.items()))
+        result = [(bin_dir_name_to_indexed_patch[bin_dir_name], passing_tests, failing_tests)
+                  for bin_dir_name, passing_tests, failing_tests
+                  in plain_validate(dir_patches_bin, dir_tests_bin, tests_runtime_deps, execute_tests)]
 
     emitter.debug(f"(patch_id, passing, failing): {pprint.pformat(result, indent=4)}")
 
@@ -92,8 +101,7 @@ def plain_validate(patches_bin_dir, tests_bin_dir, tests_runtime_deps, execute_t
 
         obj = json.loads(message)
 
-        patch_key = entry.name
-        result.append((patch_key, obj["passingTests"], obj["failingTests"]))
+        result.append((entry.name, obj["passingTests"], obj["failingTests"]))
 
     return result
 

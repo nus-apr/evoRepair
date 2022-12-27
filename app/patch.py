@@ -6,6 +6,7 @@ import shutil
 import os
 from pathlib import Path
 import time
+from collections import namedtuple
 
 
 class Patch:
@@ -66,3 +67,26 @@ class Patch:
             shutil.copytree(patched_dir_bin, out_dir, dirs_exist_ok=True)
 
         shutil.rmtree(tmp_dir)
+
+
+PatchIndex = namedtuple("PatchIndex", ["generation", "key"])
+
+
+class IndexedPatch:
+    def __init__(self, generation, patch):
+        self.generation = generation
+        self.patch = patch
+
+    def __hash__(self):
+        return hash((self.generation, self.patch.key))
+
+    def __eq__(self, other):
+        if type(other) != IndexedPatch:
+            return False
+        return self.generation == other.generation and self.patch.key == other.patch.key
+
+    def __str__(self):
+        return f"{str(self.patch)}@gen{self.generation}"
+
+    def get_index(self):
+        return PatchIndex(self.generation, self.patch.key)

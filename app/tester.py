@@ -33,7 +33,7 @@ This is the interface for EvoSuite
 # Expected Output
 # @output list of test-cases JSON format
 """
-def generate_additional_test(patches: List[Patch], dir_output, dry_run=False, timeout_per_class_in_seconds=0):
+def generate_additional_test(indexed_patches, dir_output, dry_run=False, timeout_per_class_in_seconds=0):
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
     if not dry_run:
@@ -42,8 +42,8 @@ def generate_additional_test(patches: List[Patch], dir_output, dry_run=False, ti
     emitter.sub_sub_title("Generating Test Cases")
 
     classes = set()
-    for p in patches:
-        classes.update(p.changed_classes)
+    for x in indexed_patches:
+        classes.update(x.patch.changed_classes)
 
     class_names_with_dollar = [x for x in classes if "$" in classes]
     assert not class_names_with_dollar, class_names_with_dollar

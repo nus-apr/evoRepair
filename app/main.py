@@ -7,6 +7,7 @@ import multiprocessing as mp
 import app.utilities
 from app import emitter, logger, values, repair, builder, tester, validator, utilities
 from app.configuration import  Configurations
+from app.patch import IndexedPatch
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import OrderedDict
@@ -175,10 +176,11 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        list_patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
+        patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
             num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
         )
+        indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
 
         timer.pause_phase(phase)
         phase = "Test Generation"
@@ -187,7 +189,7 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        list_test = tester.generate_additional_test(list_patches, dir_tests,
+        list_test = tester.generate_additional_test(indexed_patches, dir_tests,
                                                     timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
                                                     dry_run=dry_run_test_gen)
 
@@ -198,7 +200,7 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        _ = validator.validate(list_patches, list_test, dir_validation, compile_patches=compile_patches,
+        _ = validator.validate(indexed_patches, list_test, dir_validation, compile_patches=compile_patches,
                                compile_tests=compile_tests, execute_tests=execute_tests)
 
         timer.pause_phase(phase)
