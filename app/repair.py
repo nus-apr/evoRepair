@@ -43,6 +43,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     emitter.sub_sub_title("Generating Patches")
 
+    if num_patches_wanted <= 0:
+        emitter.normal(f"\t{num_patches_wanted} patches wanted; patch generation skipped")
+        return []
+
     java_executable = shutil.which("java")
     if java_executable is None:
         raise RuntimeError("Java executable not found")
