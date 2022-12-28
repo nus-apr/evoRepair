@@ -124,7 +124,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
     else:
         emitter.normal(f"\tDry run; will reuse tests in {dir_test_src}")
 
-    junit_classes = [f"{classname}_ESTest"]
+    junit_class = f"{classname}_ESTest"
 
     compile_deps = [evosuite_jar]
 
@@ -135,7 +135,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
     assert os.path.isfile(junit_jar), junit_jar
     runtime_deps = [evosuite_runtime_jar, junit_jar]
 
-    return TestSuite(dir_test_src, classname, junit_classes, compile_deps, runtime_deps, str(dir_test_src))
+    return TestSuite(dir_test_src, classname, junit_class, compile_deps, runtime_deps, str(dir_test_src))
 
 
 def read_evosuite_version():
