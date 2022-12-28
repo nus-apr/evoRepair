@@ -8,6 +8,7 @@ from os.path import abspath
 from pathlib import Path
 import subprocess
 from subprocess import DEVNULL, PIPE
+from collections import namedtuple
 
 
 class TestSuite:
@@ -47,3 +48,32 @@ class TestSuite:
         if process.returncode != 0:
             utilities.error_exit("failed to compiled test suite", process.stderr.decode("utf-8"),
                                  f"exit code: {process.returncode}")
+
+
+class Test:
+    def __init__(self, suite, method_name):
+        self.suite = suite
+        self.method_name = method_name
+
+
+TestIndex = namedtuple("TestIndex", ["generation", "suite_key", "method_name"])
+
+
+class IndexedTest:
+    def __init__(self, generation, test):
+        self.generation = generation
+        self.test = test
+
+    def __hash__(self):
+        return hash(self.get_index())
+
+    def __eq__(self, other):
+        if type(other) != IndexedTest:
+            return False
+        return self.get_index() == other.get_index()
+
+    def __str__(self):
+        return f"{self.test.method_name}@{str(self.test.suite)}@gen{self.generation}"
+
+    def get_index(self):
+        return TestIndex(self.generation, self.test.suite.key, self.test.method_name)

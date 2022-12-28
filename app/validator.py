@@ -28,7 +28,7 @@ Expected Output
 """
 
 
-def validate(indexed_patches, tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
+def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
     assert os.path.isabs(work_dir)
     assert os.path.isdir(work_dir)
     if compile_patches or compile_tests:
@@ -54,10 +54,13 @@ def validate(indexed_patches, tests, work_dir, compile_patches=True, compile_tes
 
             indexed_patch_to_bin_dir_name[p] = out_dir.name
 
+    unique_suites = {indexed_test.get_index()[:-1]: indexed_test.test.suite
+                     for indexed_test in indexed_tests}.values()
+
     os.makedirs(dir_tests_bin, exist_ok=True)
     if compile_tests:
-        for t in tests:
-            t.compile(dir_tests_bin)
+        for suite in unique_suites:
+            suite.compile(dir_tests_bin)
 
     if values.use_hotswap:
         raise NotImplementedError("UniAPR validation for indexed patches has not been implemented")
@@ -65,7 +68,7 @@ def validate(indexed_patches, tests, work_dir, compile_patches=True, compile_tes
         # result = run_uniapr(work_dir, dir_patches_bin, changed_classes, execute_tests)
     else:
         tests_runtime_deps = set()
-        for suite in tests:
+        for suite in unique_suites:
             tests_runtime_deps.update((str(Path(x).resolve()) for x in suite.runtime_deps))
 
         bin_dir_name_to_indexed_patch = dict(((v, k) for k, v in indexed_patch_to_bin_dir_name.items()))

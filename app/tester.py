@@ -4,6 +4,7 @@ from typing import List
 from app import emitter, utilities, values
 from app.test_suite import TestSuite
 from app.patch import Patch
+from app.test_suite import Test, IndexedTest
 
 import os
 from os.path import abspath
@@ -54,7 +55,7 @@ def generate_additional_test(indexed_patches, dir_output, dry_run=False, timeout
         os.makedirs(dir_output_this_class, exist_ok=True)
         if not dry_run:
             assert utilities.is_empty_dir(dir_output_this_class)
-        result.append(
+        result.extend(
             generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class,
                                      dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds)
         )
@@ -135,7 +136,13 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
     assert os.path.isfile(junit_jar), junit_jar
     runtime_deps = [evosuite_runtime_jar, junit_jar]
 
-    return TestSuite(dir_test_src, classname, junit_class, compile_deps, runtime_deps, str(dir_test_src))
+    suite = TestSuite(dir_test_src, classname, junit_class, compile_deps, runtime_deps, str(dir_test_src))
+
+    junit_file = Path(dir_test_src, junit_class.replace(".", os.path.sep)).with_suffix(".java")
+    with open(junit_file) as f:
+        test_names = re.findall(r"public void (test\d+)\(\)", f.read())
+
+    return [Test(suite, test_name) for test_name in test_names]
 
 
 def read_evosuite_version():
