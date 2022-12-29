@@ -104,7 +104,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         while time.time() < time_to_stop or not timeout_in_seconds:
             return_code = popen.poll()
 
-            num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_dir()])
+            # Arja writes the Patch_{n}.txt files lastly. If these are ready, then other patch files must have also
+            # been written. So only check these.
+            num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
 
             if return_code == 0:
                 stopped_early = True
@@ -134,10 +136,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                 utilities.error_exit(
                     f"ARJA did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
                     f" repair aborted")
-            num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_dir()])
+            num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
             emitter.normal(f"\tARJA stopped due to timeout; got {num_patches} patches")
     else:
-        num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_dir()])
+        num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
         emitter.normal(f"\tDry run; will reuse the {num_patches} patches in {dir_patches}")
 
     result = []
@@ -145,20 +147,25 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     strip = len(Path(dir_src).parts)
 
     for entry in os.scandir(dir_patches):
-        if not entry.is_dir():
-            assert re.fullmatch(r"Patch_\d+.txt", entry.name)
+        if not entry.is_file():
+            assert re.fullmatch(r"Patch_\d+", entry.name), entry.path
             continue
 
-        diff_file = Path(entry.path, "diff")
+        assert re.fullmatch(r"Patch_\d+\.txt", entry.name), entry.path
 
-        patched_dir = Path(entry.path, "patched")
+        directory = Path(entry.path).with_suffix("")
+        assert utilities.is_nonempty_dir(directory), str(directory)
+
+        diff_file = Path(directory, "diff")
+
+        patched_dir = Path(directory, "patched")
 
         changed_files = [Path(x).relative_to(patched_dir) for x in
                          glob.glob(os.path.join(patched_dir, "**", "*.java"), recursive=True)]
 
         changed_classes = [".".join(file.with_suffix("").parts) for file in changed_files]
 
-        key = Path(entry.path).name.split("_")[1]
+        key = directory.name.split("_")[1]
 
         result.append(Patch(diff_file, strip, changed_files, changed_classes, key))
 
