@@ -68,7 +68,7 @@ class IndexedTest:
         return hash(self.get_index())
 
     def __eq__(self, other):
-        if type(other) != IndexedTest:
+        if not isinstance(other, IndexedTest):
             return False
         return self.get_index() == other.get_index()
 

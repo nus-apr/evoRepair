@@ -81,7 +81,7 @@ class IndexedPatch:
         return hash((self.generation, self.patch.key))
 
     def __eq__(self, other):
-        if type(other) != IndexedPatch:
+        if not isinstance(other, IndexedPatch):
             return False
         return self.generation == other.generation and self.patch.key == other.patch.key
 
