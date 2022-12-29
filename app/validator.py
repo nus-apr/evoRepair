@@ -11,6 +11,8 @@ import glob
 import asyncio
 import shutil
 import pprint
+from collections import defaultdict
+import itertools
 
 
 """
@@ -27,93 +29,121 @@ Expected Output
 @output ranked list of test-cases and their mutation score
 """
 
+indexed_patch_to_bin_dir = {}
+
+indexed_suite_to_bin_dir = {}
+
 
 def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
     assert os.path.isabs(work_dir)
     assert os.path.isdir(work_dir)
-    if compile_patches or compile_tests:
-        utilities.check_is_empty_dir(work_dir)
+
+    global indexed_suite_to_bin_dir, indexed_patch_to_bin_dir
 
     emitter.sub_sub_title("Validating Generated Patches")
 
     dir_patches_bin = Path(work_dir, "patches_bin")
 
-    dir_tests_bin = Path(work_dir, "target", "test-classes")  # UniAPR accepts maven directory structure
+    dir_tests_bin = Path(work_dir, "suites_bin")
 
-    indexed_patch_to_bin_dir_name = {}
-
-    os.makedirs(dir_patches_bin, exist_ok=True)
     if compile_patches:
-        for p in indexed_patches:
-            patch_index = p.get_index()
-            out_dir = Path(dir_patches_bin, f"gen{patch_index.generation}_{patch_index.key}")
+        for i_patch in indexed_patches:
+            if i_patch not in indexed_patch_to_bin_dir:
+                index = i_patch.get_index()
+                out_dir = Path(dir_patches_bin, f"gen_{index.generation}_{index.key}")
 
-            os.makedirs(out_dir)
+                assert not out_dir.exists(), f"{str(out_dir)} already exists"
+                os.makedirs(out_dir)
 
-            p.patch.compile(out_dir)
+                i_patch.patch.compile(out_dir)
 
-            indexed_patch_to_bin_dir_name[p] = out_dir.name
+                indexed_patch_to_bin_dir[i_patch] = str(out_dir)
 
-    unique_suites = {indexed_test.get_index()[:-1]: indexed_test.test.suite
-                     for indexed_test in indexed_tests}.values()
-
-    os.makedirs(dir_tests_bin, exist_ok=True)
     if compile_tests:
-        for suite in unique_suites:
-            suite.compile(dir_tests_bin)
+        indexed_suites = set([it.indexed_suite for it in indexed_tests])
+
+        for i_suite in indexed_suites:
+            if i_suite not in indexed_suite_to_bin_dir:
+                index = i_suite.get_index()
+                out_dir = Path(dir_tests_bin, f"gen_{index.generation}_{index.key}")
+
+                assert not out_dir.exists(), f"{str(out_dir)} already exists"
+                os.makedirs(out_dir)
+
+                i_suite.suite.compile(out_dir)
+
+                indexed_suite_to_bin_dir[i_suite] = str(out_dir)
 
     if values.use_hotswap:
-        raise NotImplementedError("UniAPR validation for indexed patches has not been implemented")
-        # changed_classes = list(itertools.chain(*(p.patch.changed_classes for p in indexed_patches)))
-        # result = run_uniapr(work_dir, dir_patches_bin, changed_classes, execute_tests)
+        raise NotImplementedError("UniAPR validation for indexed patches & tests has not been implemented")
     else:
-        tests_runtime_deps = set()
-        for suite in unique_suites:
-            tests_runtime_deps.update((str(Path(x).resolve()) for x in suite.runtime_deps))
-
-        bin_dir_name_to_indexed_patch = dict(((v, k) for k, v in indexed_patch_to_bin_dir_name.items()))
-        result = [(bin_dir_name_to_indexed_patch[bin_dir_name], passing_tests, failing_tests)
-                  for bin_dir_name, passing_tests, failing_tests
-                  in plain_validate(dir_patches_bin, dir_tests_bin, tests_runtime_deps, execute_tests)]
-
-    emitter.debug(f"(patch_id, passing, failing): {pprint.pformat(result, indent=4)}")
-
-    return result
+        return plain_validate(indexed_patches, indexed_tests)
 
 
-def plain_validate(patches_bin_dir, tests_bin_dir, tests_runtime_deps, execute_tests):
-    for x in patches_bin_dir, tests_bin_dir:
-        assert os.path.isabs(x), str(x)
-        assert os.path.isdir(x), str(x)
-        if execute_tests:
-            utilities.check_is_nonempty_dir(x)
+def plain_validate(indexed_patches, indexed_tests):
+    # group indexed suites, so that any two suites in a same group do not have a same JUnit test class name
+    indexed_suites = set([it.indexed_suite for it in indexed_tests])
 
-    if not execute_tests:
-        return []
+    junit_2_i_suites = defaultdict(list)
+    for i_suite in indexed_suites:
+        junit_2_i_suites[i_suite.suite.junit_class].append(i_suite)
 
-    test_class_files = glob.glob(os.path.join(tests_bin_dir, "**", "*_ESTest.class"), recursive=True)
-    test_classes = []
-    for file in test_class_files:
-        path = Path(file).relative_to(tests_bin_dir).with_suffix("")
-        test_classes.append(".".join(path.parts))
+    i_suite_groups = []
+
+    while junit_2_i_suites:
+        i_suite_groups.append([i_suites.pop() for i_suites in junit_2_i_suites.values()])
+
+        for junit in list(junit_2_i_suites.keys()):
+            if not junit_2_i_suites[junit]:
+                del junit_2_i_suites[junit]
+
+    for group in i_suite_groups:
+        junit_classes = [i_suite.suite.junit_class for i_suite in group]
+        assert len(junit_classes) == len(set(junit_classes)), f"[{','.join([str(x) for x in group])}]"
+
+    i_suite_2_i_tests = defaultdict(list)
+    for i_test in indexed_tests:
+        i_suite_2_i_tests[i_test.indexed_suite].append(i_test)
 
     result = []
 
-    for entry in os.scandir(patches_bin_dir):
-        message = asyncio.run(run_plain_validator(entry.path, tests_bin_dir, tests_runtime_deps, test_classes))
+    for i_patch in indexed_patches:
 
-        obj = json.loads(message)
+        passing_i_tests = []
+        failing_i_tests = []
 
-        result.append((entry.name, obj["passingTests"], obj["failingTests"]))
+        patch_bin_dir = indexed_patch_to_bin_dir[i_patch]
+
+        for i_suite_group in i_suite_groups:
+            suites_bin_dirs = [indexed_suite_to_bin_dir[i_suite] for i_suite in i_suite_group]
+
+            suites_runtime_deps = set(map(os.path.abspath,
+                                          itertools.chain(
+                                              *[i_suite.suite.runtime_deps for i_suite in i_suite_group])))
+
+            i_test_group = itertools.chain(*[i_suite_2_i_tests[i_suite] for i_suite in i_suite_group])
+
+            name2itest = {f"{it.indexed_suite.suite.junit_class}#{it.method_name}": it for it in i_test_group}
+
+            message = asyncio.run(
+                run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, list(name2itest.keys())))
+
+            obj = json.loads(message)
+
+            passing_i_tests.extend([name2itest[name] for name in obj["passingTests"]])
+            failing_i_tests.extend([name2itest[name] for name in obj["failingTests"]])
+
+        result.append((i_patch, passing_i_tests, failing_i_tests))
 
     return result
 
 
-async def run_plain_validator(patch_bin_dir, tests_bin_dir, tests_runtime_deps, test_classes):
+async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, full_test_names):
     assert os.path.isabs(patch_bin_dir), str(patch_bin_dir)
-    assert os.path.isabs(tests_bin_dir), str(tests_bin_dir)
     assert utilities.is_nonempty_dir(patch_bin_dir), str(patch_bin_dir)
-    assert utilities.is_nonempty_dir(tests_bin_dir), str(tests_bin_dir)
+    for x in suites_bin_dirs:
+        assert os.path.isabs(x), str(x)
+        assert utilities.is_nonempty_dir(x), str(x)
 
     result = []
 
@@ -139,8 +169,8 @@ async def run_plain_validator(patch_bin_dir, tests_bin_dir, tests_runtime_deps, 
         classpath = [plain_validator_jar
                      , patch_bin_dir
                      , values.dir_info["classes"]
-                     , tests_bin_dir
-                     , *tests_runtime_deps
+                     , *suites_bin_dirs
+                     , *suites_runtime_deps
                      ]
 
         for entry in os.scandir(values.dir_info["deps"]):
@@ -150,9 +180,10 @@ async def run_plain_validator(patch_bin_dir, tests_bin_dir, tests_runtime_deps, 
         cp_str = ":".join((str(x) for x in classpath))
 
         command = (f'{java_executable} -cp "{cp_str}" evorepair.PlainValidator {port}'
-                   f' {" ".join(test_classes)}')
+                   f' {" ".join(full_test_names)}')
 
-        emitter.command(command)
+        emitter.debug(command)
+        emitter.normal(f"running {len(full_test_names)} test cases")
 
         process = await asyncio.create_subprocess_shell(command, stdout=DEVNULL, stderr=PIPE)
         return_code = await process.wait()

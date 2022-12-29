@@ -56,13 +56,36 @@ class Test:
         self.method_name = method_name
 
 
+SuiteIndex = namedtuple("SuiteIndex", ["generation", "key"])
+
+
+class IndexedSuite:
+    def __init__(self, generation, suite):
+        self.generation = generation
+        self.suite = suite
+
+    def __hash__(self):
+        return hash(self.get_index())
+
+    def __eq__(self, other):
+        if not isinstance(other, IndexedSuite):
+            return False
+        return self.get_index() == other.get_index()
+
+    def __str__(self):
+        return f"IndexedSuite[{self.suite.key}@gen{self.generation}]"
+
+    def get_index(self):
+        return SuiteIndex(self.generation, self.suite.key)
+
+
 TestIndex = namedtuple("TestIndex", ["generation", "suite_key", "method_name"])
 
 
 class IndexedTest:
     def __init__(self, generation, test):
-        self.generation = generation
-        self.test = test
+        self.indexed_suite = IndexedSuite(generation, test.suite)
+        self.method_name = test.method_name
 
     def __hash__(self):
         return hash(self.get_index())
@@ -73,7 +96,10 @@ class IndexedTest:
         return self.get_index() == other.get_index()
 
     def __str__(self):
-        return f"{self.test.method_name}@{str(self.test.suite)}@gen{self.generation}"
+        return f"{self.method_name}@{str(self.indexed_suite)}"
 
     def get_index(self):
-        return TestIndex(self.generation, self.test.suite.key, self.test.method_name)
+        return TestIndex(*self.indexed_suite.get_index(), self.method_name)
+
+    def get_suite_index(self):
+        return self.indexed_suite.get_index()
