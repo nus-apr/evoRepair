@@ -4,12 +4,20 @@ import com.google.gson.Gson;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.notification.RunListener;
+import org.junit.runner.Request;
+import org.junit.runner.manipulation.Filter;
 
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.io.OutputStream;
 import java.io.PrintStream;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 public final class PlainValidator {
     public static void main(String[] args) {
@@ -21,21 +29,37 @@ public final class PlainValidator {
             System.exit(-1);
         }
 
-        int numberOfTestClasses = args.length - 1;
-        Class<?>[] classes = new Class<?>[numberOfTestClasses];
-        for (int i = 0; i < numberOfTestClasses; i++) {
+        JUnitCore core = new JUnitCore();
+        RecordListener listener = new RecordListener();
+        core.addListener(listener);
+
+        Map<String, Set<String>> clazz2tests = new HashMap<>();
+        Set<Class> classes = new HashSet<>();
+
+        int numberOfTests = args.length - 1;
+        for (int i = 0; i < numberOfTests; i++) {
             try {
-                classes[i] = Class.forName(args[i + 1]);
+                String[] clazzAndMethod = args[i + 1].split("#");
+                String clazz = clazzAndMethod[0];
+                String method = clazzAndMethod[1];
+
+                classes.add(Class.forName(clazzAndMethod[0]));
+
+                if (!clazz2tests.containsKey(clazz)) {
+                    clazz2tests.put(clazz, new HashSet<>(Arrays.asList(method)));
+                } else {
+                    clazz2tests.get(clazz).add(method);
+                }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 System.exit(-1);
             }
         }
 
-        JUnitCore core = new JUnitCore();
-        RecordListener listener = new RecordListener();
-        core.addListener(listener);
-        core.run(classes);
+        Filter filter = new NameFilter(clazz2tests);
+        Request request = Request.classes(classes.toArray(new Class<?>[0])).filterWith(filter);
+        core.run(request);
+
 		// send listener values back from socket
 
         try (OutputStream os = socket.getOutputStream()) {
@@ -72,5 +96,30 @@ class RecordListener extends RunListener {
 
     List<String> getFailingTests() {
         return new ArrayList<>(this.failingTests);
+    }
+}
+
+class NameFilter extends Filter {
+    private Map<String, Set<String>> clazz2tests;
+    
+    public NameFilter(Map<String, Set<String>> clazz2tests) {
+        this.clazz2tests = clazz2tests; 
+    }
+
+    @Override
+    public String describe() {
+        return "Only execute test methods passed as arguments";
+    }
+
+    @Override
+    public boolean shouldRun(Description description) {
+        String methodName = description.getMethodName();
+        if (methodName == null) {
+            return true;
+        }
+
+        String testClass = description.getClassName();
+
+        return clazz2tests.get(testClass).contains(methodName);
     }
 }
