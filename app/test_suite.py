@@ -25,7 +25,7 @@ class TestSuite:
 
     def compile(self, out_dir):
         assert os.path.isabs(out_dir), out_dir
-        assert os.path.isdir(out_dir), out_dir
+        assert utilities.is_empty_dir(out_dir), out_dir
 
         junit_file = os.path.join(self.dir_src, f"{self.junit_class.replace('.', os.path.sep)}.java")
 
