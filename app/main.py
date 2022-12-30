@@ -189,7 +189,7 @@ def run(arg_list):
             timer.resume_phase(phase)
 
         patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
-            values.dir_info["tests"], values.dir_info["deps"], dir_patches,
+            values.dir_info["tests"], values.dir_info["deps"], dir_patches, current_i_tests,
             num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
