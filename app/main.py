@@ -205,6 +205,7 @@ def run(arg_list):
             timer.resume_phase(phase)
 
         tests = tester.generate_additional_test(current_i_patches, dir_tests,
+                                                junit_suffix=f"_gen{values.iteration_no}_ESTest",
                                                 timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
                                                 dry_run=dry_run_test_gen)
         indexed_tests = [IndexedTest(values.iteration_no, test) for test in tests]

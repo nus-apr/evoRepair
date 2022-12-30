@@ -34,11 +34,12 @@ This is the interface for EvoSuite
 # Expected Output
 # @output list of test-cases JSON format
 """
-def generate_additional_test(indexed_patches, dir_output, dry_run=False, timeout_per_class_in_seconds=0):
+def generate_additional_test(indexed_patches, dir_output, junit_suffix, dry_run=False, timeout_per_class_in_seconds=0):
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
     if not dry_run:
         utilities.check_is_empty_dir(dir_output)
+    assert junit_suffix.endswith("Test"), f'junit_suffix "{junit_suffix}" is invalid; must end with "Test"'
 
     emitter.sub_sub_title("Generating Test Cases")
 
@@ -56,14 +57,14 @@ def generate_additional_test(indexed_patches, dir_output, dry_run=False, timeout
         if not dry_run:
             assert utilities.is_empty_dir(dir_output_this_class)
         result.extend(
-            generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class,
+            generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
                                      dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds)
         )
 
     return result
 
 
-def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_location_file=None,
+def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_run=False, fix_location_file=None,
                              timeout_in_seconds=0):
     assert os.path.isabs(dir_bin)
     assert utilities.is_nonempty_dir(dir_bin)
@@ -84,7 +85,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
     assert os.path.isfile(evosuite_jar), evosuite_jar
 
     evosuite_command = (f"{java_executable} -jar {str(evosuite_jar)} -class {classname} -projectCP {str(dir_bin)}"
-                        f" -base_dir {str(dir_output)} -Dassertions=false"
+                        f" -base_dir {str(dir_output)} -Dassertions=false -Djunit_suffix={junit_suffix}"
                         )
     if timeout_in_seconds:
         evosuite_command += f" -Dsearch_budget={timeout_in_seconds} -Dstopping_condition=MaxTime"
@@ -115,8 +116,8 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
                                  popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
 
         out_file_prefix = str(Path(dir_test_src, *classname.split('.')))
-        out1 = f"{out_file_prefix}_ESTest.java"
-        out2 = f"{out_file_prefix}_ESTest_scaffolding.java"
+        out1 = f"{out_file_prefix}{junit_suffix}.java"
+        out2 = f"{out_file_prefix}{junit_suffix}_scaffolding.java"
         for x in out1, out2:
             if not os.path.isfile(x):
                 raise RuntimeError(f"EvoSuite exited normally without generating expected file {x}")
@@ -125,7 +126,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, dry_run=False, fix_
     else:
         emitter.normal(f"\tDry run; will reuse tests in {dir_test_src}")
 
-    junit_class = f"{classname}_ESTest"
+    junit_class = f"{classname}{junit_suffix}"
 
     compile_deps = [evosuite_jar]
 
