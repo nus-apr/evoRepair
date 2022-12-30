@@ -1,3 +1,4 @@
+import itertools
 import os
 import time
 import argparse
@@ -11,7 +12,7 @@ from app.patch import IndexedPatch
 from app.test_suite import IndexedTest
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 
 
 class Interval:
@@ -144,12 +145,22 @@ def run(arg_list):
 
     timer.pause_phase(phase)
 
+    i_patch_population_size = 5
+    i_test_population_size = 20
+
+    i_patch_populations = []
+    i_test_populations = []
+    current_i_patches = []
+    current_i_tests = []
+
+    i_test_to_mutation_score = Counter()
+
     while utilities.have_budget(values.time_duration_total):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
         dry_run_repair = False
-        num_patches_wanted = 5
+        num_patches_wanted = i_patch_population_size - len(current_i_patches)
         patch_gen_timeout_in_secs = 1200
 
         dry_run_test_gen = False
@@ -183,6 +194,9 @@ def run(arg_list):
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
 
+        i_patch_populations.append(indexed_patches)
+        current_i_patches.extend(indexed_patches)
+
         timer.pause_phase(phase)
         phase = "Test Generation"
         if values.iteration_no == 1:
@@ -190,10 +204,12 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        tests = tester.generate_additional_test(current_indexed_patches, dir_tests,
-                                                    timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
-                                                    dry_run=dry_run_test_gen)
+        tests = tester.generate_additional_test(current_i_patches, dir_tests,
+                                                timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
+                                                dry_run=dry_run_test_gen)
         indexed_tests = [IndexedTest(values.iteration_no, test) for test in tests]
+
+        i_test_populations.append(indexed_tests)
 
         timer.pause_phase(phase)
         phase = "Validation"
@@ -202,8 +218,15 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        _ = validator.validate(indexed_patches, indexed_tests, dir_validation, compile_patches=compile_patches,
-                               compile_tests=compile_tests, execute_tests=execute_tests)
+        validation_result = validator.validate(current_i_patches, indexed_tests, dir_validation,
+                                               compile_patches=compile_patches,
+                                               compile_tests=compile_tests,
+                                               execute_tests=execute_tests)
+
+        i_test_to_mutation_score.update(
+            itertools.chain(*[failing_i_tests for _, _, failing_i_tests in validation_result]))
+
+        current_i_tests = [i_test for i_test, _ in i_test_to_mutation_score.most_common(i_test_population_size)]
 
         timer.pause_phase(phase)
 
