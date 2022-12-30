@@ -226,6 +226,9 @@ def run(arg_list):
                                                compile_tests=compile_tests,
                                                execute_tests=execute_tests)
 
+        for i_test in indexed_tests:
+            i_test_to_mutation_score[i_test] = 0
+
         i_test_to_mutation_score.update(
             itertools.chain(*[failing_i_tests for _, _, failing_i_tests in validation_result]))
 
