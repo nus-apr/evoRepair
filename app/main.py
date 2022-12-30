@@ -148,6 +148,7 @@ def run(arg_list):
     i_patch_population_size = 5
     i_test_population_size = 20
 
+    all_i_patches = []
     i_patch_populations = []
     i_test_populations = []
     current_i_patches = []
@@ -194,6 +195,7 @@ def run(arg_list):
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
 
+        all_i_patches.extend(indexed_patches)
         i_patch_populations.append(indexed_patches)
         current_i_patches.extend(indexed_patches)
 
@@ -219,7 +221,7 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        validation_result = validator.validate(current_i_patches, indexed_tests, dir_validation,
+        validation_result = validator.validate(all_i_patches, indexed_tests, dir_validation,
                                                compile_patches=compile_patches,
                                                compile_tests=compile_tests,
                                                execute_tests=execute_tests)
