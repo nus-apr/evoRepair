@@ -44,7 +44,7 @@ class Configurations:
 
         config_json = reader.read_json(self.__config_file)
         try:
-            self.__runtime_config_values["work-dir"] = os.path.dirname(self.__config_file)
+            self.__runtime_config_values["work-dir"] = os.path.abspath(os.path.dirname(self.__config_file))
             project_info = config_json["project"]
             self.__runtime_config_values["subject"] = project_info["name"]
             self.__runtime_config_values["tag-id"] = project_info["tag"]
