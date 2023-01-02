@@ -156,6 +156,8 @@ def run(arg_list):
 
     i_test_to_mutation_score = Counter()
 
+    assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
+
     while utilities.have_budget(values.time_duration_total):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
