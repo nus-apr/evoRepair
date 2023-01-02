@@ -176,6 +176,7 @@ def run(arg_list):
         dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
         dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
         dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
+        additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
 
         directories = (dir_patches, dir_tests, dir_validation)
         non_empty_conditions = (dry_run_repair, dry_run_test_gen, not compile_patches and not compile_tests)
@@ -192,7 +193,7 @@ def run(arg_list):
             timer.resume_phase(phase)
 
         patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
-            values.dir_info["tests"], values.dir_info["deps"], dir_patches, current_i_tests,
+            values.dir_info["tests"], values.dir_info["deps"], dir_patches, current_i_tests, additional_tests_info_path,
             num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]

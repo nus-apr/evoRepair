@@ -33,15 +33,18 @@ Each patch objects has the following
 """
 
 
-def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_tests,
+def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_tests, additional_tests_info_path,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False):
     for x in dir_src, dir_bin, dir_test_bin, dir_deps:
         assert os.path.isabs(x), x
         assert utilities.is_nonempty_dir(x), x
     assert os.path.isabs(dir_patches), dir_patches
     assert os.path.isdir(dir_patches), dir_patches
+    assert os.path.isabs(additional_tests_info_path), additional_tests_info_path
+    assert not os.path.exists(additional_tests_info_path), additional_tests_info_path
     if not dry_run:
         utilities.check_is_empty_dir(dir_patches)
+        assert Path(dir_patches) not in Path(additional_tests_info_path).parents
     indexed_suites = set([it.indexed_suite for it in indexed_tests])
     for i_suite in indexed_suites:
         assert i_suite in indexed_suite_to_bin_dir, f"{str(i_suite)} has not been compiled"
@@ -73,6 +76,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
 
     dependences = ":".join([str(dir_deps), *suites_runtime_deps])
 
+    with open(additional_tests_info_path, 'w') as f:
+        f.write("\n".join(
+            [f"{i_test.indexed_suite.suite.junit_class}#{i_test.method_name}" for i_test in indexed_tests]))
+
     arja_command = (f'{java_executable} -cp {str(arja_jar)}'
                     f' us.msu.cse.repair.Main Arja'
                     f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
@@ -80,6 +87,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
                     f' -DpatchOutputRoot "{str(dir_patches)}"'
                     f' -DdiffFormat true -DmaxGenerations {max_generations}'
                     f' -DexternalProjRoot {str(dir_arja)}/external'
+                    f' -DadditionalTestsInfoPath {str(additional_tests_info_path)}'
                     )
 
     # Output directory of ARJA (`patchOutputRoot`) looks like:
