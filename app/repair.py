@@ -89,6 +89,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
                     f' -DexternalProjRoot {str(dir_arja)}/external'
                     f' -DadditionalTestsInfoPath {str(additional_tests_info_path)}'
                     f' -DwaitTime 30000'
+                    f' -DuseD4JInstr true'
                     )
 
     # Output directory of ARJA (`patchOutputRoot`) looks like:
