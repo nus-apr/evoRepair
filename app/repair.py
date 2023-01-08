@@ -51,9 +51,6 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
 
     emitter.sub_sub_title("Generating Patches")
 
-    if not values.use_arja:
-        raise NotImplemented("repair engine other than ARJA has not been integrated")
-
     if num_patches_wanted <= 0:
         emitter.normal(f"\t{num_patches_wanted} patches wanted; patch generation skipped")
         return []
@@ -65,8 +62,19 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
     dir_arja = Path(values._dir_root, "extern", "arja").resolve()
     assert os.path.isdir(dir_arja), dir_arja
 
-    arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
-    assert os.path.isfile(arja_jar), arja_jar
+    if values.use_arja:
+        arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
+        assert os.path.isfile(arja_jar), arja_jar
+
+        repair_command = f'{java_executable} -cp {str(arja_jar)}  us.msu.cse.repair.Main Arja'
+    else:
+        dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
+        assert os.path.isdir(dir_evosuite), dir_evosuite
+
+        evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0-jar-with-dependencies.jar")
+        assert os.path.isfile(evosuite_client_jar), evosuite_client_jar
+
+        repair_command = f'{java_executable} -cp {str(evosuite_client_jar)} org.evosuite.patch.RepairMain'
 
     arja_default_population_size = 40
     max_generations = 2000000  # use a large one to keep ARJA running forever
@@ -83,8 +91,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
         f.write("\n".join(
             [f"{i_test.indexed_suite.suite.junit_class}#{i_test.method_name}" for i_test in indexed_tests]))
 
-    arja_command = (f'{java_executable} -cp {str(arja_jar)}'
-                    f' us.msu.cse.repair.Main Arja'
+    repair_command += (
                     f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
                     f' -DbinTestDir "{str(dir_test_bin)}" -Ddependences "{dependences}"'
                     f' -DpatchOutputRoot "{str(dir_patches)}"'
@@ -118,10 +125,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
     # patched/ holds patched versions of all changed source files, with the original package structure.
 
     if not dry_run:
-        emitter.normal(f"\trunning ARJA, waiting for {num_patches_wanted} plausible patches")
+        emitter.normal(f"\trunning repair, waiting for {num_patches_wanted} plausible patches")
         emitter.normal(f"\toutput directory: {str(dir_patches)}")
 
-        emitter.command(arja_command)
+        emitter.command(repair_command)
 
         # put additional tests in binTestDir
         symlinks = []
@@ -136,7 +143,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
                 symlinks.append(dst)
 
         try:
-            popen = subprocess.Popen(shlex.split(arja_command), stdout=DEVNULL, stderr=PIPE)
+            popen = subprocess.Popen(shlex.split(repair_command), stdout=DEVNULL, stderr=PIPE)
 
             time_to_stop = time.time() + timeout_in_seconds
             stopped_early = False
@@ -150,10 +157,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
                 if return_code == 0:
                     stopped_early = True
                     emitter.normal(
-                        f"\tARJA terminated normally after {max_generations} generations; got {num_patches} patches")
+                        f"\trepair terminated normally after {max_generations} generations; got {num_patches} patches")
                     break
                 elif return_code is not None:
-                    utilities.error_exit("ARJA did not exit normally",
+                    utilities.error_exit("repair did not exit normally",
                                         popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
                 elif num_patches >= num_patches_wanted:
                     stopped_early = True
@@ -163,9 +170,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
                         popen.wait(timeout=timeout)
                     except subprocess.TimeoutExpired:
                         utilities.error_exit(
-                            f"ARJA did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
+                            f"repair did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
                             f" repair aborted")
-                    emitter.normal(f"\tTerminated ARJA because there are enough patches; got {num_patches} patches")
+                    emitter.normal(f"\tTerminated repair because there are enough patches; got {num_patches} patches")
                     break
             if not stopped_early:
                 popen.terminate()
@@ -174,10 +181,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
                     popen.wait(timeout=timeout)
                 except subprocess.TimeoutExpired:
                     utilities.error_exit(
-                        f"ARJA did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
+                        f"repair did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
                         f" repair aborted")
                 num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
-                emitter.normal(f"\tARJA stopped due to timeout; got {num_patches} patches")
+                emitter.normal(f"\trepair stopped due to timeout; got {num_patches} patches")
         finally:
             for symlink in symlinks:
                 os.unlink(symlink)
