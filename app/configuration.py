@@ -30,6 +30,7 @@ class Configurations:
         if arg_list.cache:
             self.__runtime_config_values["use-cache"] = True
         self.__runtime_config_values["use-hotswap"] = not arg_list.no_hotswap
+        self.__runtime_config_values["use-arja"] = arg_list.arja
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -72,6 +73,7 @@ class Configurations:
         emitter.configuration("tag id", values.tag_id)
         emitter.configuration("debug mode", values.is_debug)
         emitter.configuration("hotswap", values.use_hotswap)
+        emitter.configuration("use arja", values.use_arja)
 
     def get_value(self, config_name):
         condition = config_name in self.__runtime_config_values and self.__runtime_config_values[config_name]
@@ -93,6 +95,7 @@ class Configurations:
         values.is_debug = self.get_value("is-debug")
         values.use_cache = self.get_value("use-cache")
         values.use_hotswap = self.__runtime_config_values["use-hotswap"]
+        values.use_arja = self.__runtime_config_values["use-arja"]
 
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths

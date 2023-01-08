@@ -51,6 +51,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
 
     emitter.sub_sub_title("Generating Patches")
 
+    if not values.use_arja:
+        raise NotImplemented("repair engine other than ARJA has not been integrated")
+
     if num_patches_wanted <= 0:
         emitter.normal(f"\t{num_patches_wanted} patches wanted; patch generation skipped")
         return []
