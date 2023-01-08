@@ -1,7 +1,7 @@
 [submodule "extern/evosuite"]
 	path = extern/evosuite
 	url = git@github.com:nus-apr/evosuite
-    branch = patch-location-guidance
+    branch = evorepair
 [submodule "extern/arja"]
 	path = extern/arja
 	url = git@github.com:nus-apr/arja
