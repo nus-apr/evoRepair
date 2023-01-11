@@ -184,7 +184,7 @@ async def run(arg_list):
 
     def get_wrapper_reply(reply_str, dump_path):
         assert os.path.isabs(dump_path), str(dump_path)
-        assert not os.path.exists(dump_path), str(dump_path)
+        #assert not os.path.exists(dump_path), str(dump_path)
 
         with open(dump_path, 'w') as f:
             f.write(reply_str)
@@ -303,7 +303,9 @@ async def run(arg_list):
         }
 
         dump_path = Path("/", "tmp", f"{reply['cmd']}{values.iteration_no}.json")
-        _, final_reply_str = get_reply_str(reply, dump_path)
+        wrapper_reply = get_wrapper_reply(json.dumps(reply), dump_path)
+        final_reply_str = json.dumps(wrapper_reply)
+
         writer.write(final_reply_str.encode("utf-8"))
         await writer.drain()
 
@@ -355,7 +357,7 @@ async def run(arg_list):
         compile_tests = True
         execute_tests = True
 
-        values.dir_info["patches"] = "/home/lam/workspace/nus-apr/evoRepair/output/chart_1_buggy-raw-230111_201248/patches/"
+        values.dir_info["patches"] = "/home/lam/workspace/nus-apr/evoRepair/output/math_2_buggy-instr-230111_222410/patches"
         dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
         dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
         dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")

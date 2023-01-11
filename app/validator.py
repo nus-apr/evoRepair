@@ -179,7 +179,7 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
 
         cp_str = ":".join((str(x) for x in classpath))
 
-        command = (f'{java_executable} -cp "{cp_str}" evorepair.PlainValidator {port}'
+        command = (f'{java_executable} -Ddefects4j.instrumentation.enabled=true -cp "{cp_str}" evorepair.PlainValidator {port}'
                    f' {" ".join(full_test_names)}')
 
         emitter.debug(command)
