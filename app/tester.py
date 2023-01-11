@@ -137,7 +137,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     assert os.path.isfile(junit_jar), junit_jar
     runtime_deps = [evosuite_runtime_jar, junit_jar]
 
-    suite = TestSuite(dir_test_src, classname, junit_class, compile_deps, runtime_deps, key=classname)
+    suite = TestSuite(dir_test_src, junit_class, compile_deps, runtime_deps, key=classname)
 
     junit_file = Path(dir_test_src, junit_class.replace(".", os.path.sep)).with_suffix(".java")
     with open(junit_file) as f:

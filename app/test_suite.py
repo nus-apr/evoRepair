@@ -12,13 +12,12 @@ from collections import namedtuple
 
 
 class TestSuite:
-    def __init__(self, dir_src, CUT, junit_class, compile_deps: list, runtime_deps: list, key):
+    def __init__(self, dir_src, junit_class, compile_deps: list, runtime_deps: list, key):
         self.dir_src = dir_src
         self.junit_class = junit_class
         self.compile_deps = compile_deps
         self.runtime_deps = runtime_deps
         self.key = key
-        self.CUT = CUT
 
     def __repr__(self):
         return f"TestSuite[{self.junit_class}@{self.dir_src}]"
