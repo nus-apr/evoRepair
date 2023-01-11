@@ -68,6 +68,11 @@ class Patch:
 
         shutil.rmtree(tmp_dir)
 
+    def get_fix_locations(self):
+        return {
+            "class1": [1, 2, 3],
+            "class2": [4, 5, 6]
+        }
 
 PatchIndex = namedtuple("PatchIndex", ["generation", "key"])
 
