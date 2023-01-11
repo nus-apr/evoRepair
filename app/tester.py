@@ -87,6 +87,10 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     evosuite_command = (f"{java_executable} -jar {str(evosuite_jar)} -class {classname} -projectCP {str(dir_bin)}"
                         f" -base_dir {str(dir_output)} -Dassertions=false -Djunit_suffix={junit_suffix}"
                         )
+
+    print(evosuite_command)
+    return []
+
     if timeout_in_seconds:
         evosuite_command += f" -Dsearch_budget={timeout_in_seconds} -Dstopping_condition=MaxTime"
 

@@ -152,7 +152,7 @@ async def run(arg_list):
 
     timer.pause_phase(phase)
 
-    i_patch_population_size = 3
+    i_patch_population_size = 1
     i_test_population_size = 20
 
     assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
@@ -247,6 +247,7 @@ async def run(arg_list):
 
         patch_gen_timeout_in_secs = 1200
 
+        os.makedirs(dir_validation, exist_ok=True)
         validation_result = await validate(evosuite_goal_i_patches, indexed_tests, dir_validation)
 
         reply_kill_matrix = defaultdict(list)
@@ -344,7 +345,7 @@ async def run(arg_list):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
-        dry_run_repair = False
+        dry_run_repair = False if values.iteration_no != 1 else True
         patch_gen_timeout_in_secs = 1200
 
         dry_run_test_gen = False
@@ -354,6 +355,7 @@ async def run(arg_list):
         compile_tests = True
         execute_tests = True
 
+        values.dir_info["patches"] = "/home/lam/workspace/nus-apr/evoRepair/output/chart_1_buggy-raw-230111_201248/patches/"
         dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
         dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
         dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
