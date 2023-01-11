@@ -384,6 +384,23 @@ async def run(arg_list):
 
             values.iteration_no += 1
 
+        evosuite_goal_i_patches.update(perfect_i_patches)
+        changed_lines4class = defaultdict(set)
+        for i_patch in evosuite_goal_i_patches:
+            fix_locations = i_patch.patch.get_fix_locations()
+            for classname, lines in fix_locations.items():
+                changed_lines4class[classname].update(lines)
+        goal_fix_locations = [
+            {"classname": classname, "targetLines": list(lines)}
+            for classname, lines in changed_lines4class.items()
+        ]
+
+        fix_location_file = Path(values.dir_output, "init_locations.json")
+        with open(fix_location_file, 'w') as f:
+            json.dump(goal_fix_locations, f)
+
+        print(f"fix locations in {str(fix_location_file)}")
+
         server_socket = socket.socket()
         server_socket.bind(("localhost", 0))
         _, port = server_socket.getsockname()
@@ -392,7 +409,8 @@ async def run(arg_list):
         async with server:
             await server.start_serving()
             # start evosuite here
-            evosuite_command = ""
+
+            tester.generate_additional_test(evosuite_goal_i_patches, dir_tests, f"_gen_{values.iteration_no}_ESTest")
 
             #process = await asyncio.create_subprocess_shell(evosuite_command)
 
