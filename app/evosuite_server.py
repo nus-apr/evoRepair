@@ -3,6 +3,8 @@ from app.uniapr import run_uniapr
 from app.test_suite import TestSuite, Test, IndexedTest
 from app.tester import read_evosuite_version
 from app.validator import validate
+from app import repair
+from app.patch import IndexedPatch
 
 import os
 from pathlib import Path
@@ -84,7 +86,7 @@ async def main():
         test_path = json_data['data']['testSuitePath']
         scaffolding_path = json_data['data']['testScaffoldingPath']
 
-        dir_src = Path(test_path).parents[len(junit_class.split(".")) - 1]
+        suite_dir_src = Path(test_path).parents[len(junit_class.split(".")) - 1]
 
         dir_evosuite = Path(values._dir_root, "extern", "evosuite")
         evosuite_jar = Path(dir_evosuite, "master", "target", f"evosuite-master-{read_evosuite_version()}.jar")
@@ -100,27 +102,44 @@ async def main():
 
         runtime_deps = [evosuite_runtime_jar, junit_jar]
 
-        suite = TestSuite(dir_src, junit_class, compile_deps, runtime_deps, key=junit_class)
+        suite = TestSuite(suite_dir_src, junit_class, compile_deps, runtime_deps, key=junit_class)
 
         indexed_tests = [IndexedTest(values.iteration_no, Test(suite, test_name)) for test_name in test_names]
 
+        dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
+        dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
         dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
+        additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
+
+        patch_gen_timeout_in_secs = 1200
 
         validation_result = validate(evosuite_goal_i_patches, indexed_tests, dir_validation)
 
         reply_kill_matrix = defaultdict(list)
         useful_i_tests = set()
 
+        num_killed_patches = 0
+
         for i_patch, _, failing_i_tests in validation_result:
             for i_test in failing_i_tests:
                 reply_kill_matrix[i_test].append(i_patch)
                 useful_i_tests.add(i_test)
             if failing_i_tests:
-                perfect_i_patches.remove(i_patch)
-                hall_of_fame_i_patches.add(i_patch)
+                if i_patch in perfect_i_patches:
+                    perfect_i_patches.discard(i_patch)
+                    hall_of_fame_i_patches.add(i_patch)
+                    num_killed_patches += 1
 
         if useful_i_tests:
             all_i_tests.update(useful_i_tests)
+
+            patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
+                                      values.dir_info["tests"], values.dir_info["deps"],
+                                      dir_patches, all_i_tests, additional_tests_info_path,
+                                      num_patches_wanted=num_killed_patches,
+                                      timeout_in_seconds=patch_gen_timeout_in_secs)
+            indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
+            perfect_i_patches.update(indexed_patches)
 
             # generate some new patches
             evosuite_goal_i_patches.clear()
@@ -131,7 +150,6 @@ async def main():
             fix_locations = i_patch.patch.get_fix_locations()
             for classname, lines in fix_locations.items():
                 changed_lines4class[classname].update(lines)
-
         goal_fix_locations = [
             {"classname": classname, "targetLines": list(lines)}
             for classname, lines in changed_lines4class.items()
