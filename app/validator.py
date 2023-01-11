@@ -34,7 +34,7 @@ indexed_patch_to_bin_dir = {}
 indexed_suite_to_bin_dir = {}
 
 
-def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
+async def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
     assert os.path.isabs(work_dir)
     assert os.path.isdir(work_dir)
 
@@ -77,10 +77,10 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
     if values.use_hotswap:
         raise NotImplementedError("UniAPR validation for indexed patches & tests has not been implemented")
     else:
-        return plain_validate(indexed_patches, indexed_tests)
+        return await plain_validate(indexed_patches, indexed_tests)
 
 
-def plain_validate(indexed_patches, indexed_tests):
+async def plain_validate(indexed_patches, indexed_tests):
     # group indexed suites, so that any two suites in a same group do not have a same JUnit test class name
     indexed_suites = set([it.indexed_suite for it in indexed_tests])
 
@@ -125,8 +125,8 @@ def plain_validate(indexed_patches, indexed_tests):
 
             name2itest = {f"{it.indexed_suite.suite.junit_class}#{it.method_name}": it for it in i_test_group}
 
-            message = asyncio.run(
-                run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, list(name2itest.keys())))
+            message = await run_plain_validator(patch_bin_dir,
+                                                suites_bin_dirs, suites_runtime_deps, list(name2itest.keys()))
 
             obj = json.loads(message)
 

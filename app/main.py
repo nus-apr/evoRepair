@@ -247,7 +247,7 @@ async def run(arg_list):
 
         patch_gen_timeout_in_secs = 1200
 
-        validation_result = validate(evosuite_goal_i_patches, indexed_tests, dir_validation)
+        validation_result = await validate(evosuite_goal_i_patches, indexed_tests, dir_validation)
 
         reply_kill_matrix = defaultdict(list)
         useful_i_tests = set()
