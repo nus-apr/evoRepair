@@ -148,6 +148,7 @@ def configuration(setting, value):
 
 
 def end(timer, is_error=False):
+    timer.pause_all()
     summary = timer.summarize()
 
     SECONDS_IN_MINUTE = 60
