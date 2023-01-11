@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import time
 from collections import namedtuple
+from unidiff import PatchSet
 
 
 class Patch:
@@ -69,10 +70,50 @@ class Patch:
         shutil.rmtree(tmp_dir)
 
     def get_fix_locations(self):
-        return {
-            "class1": [1, 2, 3],
-            "class2": [4, 5, 6]
+        """
+
+        :return: map from full class name to list of changed line numbers (int)
+
+        {
+            "foo.bar.Baz1": [2, 3],
+            "foo.bar.Baz2": [101, 500, 933]
         }
+        """
+        result = {}
+
+        with open(self.diff_file) as f:
+            diff = f.read()
+
+        patch_set = PatchSet.from_string(diff)
+        for patched_file in patch_set:
+            assert values.dir_info["source"] in Path(patched_file.source_file).parents
+            relative_path = Path(patched_file.source_file).relative_to(values.dir_info["source"])
+            classname = ".".join(relative_path.with_suffix("").parts)
+
+            changed_lines = []
+            for hunk in patched_file:
+                i = 0
+                num_lines = len(hunk)
+                last_line = None
+                while i < num_lines:
+                    line = hunk[i]
+                    if line.is_removed:
+                        assert not last_line.is_added
+                        if last_line.is_context:
+                            changed_lines.append(line.source_line_no)
+                    elif line.is_added:
+                        if last_line.is_context:
+                            changed_lines.append(last_line.source_line_no + 1)
+                    elif line.is_context:
+                        pass
+                    else:
+                        assert not line.value.strip(), line
+                    last_line = line
+                    i += 1
+
+            result[classname] = changed_lines
+        return result
+
 
 PatchIndex = namedtuple("PatchIndex", ["generation", "key"])
 
