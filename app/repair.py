@@ -46,13 +46,14 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     assert os.path.isabs(dir_patches), dir_patches
     assert os.path.isdir(dir_patches), dir_patches
     assert os.path.isabs(additional_tests_info_path), additional_tests_info_path
-    assert not os.path.exists(additional_tests_info_path), additional_tests_info_path
     if not dry_run:
         utilities.check_is_empty_dir(dir_patches)
         assert Path(dir_patches) not in Path(additional_tests_info_path).parents
 
         if dir_fames is not None:
             utilities.check_is_empty_dir(dir_fames)
+
+        assert not os.path.exists(additional_tests_info_path), additional_tests_info_path
     indexed_suites = set([it.indexed_suite for it in indexed_tests])
     for i_suite in indexed_suites:
         assert i_suite in indexed_suite_to_bin_dir, f"{str(i_suite)} has not been compiled"
@@ -64,7 +65,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             except Exception as e:
                 assert False, e
             assert os.path.isabs(summary_path), summary_path
-            assert not os.path.exists(summary_path), summary_path
+            if not dry_run:
+                assert not os.path.exists(summary_path), summary_path
 
     emitter.sub_sub_title("Generating Patches")
 
@@ -104,9 +106,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     dependences = ":".join([str(dir_deps), *suites_runtime_deps])
 
-    with open(additional_tests_info_path, 'w') as f:
-        f.write("\n".join(
-            [f"{i_test.indexed_suite.suite.junit_class}#{i_test.method_name}" for i_test in indexed_tests]))
+    if not dry_run:
+        with open(additional_tests_info_path, 'w') as f:
+            f.write("\n".join(
+                [f"{i_test.indexed_suite.suite.junit_class}#{i_test.method_name}" for i_test in indexed_tests]))
 
     repair_command += (
                     f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
@@ -124,16 +127,22 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     if perfect_i_patches is not None:
         summaries = [i_patch.patch.read_summary_file() for i_patch in perfect_i_patches]
-        with open(perfect_summary_path, 'w') as f:
-            f.write("\n".join(summaries))
+
+        if not dry_run:
+            with open(perfect_summary_path, 'w') as f:
+                f.write("\n".join(summaries))
+
         repair_command += (f' -DperfectPath {str(perfect_summary_path)}'
                            f' -DinitRatioOfPerfect {init_ratio_perfect}'
                            )
 
     if fame_i_patches is not None:
         summaries = [i_patch.patch.read_summary_file() for i_patch in fame_i_patches]
-        with open(fame_summary_path, 'w') as f:
-            f.write("\n".join(summaries))
+
+        if not dry_run:
+            with open(fame_summary_path, 'w') as f:
+                f.write("\n".join(summaries))
+
         repair_command += (f' -DhallOfFameInPath {str(fame_summary_path)}'
                            f' -DinitRatioOfFame {init_ratio_fame}'
                            )

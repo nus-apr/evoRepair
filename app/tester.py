@@ -47,7 +47,8 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
     assert junit_suffix.endswith("Test"), f'junit_suffix "{junit_suffix}" is invalid; must end with "Test"'
     if fix_location_file is not None:
         assert os.path.isabs(fix_location_file), fix_location_file
-        assert not os.path.exists(fix_location_file), fix_location_file
+        if not dry_run:
+            assert not os.path.exists(fix_location_file), fix_location_file
 
     emitter.sub_sub_title("Generating Test Cases")
 
@@ -69,8 +70,9 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
             for classname, lines in changed_lines_for_class.items()
         ]
 
-        with open(fix_location_file, 'w') as f:
-            json.dump(goal_fix_locations, f)
+        if not dry_run:
+            with open(fix_location_file, 'w') as f:
+                json.dump(goal_fix_locations, f)
 
     result = []
     for classname in classes:
