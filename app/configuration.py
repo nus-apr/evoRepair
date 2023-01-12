@@ -31,6 +31,8 @@ class Configurations:
             self.__runtime_config_values["use-cache"] = True
         self.__runtime_config_values["use-hotswap"] = not arg_list.no_hotswap
         self.__runtime_config_values["use-arja"] = arg_list.arja
+        self.__runtime_config_values["init-ratio-perfect"] = arg_list.init_ratio_perfect
+        self.__runtime_config_values["init-ratio-fame"] = arg_list.init_ratio_fame
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -74,6 +76,8 @@ class Configurations:
         emitter.configuration("debug mode", values.is_debug)
         emitter.configuration("hotswap", values.use_hotswap)
         emitter.configuration("use arja", values.use_arja)
+        emitter.configuration("ratio of perfect patches", values.init_ratio_perfect)
+        emitter.configuration("ratio of user-tests-adequate patches", values.init_ratio_fame)
 
     def get_value(self, config_name):
         condition = config_name in self.__runtime_config_values and self.__runtime_config_values[config_name]
@@ -96,6 +100,8 @@ class Configurations:
         values.use_cache = self.get_value("use-cache")
         values.use_hotswap = self.__runtime_config_values["use-hotswap"]
         values.use_arja = self.__runtime_config_values["use-arja"]
+        values.init_ratio_perfect = self.__runtime_config_values["init-ratio-perfect"]
+        values.init_ratio_fame = self.__runtime_config_values["init-ratio-fame"]
 
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths

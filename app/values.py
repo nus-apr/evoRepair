@@ -27,6 +27,8 @@ silence_emitter = False
 arg_parsed = False
 use_hotswap = True
 use_arja = False
+init_ratio_perfect = 0
+init_ratio_fame = 0
 
 # ------------------- Directories --------------------
 _dir_root = "/".join(os.path.realpath(__file__).split("/")[:-2])

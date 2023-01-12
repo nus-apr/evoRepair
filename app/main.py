@@ -173,6 +173,8 @@ def run(arg_list):
         dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
         dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
         additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
+        perfect_summary_path = Path(values.dir_info["patches"], f"perfect_summary_gen{values.iteration_no}.txt")
+        fame_summary_path = Path(values.dir_info["patches"], f"fame_summary_gen{values.iteration_no}.txt")
 
         directories = (dir_patches, dir_fames, dir_tests, dir_validation)
         non_empty_conditions = (dry_run_repair, dry_run_repair, dry_run_test_gen,
@@ -189,11 +191,21 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
+        init_ratio_perfect = values.init_ratio_perfect
+        init_ratio_fame = values.init_ratio_fame
+
         patches, fame_patches = repair.generate(
             values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
             all_i_tests, additional_tests_info_path,
             dir_fames=dir_fames,
+
+            perfect_i_patches=perfect_i_patches, init_ratio_perfect=init_ratio_perfect,
+            perfect_summary_path=perfect_summary_path,
+
+            fame_i_patches=fame_i_patches, init_ratio_fame=init_ratio_fame,
+            fame_summary_path=fame_summary_path,
+
             num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
@@ -256,6 +268,14 @@ def parse_args():
     optional.add_argument('--arja', help='use ARJA for patch generation instead',
                           action='store_true',
                           default=False)
+    optional.add_argument('--init-ratio-perfect', help='ratio of perfect patches in initial patch population',
+                          action='store',
+                          type=float,
+                          default=0)
+    optional.add_argument('--init-ratio-fame', help='ratio of user-test-adequate patches in initial patch population',
+                          action='store',
+                          type=float,
+                          default=0)
     args = parser.parse_args()
     return args
 
