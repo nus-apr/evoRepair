@@ -244,10 +244,14 @@ def run(arg_list):
                                                execute_tests=execute_tests,
                                                use_d4j_instr=True)
 
+        num_killed_patches = 0
         for i_patch, _, failing_i_tests in validation_result:
             if failing_i_tests:
                 perfect_i_patches.remove(i_patch)
                 fame_i_patches.add(i_patch)
+                num_killed_patches += 1
+
+        emitter.normal(f"{num_killed_patches} perfect patch(es) are killed")
 
         timer.pause_phase(phase)
 
