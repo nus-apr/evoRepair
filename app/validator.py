@@ -48,6 +48,13 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
     dir_tests_bin = Path(work_dir, "suites_bin")
 
     if compile_patches:
+        os.makedirs(dir_patches_bin, exist_ok=True)
+        utilities.check_is_empty_dir(dir_patches_bin), str(dir_patches_bin)
+    if compile_tests:
+        os.makedirs(dir_tests_bin, exist_ok=True)
+        utilities.check_is_empty_dir(dir_tests_bin), str(dir_tests_bin)
+
+    if compile_patches:
         for i_patch in indexed_patches:
             if i_patch not in indexed_patch_to_bin_dir:
                 index = i_patch.get_index()
