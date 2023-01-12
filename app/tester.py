@@ -17,6 +17,9 @@ import subprocess
 from subprocess import DEVNULL, PIPE
 import shlex
 
+from collections import defaultdict
+import json
+
 """
 This function implements the developer testing to generate test-diagnostics for the repair 
 
@@ -34,12 +37,17 @@ This is the interface for EvoSuite
 # Expected Output
 # @output list of test-cases JSON format
 """
-def generate_additional_test(indexed_patches, dir_output, junit_suffix, dry_run=False, timeout_per_class_in_seconds=0):
+def generate_additional_test(indexed_patches, dir_output, junit_suffix,
+                             fix_location_file=None,
+                             dry_run=False, timeout_per_class_in_seconds=0):
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
     if not dry_run:
         utilities.check_is_empty_dir(dir_output)
     assert junit_suffix.endswith("Test"), f'junit_suffix "{junit_suffix}" is invalid; must end with "Test"'
+    if fix_location_file is not None:
+        assert os.path.isabs(fix_location_file), fix_location_file
+        assert not os.path.exists(fix_location_file), fix_location_file
 
     emitter.sub_sub_title("Generating Test Cases")
 
@@ -50,6 +58,20 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix, dry_run=
     class_names_with_dollar = [x for x in classes if "$" in classes]
     assert not class_names_with_dollar, class_names_with_dollar
 
+    if fix_location_file is not None:
+        changed_lines_for_class = defaultdict(set)
+        for i_patch in indexed_patches:
+            for classname, changed_lines in i_patch.patch.get_fix_locations().items():
+                changed_lines_for_class[classname].update(changed_lines)
+
+        goal_fix_locations = [
+            {"classname": classname, "targetLines": list(lines)}
+            for classname, lines in changed_lines_for_class.items()
+        ]
+
+        with open(fix_location_file, 'w') as f:
+            json.dump(goal_fix_locations, f)
+
     result = []
     for classname in classes:
         dir_output_this_class = Path(dir_output, classname)
@@ -58,7 +80,8 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix, dry_run=
             assert utilities.is_empty_dir(dir_output_this_class)
         result.extend(
             generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
-                                     dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds)
+                                     dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
+                                     fix_location_file=fix_location_file)
         )
 
     return result
