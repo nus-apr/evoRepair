@@ -146,15 +146,10 @@ def run(arg_list):
     timer.pause_phase(phase)
 
     i_patch_population_size = 5
-    i_test_population_size = 20
 
-    all_i_patches = []
-    i_patch_populations = []
-    i_test_populations = []
-    current_i_patches = []
-    current_i_tests = []
-
-    i_test_to_mutation_score = Counter()
+    perfect_i_patches = set()
+    fame_i_patches = set()
+    all_i_tests = set()
 
     assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
 
@@ -163,7 +158,7 @@ def run(arg_list):
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
         dry_run_repair = False
-        num_patches_wanted = i_patch_population_size - len(current_i_patches)
+        num_patches_wanted = i_patch_population_size - len(perfect_i_patches)
         patch_gen_timeout_in_secs = 1200
 
         dry_run_test_gen = False
@@ -192,15 +187,15 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        patches, _ = repair.generate(values.dir_info["source"], values.dir_info["classes"],
-            values.dir_info["tests"], values.dir_info["deps"], dir_patches, current_i_tests, additional_tests_info_path,
+        patches, fame_patches = repair.generate(values.dir_info["source"], values.dir_info["classes"],
+            values.dir_info["tests"], values.dir_info["deps"], dir_patches, all_i_tests, additional_tests_info_path,
             num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
+        indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
 
-        all_i_patches.extend(indexed_patches)
-        i_patch_populations.append(indexed_patches)
-        current_i_patches.extend(indexed_patches)
+        perfect_i_patches.update(indexed_patches)
+        fame_i_patches.update(indexed_fame_patches)
 
         timer.pause_phase(phase)
         phase = "Test Generation"
@@ -209,13 +204,13 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        tests = tester.generate_additional_test(current_i_patches, dir_tests,
+        tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
                                                 junit_suffix=f"_gen{values.iteration_no}_ESTest",
                                                 timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
                                                 dry_run=dry_run_test_gen)
         indexed_tests = [IndexedTest(values.iteration_no, test) for test in tests]
 
-        i_test_populations.append(indexed_tests)
+        all_i_tests.update(indexed_tests)
 
         timer.pause_phase(phase)
         phase = "Validation"
@@ -224,18 +219,15 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        validation_result = validator.validate(all_i_patches, indexed_tests, dir_validation,
+        validation_result = validator.validate(perfect_i_patches, indexed_tests, dir_validation,
                                                compile_patches=compile_patches,
                                                compile_tests=compile_tests,
                                                execute_tests=execute_tests)
 
-        for i_test in indexed_tests:
-            i_test_to_mutation_score[i_test] = 0
-
-        i_test_to_mutation_score.update(
-            itertools.chain(*[failing_i_tests for _, _, failing_i_tests in validation_result]))
-
-        current_i_tests = [i_test for i_test, _ in i_test_to_mutation_score.most_common(i_test_population_size)]
+        for i_patch, _, failing_i_tests in validation_result:
+            if failing_i_tests:
+                perfect_i_patches.remove(i_patch)
+                fame_i_patches.add(i_patch)
 
         timer.pause_phase(phase)
 
