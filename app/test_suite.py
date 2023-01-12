@@ -79,6 +79,9 @@ class IndexedSuite:
     def get_index(self):
         return SuiteIndex(self.generation, self.suite.key)
 
+    def get_index_str(self):
+        return f"{self.suite.key}@gen{self.generation}"
+
 
 TestIndex = namedtuple("TestIndex", ["generation", "suite_key", "method_name"])
 
@@ -104,3 +107,6 @@ class IndexedTest:
 
     def get_suite_index(self):
         return self.indexed_suite.get_index()
+
+    def get_index_str(self):
+        return f"{self.method_name}#{self.indexed_suite.get_index_str()}"

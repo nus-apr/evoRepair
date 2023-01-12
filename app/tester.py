@@ -39,6 +39,7 @@ This is the interface for EvoSuite
 """
 def generate_additional_test(indexed_patches, dir_output, junit_suffix,
                              target_patches_file=None,
+                             seed_i_tests=None, seeds_file=None, kill_matrix=None,
                              dry_run=False, timeout_per_class_in_seconds=0):
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
@@ -49,6 +50,12 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
         assert os.path.isabs(target_patches_file), target_patches_file
         if not dry_run:
             assert not os.path.exists(target_patches_file), target_patches_file
+    if seed_i_tests is not None:
+        assert seeds_file is not None
+        assert os.path.isabs(seeds_file), str(seeds_file)
+        if not dry_run:
+            assert not os.path.exists(seeds_file), str(seeds_file)
+        assert kill_matrix is not None
 
     emitter.sub_sub_title("Generating Test Cases")
 
@@ -78,6 +85,29 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
             with open(target_patches_file, 'w') as f:
                 json.dump(target_patches_info, f)
 
+    if seed_i_tests is not None:
+        i_tests_for_i_suite = defaultdict(list)
+        for i_test in seed_i_tests:
+            i_tests_for_i_suite[i_test.indexed_suite].append(i_test)
+
+        seeds_info = [
+            {
+                "serializedSuite": i_suite.suite.dump_file,
+                "tests": [
+                    {
+                        "name": i_test.get_index_str(),
+                        "kills": kill_matrix[i_test] if i_test in kill_matrix else []
+                    }
+                    for i_test in i_tests
+                ]
+            }
+            for i_suite, i_tests in i_tests_for_i_suite.items()
+        ]
+
+        if not dry_run:
+            with open(seeds_file, 'w') as f:
+                json.dump(seeds_info, f)
+
     result = []
     for classname in classes:
         dir_output_this_class = Path(dir_output, classname)
@@ -87,14 +117,14 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
         result.extend(
             generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
                                      dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
-                                     target_patches_file=target_patches_file)
+                                     seeds_file=seeds_file, target_patches_file=target_patches_file)
         )
 
     return result
 
 
 def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_run=False, target_patches_file=None,
-                             timeout_in_seconds=0):
+                             seeds_file=None, timeout_in_seconds=0):
     assert os.path.isabs(dir_bin)
     assert utilities.is_nonempty_dir(dir_bin)
     assert os.path.isabs(dir_output)
@@ -102,6 +132,9 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     if target_patches_file is not None:
         assert os.path.isabs(target_patches_file)
         assert os.path.isfile(target_patches_file)
+    if seeds_file is not None:
+        assert os.path.isabs(seeds_file), seeds_file
+        assert os.path.isfile(seeds_file), seeds_file
     if not dry_run:
         assert utilities.is_empty_dir(dir_output)
 
@@ -121,6 +154,9 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
 
     if target_patches_file is not None:
         evosuite_command += f" -targetPatches {str(target_patches_file)}"
+
+    if seeds_file is not None:
+        evosuite_command += f" -seeds {str(seeds_file)}"
 
     dir_test_src = Path(dir_output, "evosuite-tests")
 
