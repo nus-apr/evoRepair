@@ -33,8 +33,13 @@ Each patch objects has the following
 """
 
 
-def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_tests, additional_tests_info_path,
-             num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False):
+def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
+             indexed_tests, additional_tests_info_path,
+             dir_fames=None,
+             perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
+             fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
+             num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
+             ):
     for x in dir_src, dir_bin, dir_test_bin, dir_deps:
         assert os.path.isabs(x), x
         assert utilities.is_nonempty_dir(x), x
@@ -45,9 +50,21 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
     if not dry_run:
         utilities.check_is_empty_dir(dir_patches)
         assert Path(dir_patches) not in Path(additional_tests_info_path).parents
+
+        if dir_fames is not None:
+            utilities.check_is_empty_dir(dir_fames)
     indexed_suites = set([it.indexed_suite for it in indexed_tests])
     for i_suite in indexed_suites:
         assert i_suite in indexed_suite_to_bin_dir, f"{str(i_suite)} has not been compiled"
+    for i_patches, ratio, summary_path in ((perfect_i_patches, init_ratio_perfect, perfect_summary_path),
+                                           (fame_i_patches, init_ratio_fame, fame_summary_path)):
+        if i_patches is not None:
+            try:
+                assert 0 <= ratio <= 1, ratio
+            except Exception as e:
+                assert False, e
+            assert os.path.isabs(summary_path), summary_path
+            assert not os.path.exists(summary_path), summary_path
 
     emitter.sub_sub_title("Generating Patches")
 
@@ -101,6 +118,25 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
                     f' -DwaitTime 30000'
                     f' -DuseD4JInstr true'
                     )
+
+    if dir_fames is not None:
+        repair_command += f' -DfameOutputRoot {str(dir_fames)}'
+
+    if perfect_i_patches is not None:
+        summaries = [i_patch.patch.read_summary_file() for i_patch in perfect_i_patches]
+        with open(perfect_summary_path, 'w') as f:
+            f.write("\n".join(summaries))
+        repair_command += (f' -DperfectPath {str(perfect_summary_path)}'
+                           f' -DinitRatioOfPerfect {init_ratio_perfect}'
+                           )
+
+    if fame_i_patches is not None:
+        summaries = [i_patch.patch.read_summary_file() for i_patch in fame_i_patches]
+        with open(fame_summary_path, 'w') as f:
+            f.write("\n".join(summaries))
+        repair_command += (f' -DhallOfFameInPath {str(fame_summary_path)}'
+                           f' -DinitRatioOfFame {init_ratio_fame}'
+                           )
 
     # Output directory of ARJA (`patchOutputRoot`) looks like:
     #
