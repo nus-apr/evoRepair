@@ -191,7 +191,7 @@ def run(arg_list):
         additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
         perfect_summary_path = Path(values.dir_info["patches"], f"perfect_summary_gen{values.iteration_no}.txt")
         fame_summary_path = Path(values.dir_info["patches"], f"fame_summary_gen{values.iteration_no}.txt")
-        target_fix_location_file = Path(values.dir_info["gen-test"], f"target_locations_gen{values.iteration_no}.json")
+        target_patches_file = Path(values.dir_info["gen-test"], f"target_patches_gen{values.iteration_no}.json")
 
         directories = (dir_patches, dir_fames, dir_tests, dir_validation)
         non_empty_conditions = (dry_run_repair, dry_run_repair, dry_run_test_gen,
@@ -240,7 +240,7 @@ def run(arg_list):
             timer.resume_phase(phase)
 
         tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
-                                                fix_location_file=target_fix_location_file,
+                                                target_patches_file=target_patches_file,
                                                 junit_suffix=f"_gen{values.iteration_no}_ESTest",
                                                 timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
                                                 dry_run=dry_run_test_gen)

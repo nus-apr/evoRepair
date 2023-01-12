@@ -38,17 +38,17 @@ This is the interface for EvoSuite
 # @output list of test-cases JSON format
 """
 def generate_additional_test(indexed_patches, dir_output, junit_suffix,
-                             fix_location_file=None,
+                             target_patches_file=None,
                              dry_run=False, timeout_per_class_in_seconds=0):
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
     if not dry_run:
         utilities.check_is_empty_dir(dir_output)
     assert junit_suffix.endswith("Test"), f'junit_suffix "{junit_suffix}" is invalid; must end with "Test"'
-    if fix_location_file is not None:
-        assert os.path.isabs(fix_location_file), fix_location_file
+    if target_patches_file is not None:
+        assert os.path.isabs(target_patches_file), target_patches_file
         if not dry_run:
-            assert not os.path.exists(fix_location_file), fix_location_file
+            assert not os.path.exists(target_patches_file), target_patches_file
 
     emitter.sub_sub_title("Generating Test Cases")
 
@@ -59,20 +59,24 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
     class_names_with_dollar = [x for x in classes if "$" in classes]
     assert not class_names_with_dollar, class_names_with_dollar
 
-    if fix_location_file is not None:
-        changed_lines_for_class = defaultdict(set)
-        for i_patch in indexed_patches:
-            for classname, changed_lines in i_patch.patch.get_fix_locations().items():
-                changed_lines_for_class[classname].update(changed_lines)
-
-        goal_fix_locations = [
-            {"classname": classname, "targetLines": list(lines)}
-            for classname, lines in changed_lines_for_class.items()
+    if target_patches_file is not None:
+        target_patches_info = [
+            {
+                "index": i_patch.get_index_str(),
+                "fixLocations": [
+                    {
+                        "classname": classname,
+                        "targetLines": changed_lines
+                    }
+                    for classname, changed_lines in i_patch.patch.get_fix_locations().items()
+                ]
+            }
+            for i_patch in indexed_patches
         ]
 
         if not dry_run:
-            with open(fix_location_file, 'w') as f:
-                json.dump(goal_fix_locations, f)
+            with open(target_patches_file, 'w') as f:
+                json.dump(target_patches_info, f)
 
     result = []
     for classname in classes:
@@ -83,21 +87,21 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
         result.extend(
             generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
                                      dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
-                                     fix_location_file=fix_location_file)
+                                     target_patches_file=target_patches_file)
         )
 
     return result
 
 
-def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_run=False, fix_location_file=None,
+def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_run=False, target_patches_file=None,
                              timeout_in_seconds=0):
     assert os.path.isabs(dir_bin)
     assert utilities.is_nonempty_dir(dir_bin)
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
-    if fix_location_file is not None:
-        assert os.path.isabs(fix_location_file)
-        assert os.path.isfile(fix_location_file)
+    if target_patches_file is not None:
+        assert os.path.isabs(target_patches_file)
+        assert os.path.isfile(target_patches_file)
     if not dry_run:
         assert utilities.is_empty_dir(dir_output)
 
@@ -115,8 +119,8 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     if timeout_in_seconds:
         evosuite_command += f" -Dsearch_budget={timeout_in_seconds} -Dstopping_condition=MaxTime"
 
-    if fix_location_file is not None:
-        evosuite_command += f" -targetLines {str(fix_location_file)}"
+    if target_patches_file is not None:
+        evosuite_command += f" -targetPatches {str(target_patches_file)}"
 
     dir_test_src = Path(dir_output, "evosuite-tests")
 
