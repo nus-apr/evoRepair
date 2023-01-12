@@ -70,7 +70,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     if num_patches_wanted <= 0:
         emitter.normal(f"\t{num_patches_wanted} patches wanted; patch generation skipped")
-        return []
+        return [], []
 
     java_executable = shutil.which("java")
     if java_executable is None:
@@ -228,33 +228,43 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
         emitter.normal(f"\tDry run; will reuse the {num_patches} patches in {dir_patches}")
 
-    result = []
-
     strip = len(Path(dir_src).parts)
 
-    for entry in os.scandir(dir_patches):
-        if not entry.is_file():
-            assert re.fullmatch(r"Patch_\d+", entry.name), entry.path
-            continue
+    def read_arja_output_root(output_root):
+        result = []
 
-        assert re.fullmatch(r"Patch_\d+\.txt", entry.name), entry.path
+        for entry in os.scandir(output_root):
+            if not entry.is_file():
+                assert re.fullmatch(r"Patch_\d+", entry.name), entry.path
+                continue
 
-        directory = Path(entry.path).with_suffix("")
-        assert utilities.is_nonempty_dir(directory), str(directory)
+            assert re.fullmatch(r"Patch_\d+\.txt", entry.name), entry.path
 
-        diff_file = Path(directory, "diff")
+            directory = Path(entry.path).with_suffix("")
+            assert utilities.is_nonempty_dir(directory), str(directory)
 
-        patched_dir = Path(directory, "patched")
+            diff_file = Path(directory, "diff")
 
-        changed_files = [Path(x).relative_to(patched_dir) for x in
-                         glob.glob(os.path.join(patched_dir, "**", "*.java"), recursive=True)]
+            patched_dir = Path(directory, "patched")
 
-        changed_classes = [".".join(file.with_suffix("").parts) for file in changed_files]
+            changed_files = [Path(x).relative_to(patched_dir) for x in
+                             glob.glob(os.path.join(patched_dir, "**", "*.java"), recursive=True)]
 
-        key = directory.name.split("_")[1]
+            changed_classes = [".".join(file.with_suffix("").parts) for file in changed_files]
 
-        summary_file = Path(directory, "summary")
+            key = directory.name.split("_")[1]
 
-        result.append(Patch(diff_file, strip, changed_files, changed_classes, key, summary_file))
+            summary_file = Path(directory, "summary")
 
-    return result
+            result.append(Patch(diff_file, strip, changed_files, changed_classes, key, summary_file))
+
+        return result
+
+    patches = read_arja_output_root(dir_patches)
+
+    if dir_fames is not None:
+        hall_of_fame_patches = read_arja_output_root(dir_fames)
+    else:
+        hall_of_fame_patches = []
+
+    return patches, hall_of_fame_patches
