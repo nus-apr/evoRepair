@@ -120,6 +120,10 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
 
     dir_test_src = Path(dir_output, "evosuite-tests")
 
+    dump_file = Path(dir_test_src, "dump")
+
+    test_names_file = Path(dir_test_src, "test_names.txt")
+
     if not dry_run:
         emitter.normal(f"\trunning evosuite for {classname}")
 
@@ -143,7 +147,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
         out_file_prefix = str(Path(dir_test_src, *classname.split('.')))
         out1 = f"{out_file_prefix}{junit_suffix}.java"
         out2 = f"{out_file_prefix}{junit_suffix}_scaffolding.java"
-        for x in out1, out2:
+        for x in out1, out2, dump_file, test_names_file:
             if not os.path.isfile(x):
                 raise RuntimeError(f"EvoSuite exited normally without generating expected file {x}")
 
@@ -152,6 +156,10 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
         emitter.normal(f"\tDry run; will reuse tests in {dir_test_src}")
 
     junit_class = f"{classname}{junit_suffix}"
+
+    with open(test_names_file) as f:
+        lines = [line.strip() for line in f]
+        test_names = set([line.split("#")[1] for line in lines if line])
 
     compile_deps = [evosuite_jar]
 
@@ -162,13 +170,9 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     assert os.path.isfile(junit_jar), junit_jar
     runtime_deps = [evosuite_runtime_jar, junit_jar]
 
-    suite = TestSuite(dir_test_src, junit_class, compile_deps, runtime_deps, key=classname)
+    suite = TestSuite(dir_test_src, junit_class, dump_file, test_names, compile_deps, runtime_deps, key=classname)
 
-    junit_file = Path(dir_test_src, junit_class.replace(".", os.path.sep)).with_suffix(".java")
-    with open(junit_file) as f:
-        test_names = re.findall(r"public void (test\d+)\(\)", f.read())
-
-    return [Test(suite, test_name) for test_name in test_names]
+    return [Test(suite, test_name) for test_name in suite.test_names]
 
 
 def read_evosuite_version():
