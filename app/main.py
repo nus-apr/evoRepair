@@ -276,6 +276,10 @@ def main():
         emitter.error("Runtime Error")
         emitter.error(str(e))
         logger.error(traceback.format_exc())
+    except KeyboardInterrupt:
+        timer.pause_all()
+
+        emitter.information("Repair process stopped by user")
     finally:
         emitter.end(timer, is_error)
         logger.store_logs()
