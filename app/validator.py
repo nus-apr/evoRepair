@@ -75,6 +75,9 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
 
                 indexed_suite_to_bin_dir[i_suite] = str(out_dir)
 
+    if not execute_tests:
+        return []
+
     if values.use_hotswap:
         raise NotImplementedError("UniAPR validation for indexed patches & tests has not been implemented")
     else:
