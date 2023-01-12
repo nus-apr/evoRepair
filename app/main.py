@@ -241,7 +241,8 @@ def run(arg_list):
         validation_result = validator.validate(perfect_i_patches, indexed_tests, dir_validation,
                                                compile_patches=compile_patches,
                                                compile_tests=compile_tests,
-                                               execute_tests=execute_tests)
+                                               execute_tests=execute_tests,
+                                               use_d4j_instr=True)
 
         for i_patch, _, failing_i_tests in validation_result:
             if failing_i_tests:

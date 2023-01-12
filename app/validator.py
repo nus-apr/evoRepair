@@ -34,7 +34,8 @@ indexed_patch_to_bin_dir = {}
 indexed_suite_to_bin_dir = {}
 
 
-def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True):
+def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, compile_tests=True, execute_tests=True,
+             use_d4j_instr=True):
     assert os.path.isabs(work_dir)
     assert os.path.isdir(work_dir)
 
@@ -77,10 +78,10 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
     if values.use_hotswap:
         raise NotImplementedError("UniAPR validation for indexed patches & tests has not been implemented")
     else:
-        return plain_validate(indexed_patches, indexed_tests)
+        return plain_validate(indexed_patches, indexed_tests, use_d4j_instr)
 
 
-def plain_validate(indexed_patches, indexed_tests):
+def plain_validate(indexed_patches, indexed_tests, use_d4j_instr):
     # group indexed suites, so that any two suites in a same group do not have a same JUnit test class name
     indexed_suites = set([it.indexed_suite for it in indexed_tests])
 
@@ -126,7 +127,8 @@ def plain_validate(indexed_patches, indexed_tests):
             name2itest = {f"{it.indexed_suite.suite.junit_class}#{it.method_name}": it for it in i_test_group}
 
             message = asyncio.run(
-                run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, list(name2itest.keys())))
+                run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, list(name2itest.keys()),
+                                    use_d4j_instr))
 
             obj = json.loads(message)
 
@@ -138,7 +140,7 @@ def plain_validate(indexed_patches, indexed_tests):
     return result
 
 
-async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, full_test_names):
+async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, full_test_names, use_d4j_instr):
     assert os.path.isabs(patch_bin_dir), str(patch_bin_dir)
     assert utilities.is_nonempty_dir(patch_bin_dir), str(patch_bin_dir)
     for x in suites_bin_dirs:
@@ -179,8 +181,12 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
 
         cp_str = ":".join((str(x) for x in classpath))
 
-        command = (f'{java_executable} -cp "{cp_str}" evorepair.PlainValidator {port}'
-                   f' {" ".join(full_test_names)}')
+        command = java_executable
+        if use_d4j_instr:
+            command += ' -Ddefects4j.instrumentation.enabled=true'
+        command += (f' -cp "{cp_str}" evorepair.PlainValidator {port}'
+                    f' {" ".join(full_test_names)}'
+                    )
 
         emitter.debug(command)
         emitter.normal(f"running {len(full_test_names)} test cases")
