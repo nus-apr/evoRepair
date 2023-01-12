@@ -217,6 +217,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches, indexed_test
 
         key = directory.name.split("_")[1]
 
-        result.append(Patch(diff_file, strip, changed_files, changed_classes, key))
+        summary_file = Path(directory, "summary")
+
+        result.append(Patch(diff_file, strip, changed_files, changed_classes, key, summary_file))
 
     return result

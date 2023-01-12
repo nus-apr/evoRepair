@@ -11,12 +11,14 @@ from unidiff import PatchSet
 
 
 class Patch:
-    def __init__(self, diff_file, strip: int, changed_files, changed_classes, key):
+    def __init__(self, diff_file, strip: int, changed_files, changed_classes, key, summary_file):
         self.diff_file = diff_file
         self.strip = strip
         self.changed_files = changed_files
         self.changed_classes = changed_classes
         self.key = key
+        self.summary_file = summary_file
+        self.__summary = None
 
     def __repr__(self):
         return f"Patch@{self.key}[diff={self.diff_file}, strip={self.strip}, classes={self.changed_classes}]"
@@ -113,6 +115,12 @@ class Patch:
 
             result[classname] = changed_lines
         return result
+
+    def read_summary_file(self):
+        if self.__summary is None:
+            with open(self.summary_file) as f:
+                self.__summary = f.read()
+        return self.__summary
 
 
 PatchIndex = namedtuple("PatchIndex", ["generation", "key"])
