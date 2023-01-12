@@ -39,6 +39,22 @@ class Timer:
 
         self.time_intervals[phase][-1].end = time.time()
 
+    def last_interval_duration(self, phase, unit="s"):
+        if not self.__exists(phase):
+            raise ValueError(f"Phase {phase} does not exist")
+        if self.__is_running(phase):
+            raise ValueError(f"Phase {phase} is still running")
+        if unit not in ("s", "m", "h"):
+            raise ValueError(f'Unknown time unit "{unit}"')
+
+        last_interval = self.time_intervals[phase][-1]
+        duration = last_interval.end - last_interval.start
+        if unit == "m":
+            duration /= 60
+        elif unit == "h":
+            duration /= 3600
+        return duration
+
     def pause_all(self):
         end_time = time.time()
         for intervals in self.time_intervals.values():
@@ -216,6 +232,7 @@ def run(arg_list):
         fame_i_patches.update(indexed_fame_patches)
 
         timer.pause_phase(phase)
+        emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
         phase = "Test Generation"
         if values.iteration_no == 1:
             timer.start_phase(phase)
@@ -232,6 +249,7 @@ def run(arg_list):
         all_i_tests.update(indexed_tests)
 
         timer.pause_phase(phase)
+        emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
         phase = "Validation"
         if values.iteration_no == 1:
             timer.start_phase(phase)
@@ -254,6 +272,7 @@ def run(arg_list):
         emitter.normal(f"{num_killed_patches} perfect patch(es) are killed")
 
         timer.pause_phase(phase)
+        emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
 
 
 def parse_args():
