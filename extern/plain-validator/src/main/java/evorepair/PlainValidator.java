@@ -8,9 +8,12 @@ import org.junit.runner.Request;
 import org.junit.runner.manipulation.Filter;
 
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -36,10 +39,23 @@ public final class PlainValidator {
         Map<String, Set<String>> clazz2tests = new HashMap<>();
         Set<Class> classes = new HashSet<>();
 
-        int numberOfTests = args.length - 1;
-        for (int i = 0; i < numberOfTests; i++) {
+        List<String> testNames = null;
+
+        if (args[1].equals("-f")) {
+            String testNamesFile = args[2];
             try {
-                String[] clazzAndMethod = args[i + 1].split("#");
+                testNames = Files.readAllLines(Paths.get(testNamesFile));
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        } else {
+            testNames = Arrays.asList(Arrays.copyOfRange(args, 1, args.length));
+        }
+
+        for (String testName: testNames) {
+            try {
+                String[] clazzAndMethod = testName.split("#");
                 String clazz = clazzAndMethod[0];
                 String method = clazzAndMethod[1];
 

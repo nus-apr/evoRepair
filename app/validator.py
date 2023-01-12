@@ -47,12 +47,17 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
 
     dir_tests_bin = Path(work_dir, "suites_bin")
 
+    dir_execution = Path(work_dir, "execution")
+
     if compile_patches:
         os.makedirs(dir_patches_bin, exist_ok=True)
         utilities.check_is_empty_dir(dir_patches_bin), str(dir_patches_bin)
     if compile_tests:
         os.makedirs(dir_tests_bin, exist_ok=True)
         utilities.check_is_empty_dir(dir_tests_bin), str(dir_tests_bin)
+    if execute_tests:
+        os.makedirs(dir_execution, exist_ok=True)
+        utilities.check_is_empty_dir(dir_execution)
 
     if compile_patches:
         for i_patch in indexed_patches:
@@ -88,10 +93,13 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
     if values.use_hotswap:
         raise NotImplementedError("UniAPR validation for indexed patches & tests has not been implemented")
     else:
-        return plain_validate(indexed_patches, indexed_tests, use_d4j_instr)
+        return plain_validate(indexed_patches, indexed_tests, dir_execution, use_d4j_instr)
 
 
-def plain_validate(indexed_patches, indexed_tests, use_d4j_instr):
+def plain_validate(indexed_patches, indexed_tests, work_dir, use_d4j_instr):
+    assert os.path.isabs(work_dir), str(work_dir)
+    assert utilities.is_empty_dir(work_dir), str(work_dir)
+
     # group indexed suites, so that any two suites in a same group do not have a same JUnit test class name
     indexed_suites = set([it.indexed_suite for it in indexed_tests])
 
@@ -118,6 +126,8 @@ def plain_validate(indexed_patches, indexed_tests, use_d4j_instr):
 
     result = []
 
+    validator_run_count = 0
+
     for i_patch in indexed_patches:
 
         passing_i_tests = []
@@ -126,6 +136,8 @@ def plain_validate(indexed_patches, indexed_tests, use_d4j_instr):
         patch_bin_dir = indexed_patch_to_bin_dir[i_patch]
 
         for i_suite_group in i_suite_groups:
+            validator_run_count += 1
+
             suites_bin_dirs = [indexed_suite_to_bin_dir[i_suite] for i_suite in i_suite_group]
 
             suites_runtime_deps = set(map(os.path.abspath,
@@ -136,9 +148,11 @@ def plain_validate(indexed_patches, indexed_tests, use_d4j_instr):
 
             name2itest = {f"{it.indexed_suite.suite.junit_class}#{it.method_name}": it for it in i_test_group}
 
+            test_names_file = Path(work_dir, f"tests{validator_run_count}.txt")
+
             message = asyncio.run(
                 run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, list(name2itest.keys()),
-                                    use_d4j_instr))
+                                    test_names_file, use_d4j_instr))
 
             obj = json.loads(message)
 
@@ -150,17 +164,23 @@ def plain_validate(indexed_patches, indexed_tests, use_d4j_instr):
     return result
 
 
-async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, full_test_names, use_d4j_instr):
+async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_deps, full_test_names,
+                              test_names_file, use_d4j_instr):
     assert os.path.isabs(patch_bin_dir), str(patch_bin_dir)
     assert utilities.is_nonempty_dir(patch_bin_dir), str(patch_bin_dir)
     for x in suites_bin_dirs:
         assert os.path.isabs(x), str(x)
         assert utilities.is_nonempty_dir(x), str(x)
+    assert os.path.isabs(test_names_file), str(test_names_file)
+    assert not os.path.exists(test_names_file)
 
     result = []
 
     async def plain_validator_connected(reader, _):
         result.append((await reader.read()).decode("utf-8"))
+
+    with open(test_names_file, 'w') as f:
+        f.write("\n".join(full_test_names))
 
     server_socket = socket.socket()
     server_socket.bind(("localhost", 0))
@@ -195,10 +215,10 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
         if use_d4j_instr:
             command += ' -Ddefects4j.instrumentation.enabled=true'
         command += (f' -cp "{cp_str}" evorepair.PlainValidator {port}'
-                    f' {" ".join(full_test_names)}'
+                    f' -f {str(test_names_file)}'
                     )
 
-        emitter.debug(command)
+        emitter.command(command)
         emitter.normal(f"running {len(full_test_names)} test cases")
 
         process = await asyncio.create_subprocess_shell(command, stdout=DEVNULL, stderr=PIPE)
