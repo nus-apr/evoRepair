@@ -168,6 +168,11 @@ def run(arg_list):
     all_i_tests = set()
     kill_matrix = {}
 
+    dir_perfect_patches = Path(values.dir_output, "perfect-patches")
+    os.makedirs(dir_perfect_patches, exist_ok=True)
+    utilities.check_is_empty_dir(dir_perfect_patches), str(dir_perfect_patches)
+    save_path_for_i_patch = {}
+
     assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
 
     while utilities.have_budget(values.time_duration_total):
@@ -231,6 +236,11 @@ def run(arg_list):
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
 
         perfect_i_patches.update(indexed_patches)
+        for i_patch in indexed_patches:
+            save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
+            assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
+            save_path_for_i_patch[i_patch] = save_path
+            os.symlink(i_patch.patch.diff_file, save_path)
         fame_i_patches.update(indexed_fame_patches)
 
         timer.pause_phase(phase)
@@ -272,6 +282,9 @@ def run(arg_list):
         for i_patch, _, failing_i_tests in validation_result:
             if failing_i_tests:
                 perfect_i_patches.remove(i_patch)
+                assert i_patch in save_path_for_i_patch, i_patch.get_index_str()
+                os.remove(save_path_for_i_patch[i_patch])
+
                 fame_i_patches.add(i_patch)
 
                 for i_test in failing_i_tests:
