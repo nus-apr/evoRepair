@@ -6,6 +6,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.notification.RunListener;
 import org.junit.runner.Request;
 import org.junit.runner.manipulation.Filter;
+import org.junit.runner.notification.Failure;
 
 import java.net.Socket;
 import java.nio.file.Files;
@@ -100,7 +101,7 @@ class RecordListener extends RunListener {
         passingTests.add(this.currentTest);
     }
 
-    public void testFailure(Description description) {
+    public void testFailure(Failure failure) {
         String tmp = passingTests.remove(passingTests.size() - 1);
         assert tmp.equals(this.currentTest);
         failingTests.add(this.currentTest);
