@@ -27,13 +27,13 @@ RUN wget -q -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py && cd /tmp &
 RUN python3 -m pip install unidiff
 
 # Install Maven
-RUN cd /opt && wget https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz && \
+RUN cd /opt && wget -q https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz && \
     tar -xvf apache-maven-3.6.3-bin.tar.gz
 ENV M2_HOME '/opt/apache-maven-3.6.3'
 ENV PATH "$M2_HOME/bin:${PATH}"
 
 # Instead of openjdk-8-jdk, install zulu jdk 8.0 to accomodate Defects4J version 1.5.0 and older
-RUN wget -O /tmp/zulu8.deb https://cdn.azul.com/zulu/bin/zulu8.66.0.15-ca-jdk8.0.352-linux_amd64.deb
+RUN wget -q -O /tmp/zulu8.deb https://cdn.azul.com/zulu/bin/zulu8.66.0.15-ca-jdk8.0.352-linux_amd64.deb
 RUN apt install -y /tmp/zulu8.deb
 
 # Build Defects4J (adapted from https://github.com/rjust/defects4j/blob/master/Dockerfile)
