@@ -93,6 +93,7 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
         seeds_info = [
             {
                 "serializedSuite": i_suite.suite.dump_file,
+                "testPrefix": f"{i_suite.suite.junit_class}#",
                 "tests": [
                     {
                         "name": i_test.get_index_str(),
