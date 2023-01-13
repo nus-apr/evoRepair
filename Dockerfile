@@ -74,4 +74,8 @@ RUN mvn clean; mvn package -DskipTests
 WORKDIR /opt/EvoRepair/extern/uniapr/
 RUN ./install.sh jars/uniapr-plugin-1.0-SNAPSHOT-fixed.jar
 
+# Set up plain validator
+WORKDIR /opt/EvoRepair/extern/plain-validator/
+RUN mvn clean; mvn package
+
 WORKDIR /opt/EvoRepair
