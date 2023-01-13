@@ -119,7 +119,7 @@ class Patch:
     def read_summary_file(self):
         if self.__summary is None:
             with open(self.summary_file) as f:
-                self.__summary = f.read()
+                self.__summary = f.read().strip()
         return self.__summary
 
 
