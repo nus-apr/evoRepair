@@ -154,6 +154,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
         evosuite_command += f" -Dsearch_budget={timeout_in_seconds} -Dstopping_condition=MaxTime"
 
     if target_patches_file is not None:
+        evosuite_command += f" -generateMOSuite -evorepair=testgen"
         evosuite_command += f" -targetPatches {str(target_patches_file)}"
 
     if seeds_file is not None:
