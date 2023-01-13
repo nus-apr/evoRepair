@@ -22,6 +22,10 @@ RUN apt-get install -y --no-install-recommends  \
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
 
+RUN apt-get install -y python3-distutils --no-install-recommends
+RUN wget -q -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py && cd /tmp && python3 get-pip.py
+RUN python3 -m pip install unidiff
+
 # Install Maven
 RUN cd /opt && wget https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz && \
     tar -xvf apache-maven-3.6.3-bin.tar.gz
