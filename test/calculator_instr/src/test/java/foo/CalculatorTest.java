@@ -15,4 +15,9 @@ public class CalculatorTest {
         int result = Calculator.wrongAdd(1, 1);
         assertTrue(result >= 2);
     }
+
+    @Test
+    public void testWithoutAssertion() {
+        int result = Calculator.wrongAdd(1, 1);
+    }
 }
