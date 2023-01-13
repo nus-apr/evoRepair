@@ -161,6 +161,9 @@ def run(arg_list):
 
     timer.pause_phase(phase)
 
+    emitter.information("Starting co-evolution")
+    emitter.information(f"Output directory: {str(values.dir_output)}")
+
     i_patch_population_size = 5
 
     perfect_i_patches = set()
