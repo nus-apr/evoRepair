@@ -15,7 +15,7 @@ import org.evosuite.runtime.sandbox.Sandbox;
 import org.evosuite.runtime.sandbox.Sandbox.SandboxMode;
 
 @EvoSuiteClassExclude
-public class Calculator_gen1_ESTest_scaffolding {
+public class Calculator_instr_ESTest_scaffolding {
 
   @org.junit.Rule
   public org.evosuite.runtime.vnet.NonFunctionalRequirementRule nfr = new org.evosuite.runtime.vnet.NonFunctionalRequirementRule();
@@ -75,13 +75,13 @@ public class Calculator_gen1_ESTest_scaffolding {
   }
 
   private static void initializeClasses() {
-    org.evosuite.runtime.classhandling.ClassStateSupport.initializeClasses(Calculator_gen1_ESTest_scaffolding.class.getClassLoader() ,
+    org.evosuite.runtime.classhandling.ClassStateSupport.initializeClasses(Calculator_instr_ESTest_scaffolding.class.getClassLoader() ,
       "foo.Calculator"
     );
   } 
 
   private static void resetClasses() {
-    org.evosuite.runtime.classhandling.ClassResetter.getInstance().setClassLoader(Calculator_gen1_ESTest_scaffolding.class.getClassLoader()); 
+    org.evosuite.runtime.classhandling.ClassResetter.getInstance().setClassLoader(Calculator_instr_ESTest_scaffolding.class.getClassLoader());
 
     org.evosuite.runtime.classhandling.ClassStateSupport.resetClasses(
       "foo.Calculator"
