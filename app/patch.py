@@ -144,3 +144,6 @@ class IndexedPatch:
 
     def get_index(self):
         return PatchIndex(self.generation, self.patch.key)
+
+    def get_index_str(self):
+        return f"{self.patch.key}@gen{self.generation}"

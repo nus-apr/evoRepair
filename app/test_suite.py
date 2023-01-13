@@ -12,12 +12,14 @@ from collections import namedtuple
 
 
 class TestSuite:
-    def __init__(self, dir_src, junit_class, compile_deps: list, runtime_deps: list, key):
+    def __init__(self, dir_src, junit_class, dump_file, test_names, compile_deps: list, runtime_deps: list, key):
         self.dir_src = dir_src
         self.junit_class = junit_class
         self.compile_deps = compile_deps
         self.runtime_deps = runtime_deps
         self.key = key
+        self.dump_file = dump_file
+        self.test_names = test_names
 
     def __repr__(self):
         return f"TestSuite[{self.junit_class}@{self.dir_src}]"
@@ -77,6 +79,9 @@ class IndexedSuite:
     def get_index(self):
         return SuiteIndex(self.generation, self.suite.key)
 
+    def get_index_str(self):
+        return f"{self.suite.key}@gen{self.generation}"
+
 
 TestIndex = namedtuple("TestIndex", ["generation", "suite_key", "method_name"])
 
@@ -102,3 +107,6 @@ class IndexedTest:
 
     def get_suite_index(self):
         return self.indexed_suite.get_index()
+
+    def get_index_str(self):
+        return f"{self.method_name}#{self.indexed_suite.get_index_str()}"

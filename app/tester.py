@@ -38,17 +38,24 @@ This is the interface for EvoSuite
 # @output list of test-cases JSON format
 """
 def generate_additional_test(indexed_patches, dir_output, junit_suffix,
-                             fix_location_file=None,
+                             target_patches_file=None,
+                             seed_i_tests=None, seeds_file=None, kill_matrix=None,
                              dry_run=False, timeout_per_class_in_seconds=0):
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
     if not dry_run:
         utilities.check_is_empty_dir(dir_output)
     assert junit_suffix.endswith("Test"), f'junit_suffix "{junit_suffix}" is invalid; must end with "Test"'
-    if fix_location_file is not None:
-        assert os.path.isabs(fix_location_file), fix_location_file
+    if target_patches_file is not None:
+        assert os.path.isabs(target_patches_file), target_patches_file
         if not dry_run:
-            assert not os.path.exists(fix_location_file), fix_location_file
+            assert not os.path.exists(target_patches_file), target_patches_file
+    if seed_i_tests is not None:
+        assert seeds_file is not None
+        assert os.path.isabs(seeds_file), str(seeds_file)
+        if not dry_run:
+            assert not os.path.exists(seeds_file), str(seeds_file)
+        assert kill_matrix is not None
 
     emitter.sub_sub_title("Generating Test Cases")
 
@@ -59,20 +66,48 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
     class_names_with_dollar = [x for x in classes if "$" in classes]
     assert not class_names_with_dollar, class_names_with_dollar
 
-    if fix_location_file is not None:
-        changed_lines_for_class = defaultdict(set)
-        for i_patch in indexed_patches:
-            for classname, changed_lines in i_patch.patch.get_fix_locations().items():
-                changed_lines_for_class[classname].update(changed_lines)
-
-        goal_fix_locations = [
-            {"classname": classname, "targetLines": list(lines)}
-            for classname, lines in changed_lines_for_class.items()
+    if target_patches_file is not None:
+        target_patches_info = [
+            {
+                "index": i_patch.get_index_str(),
+                "fixLocations": [
+                    {
+                        "classname": classname,
+                        "targetLines": changed_lines
+                    }
+                    for classname, changed_lines in i_patch.patch.get_fix_locations().items()
+                ]
+            }
+            for i_patch in indexed_patches
         ]
 
         if not dry_run:
-            with open(fix_location_file, 'w') as f:
-                json.dump(goal_fix_locations, f)
+            with open(target_patches_file, 'w') as f:
+                json.dump(target_patches_info, f)
+
+    if seed_i_tests is not None:
+        i_tests_for_i_suite = defaultdict(list)
+        for i_test in seed_i_tests:
+            i_tests_for_i_suite[i_test.indexed_suite].append(i_test)
+
+        seeds_info = [
+            {
+                "serializedSuite": i_suite.suite.dump_file,
+                "testPrefix": f"{i_suite.suite.junit_class}#",
+                "tests": [
+                    {
+                        "name": i_test.get_index_str(),
+                        "kills": kill_matrix[i_test] if i_test in kill_matrix else []
+                    }
+                    for i_test in i_tests
+                ]
+            }
+            for i_suite, i_tests in i_tests_for_i_suite.items()
+        ]
+
+        if not dry_run:
+            with open(seeds_file, 'w') as f:
+                json.dump(seeds_info, f)
 
     result = []
     for classname in classes:
@@ -83,21 +118,24 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
         result.extend(
             generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
                                      dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
-                                     fix_location_file=fix_location_file)
+                                     seeds_file=seeds_file, target_patches_file=target_patches_file)
         )
 
     return result
 
 
-def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_run=False, fix_location_file=None,
-                             timeout_in_seconds=0):
+def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_run=False, target_patches_file=None,
+                             seeds_file=None, timeout_in_seconds=0):
     assert os.path.isabs(dir_bin)
     assert utilities.is_nonempty_dir(dir_bin)
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
-    if fix_location_file is not None:
-        assert os.path.isabs(fix_location_file)
-        assert os.path.isfile(fix_location_file)
+    if target_patches_file is not None:
+        assert os.path.isabs(target_patches_file)
+        assert os.path.isfile(target_patches_file)
+    if seeds_file is not None:
+        assert os.path.isabs(seeds_file), seeds_file
+        assert os.path.isfile(seeds_file), seeds_file
     if not dry_run:
         assert utilities.is_empty_dir(dir_output)
 
@@ -115,10 +153,17 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     if timeout_in_seconds:
         evosuite_command += f" -Dsearch_budget={timeout_in_seconds} -Dstopping_condition=MaxTime"
 
-    if fix_location_file is not None:
-        evosuite_command += f" -targetLines {str(fix_location_file)}"
+    if target_patches_file is not None:
+        evosuite_command += f" -targetPatches {str(target_patches_file)}"
+
+    if seeds_file is not None:
+        evosuite_command += f" -seeds {str(seeds_file)}"
 
     dir_test_src = Path(dir_output, "evosuite-tests")
+
+    dump_file = Path(dir_test_src, "dump")
+
+    test_names_file = Path(dir_test_src, "test_names.txt")
 
     if not dry_run:
         emitter.normal(f"\trunning evosuite for {classname}")
@@ -143,7 +188,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
         out_file_prefix = str(Path(dir_test_src, *classname.split('.')))
         out1 = f"{out_file_prefix}{junit_suffix}.java"
         out2 = f"{out_file_prefix}{junit_suffix}_scaffolding.java"
-        for x in out1, out2:
+        for x in out1, out2, dump_file, test_names_file:
             if not os.path.isfile(x):
                 raise RuntimeError(f"EvoSuite exited normally without generating expected file {x}")
 
@@ -152,6 +197,10 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
         emitter.normal(f"\tDry run; will reuse tests in {dir_test_src}")
 
     junit_class = f"{classname}{junit_suffix}"
+
+    with open(test_names_file) as f:
+        lines = [line.strip() for line in f]
+        test_names = set([line.split("#")[1] for line in lines if line])
 
     compile_deps = [evosuite_jar]
 
@@ -162,13 +211,9 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     assert os.path.isfile(junit_jar), junit_jar
     runtime_deps = [evosuite_runtime_jar, junit_jar]
 
-    suite = TestSuite(dir_test_src, junit_class, compile_deps, runtime_deps, key=classname)
+    suite = TestSuite(dir_test_src, junit_class, dump_file, test_names, compile_deps, runtime_deps, key=classname)
 
-    junit_file = Path(dir_test_src, junit_class.replace(".", os.path.sep)).with_suffix(".java")
-    with open(junit_file) as f:
-        test_names = re.findall(r"public void (test\d+)\(\)", f.read())
-
-    return [Test(suite, test_name) for test_name in test_names]
+    return [Test(suite, test_name) for test_name in suite.test_names]
 
 
 def read_evosuite_version():

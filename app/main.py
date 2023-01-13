@@ -166,6 +166,7 @@ def run(arg_list):
     perfect_i_patches = set()
     fame_i_patches = set()
     all_i_tests = set()
+    kill_matrix = {}
 
     assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
 
@@ -191,7 +192,8 @@ def run(arg_list):
         additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
         perfect_summary_path = Path(values.dir_info["patches"], f"perfect_summary_gen{values.iteration_no}.txt")
         fame_summary_path = Path(values.dir_info["patches"], f"fame_summary_gen{values.iteration_no}.txt")
-        target_fix_location_file = Path(values.dir_info["gen-test"], f"target_locations_gen{values.iteration_no}.json")
+        target_patches_file = Path(values.dir_info["gen-test"], f"target_patches_gen{values.iteration_no}.json")
+        seed_tests_file = Path(values.dir_info["gen-test"], f"seed_tests_gen{values.iteration_no}.json")
 
         directories = (dir_patches, dir_fames, dir_tests, dir_validation)
         non_empty_conditions = (dry_run_repair, dry_run_repair, dry_run_test_gen,
@@ -240,7 +242,11 @@ def run(arg_list):
             timer.resume_phase(phase)
 
         tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
-                                                fix_location_file=target_fix_location_file,
+                                                target_patches_file=target_patches_file,
+
+                                                seed_i_tests=all_i_tests, seeds_file=seed_tests_file,
+                                                kill_matrix=kill_matrix,
+
                                                 junit_suffix=f"_gen{values.iteration_no}_ESTest",
                                                 timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
                                                 dry_run=dry_run_test_gen)
@@ -267,6 +273,12 @@ def run(arg_list):
             if failing_i_tests:
                 perfect_i_patches.remove(i_patch)
                 fame_i_patches.add(i_patch)
+
+                for i_test in failing_i_tests:
+                    if i_test not in kill_matrix:
+                        kill_matrix[i_test] = []
+                    kill_matrix[i_test].append(i_patch)
+
                 num_killed_patches += 1
 
         emitter.normal(f"{num_killed_patches} perfect patch(es) are killed")
