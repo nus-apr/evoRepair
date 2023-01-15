@@ -57,8 +57,9 @@ class Timer:
 
     def pause_all(self):
         end_time = time.time()
-        for intervals in self.time_intervals.values():
-            intervals[-1].end = end_time
+        for phase, intervals in self.time_intervals.items():
+            if self.__is_running(phase):
+                intervals[-1].end = end_time
 
     def resume_phase(self, phase):
         if not self.__exists(phase):
