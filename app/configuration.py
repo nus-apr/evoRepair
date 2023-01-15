@@ -33,6 +33,9 @@ class Configurations:
         self.__runtime_config_values["use-arja"] = arg_list.arja
         self.__runtime_config_values["init-ratio-perfect"] = arg_list.init_ratio_perfect
         self.__runtime_config_values["init-ratio-fame"] = arg_list.init_ratio_fame
+        self.__runtime_config_values["num-perfect-patches"] = arg_list.num_perfect_patches
+        self.__runtime_config_values["patch-gen-timeout"] = arg_list.patch_gen_timeout
+        self.__runtime_config_values["test-gen-timeout"] = arg_list.test_gen_timeout
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -78,6 +81,9 @@ class Configurations:
         emitter.configuration("use arja", values.use_arja)
         emitter.configuration("ratio of perfect patches", values.init_ratio_perfect)
         emitter.configuration("ratio of user-tests-adequate patches", values.init_ratio_fame)
+        emitter.configuration("desired number of perfect patches", values.num_perfect_patches)
+        emitter.configuration("patch generation timeout", values.patch_gen_timeout)
+        emitter.configuration("test generation timeout", values.test_gen_timeout)
 
     def get_value(self, config_name):
         condition = config_name in self.__runtime_config_values and self.__runtime_config_values[config_name]
@@ -102,6 +108,9 @@ class Configurations:
         values.use_arja = self.__runtime_config_values["use-arja"]
         values.init_ratio_perfect = self.__runtime_config_values["init-ratio-perfect"]
         values.init_ratio_fame = self.__runtime_config_values["init-ratio-fame"]
+        values.num_perfect_patches = self.__runtime_config_values["num-perfect-patches"]
+        values.patch_gen_timeout = self.__runtime_config_values["patch-gen-timeout"]
+        values.test_gen_timeout = self.__runtime_config_values["test-gen-timeout"]
 
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths

@@ -29,6 +29,9 @@ use_hotswap = True
 use_arja = False
 init_ratio_perfect = 0
 init_ratio_fame = 0
+num_perfect_patches = 10
+patch_gen_timeout = 1200
+test_gen_timeout = 60
 
 # ------------------- Directories --------------------
 _dir_root = "/".join(os.path.realpath(__file__).split("/")[:-2])

@@ -164,7 +164,7 @@ def run(arg_list):
     emitter.information("Starting co-evolution")
     emitter.information(f"Output directory: {str(values.dir_output)}")
 
-    i_patch_population_size = 5
+    i_patch_population_size = values.num_perfect_patches
 
     perfect_i_patches = set()
     fame_i_patches = set()
@@ -184,10 +184,10 @@ def run(arg_list):
 
         dry_run_repair = False
         num_patches_wanted = i_patch_population_size - len(perfect_i_patches)
-        patch_gen_timeout_in_secs = 1200
+        patch_gen_timeout_in_secs = values.patch_gen_timeout
 
         dry_run_test_gen = False
-        test_gen_timeout_per_class_in_secs = 20
+        test_gen_timeout_per_class_in_secs = values.test_gen_timeout
 
         compile_patches = True
         compile_tests = True
@@ -330,6 +330,17 @@ def parse_args():
                           action='store',
                           type=float,
                           default=0)
+    optional.add_argument('--num-perfect-patches', help='number of perfect patches to generate',
+                          action='store',
+                          type=int,
+                          default=10)
+    optional.add_argument('--patch-gen-timeout', help='timeout of each patch generation attempt in seconds',
+                          action='store',
+                          type=int,
+                          default=1200)
+    optional.add_argument('--test-gen-timeout', help='timeout of each test generation attempt in seconds',
+                          type=int,
+                          default=60)
     args = parser.parse_args()
     return args
 
