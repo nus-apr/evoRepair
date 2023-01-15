@@ -178,7 +178,13 @@ def run(arg_list):
 
     assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
 
-    while utilities.have_budget(values.time_duration_total):
+    while True:
+        if values.num_iterations > 0:
+            if values.iteration_no >= values.num_iterations:
+                break
+        elif not utilities.have_budget(values.time_duration_total):
+            break
+
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
@@ -341,6 +347,9 @@ def parse_args():
     optional.add_argument('--test-gen-timeout', help='timeout of each test generation attempt in seconds',
                           type=int,
                           default=60)
+    optional.add_argument('--num-iterations', help='number of co-evolution iterations to run',
+                          type=int,
+                          default=0)
     args = parser.parse_args()
     return args
 

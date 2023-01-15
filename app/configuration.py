@@ -36,6 +36,7 @@ class Configurations:
         self.__runtime_config_values["num-perfect-patches"] = arg_list.num_perfect_patches
         self.__runtime_config_values["patch-gen-timeout"] = arg_list.patch_gen_timeout
         self.__runtime_config_values["test-gen-timeout"] = arg_list.test_gen_timeout
+        self.__runtime_config_values["num-iterations"] = arg_list.num_iterations
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -84,6 +85,7 @@ class Configurations:
         emitter.configuration("desired number of perfect patches", values.num_perfect_patches)
         emitter.configuration("patch generation timeout", values.patch_gen_timeout)
         emitter.configuration("test generation timeout", values.test_gen_timeout)
+        emitter.configuration("number of iterations to run", values.num_iterations)
 
     def get_value(self, config_name):
         condition = config_name in self.__runtime_config_values and self.__runtime_config_values[config_name]
@@ -111,6 +113,7 @@ class Configurations:
         values.num_perfect_patches = self.__runtime_config_values["num-perfect-patches"]
         values.patch_gen_timeout = self.__runtime_config_values["patch-gen-timeout"]
         values.test_gen_timeout = self.__runtime_config_values["test-gen-timeout"]
+        values.num_iterations = self.__runtime_config_values["num-iterations"]
 
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths
