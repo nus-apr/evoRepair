@@ -29,7 +29,7 @@ class Configurations:
             self.__config_file = str(arg_list.config)
         if arg_list.cache:
             self.__runtime_config_values["use-cache"] = True
-        self.__runtime_config_values["use-hotswap"] = not arg_list.no_hotswap
+        self.__runtime_config_values["use-hotswap"] = arg_list.use_hotswap
         self.__runtime_config_values["use-arja"] = arg_list.arja
         self.__runtime_config_values["init-ratio-perfect"] = arg_list.init_ratio_perfect
         self.__runtime_config_values["init-ratio-fame"] = arg_list.init_ratio_fame

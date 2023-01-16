@@ -323,7 +323,7 @@ def parse_args():
     optional.add_argument('-c', '--cache', help='use cached information for the process',
                           action='store_true',
                           default=False)
-    optional.add_argument('--no-hotswap', help='do not use hot swap for validation',
+    optional.add_argument('--use-hotswap', help='do not use hot swap for validation',
                           action='store_true',
                           default=False)
     optional.add_argument('--arja', help='use ARJA for patch generation instead',
