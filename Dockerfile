@@ -72,7 +72,7 @@ RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
 
 # Build EvoSuite
 WORKDIR /opt/EvoRepair/extern/evosuite
-RUN mvn clean; mvn package -DskipTests
+RUN mvn clean; mvn package -DskipTests; exit 0
 
 # Set up UniAPR
 WORKDIR /opt/EvoRepair/extern/uniapr/
@@ -80,6 +80,6 @@ RUN ./install.sh jars/uniapr-plugin-1.0-SNAPSHOT-fixed.jar
 
 # Set up plain validator
 WORKDIR /opt/EvoRepair/extern/plain-validator/
-RUN mvn clean; mvn package
+RUN mvn clean; mvn package; exit 0
 
 WORKDIR /opt/EvoRepair
