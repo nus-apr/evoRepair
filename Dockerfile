@@ -66,7 +66,7 @@ RUN evorepair --help
 
 # Build ARJA
 WORKDIR /opt/EvoRepair/extern/arja
-RUN mvn clean package
+RUN mvn clean package && exit 0
 WORKDIR /opt/EvoRepair/extern/arja/external
 RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
 
