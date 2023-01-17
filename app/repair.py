@@ -41,8 +41,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
              ):
     for x in dir_src, dir_bin, dir_test_bin, dir_deps:
-        assert os.path.isabs(x), x
-        assert utilities.is_nonempty_dir(x), x
+        if x:
+            assert os.path.isabs(x), x
+            assert utilities.is_nonempty_dir(x), x
     assert os.path.isabs(dir_patches), dir_patches
     assert os.path.isdir(dir_patches), dir_patches
     assert os.path.isabs(additional_tests_info_path), additional_tests_info_path
@@ -111,9 +112,11 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             f.write("\n".join(
                 [f"{i_test.indexed_suite.suite.junit_class}#{i_test.method_name}" for i_test in indexed_tests]))
 
+    if dependences:
+        repair_command += f' -Ddependences "{dependences}" '
     repair_command += (
                     f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
-                    f' -DbinTestDir "{str(dir_test_bin)}" -Ddependences "{dependences}"'
+                    f' -DbinTestDir "{str(dir_test_bin)}"'
                     f' -DpatchOutputRoot "{str(dir_patches)}"'
                     f' -DdiffFormat true -DmaxGenerations {max_generations}'
                     f' -DexternalProjRoot {str(dir_arja)}/external'

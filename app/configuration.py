@@ -132,7 +132,10 @@ class Configurations:
         values.dir_info["source"] = Path(work_dir, self.__runtime_config_values["src-dir"])
         values.dir_info["classes"] = Path(work_dir, self.__runtime_config_values["classes-dir"])
         values.dir_info["tests"] = Path(work_dir, self.__runtime_config_values["test-dir"])
-        values.dir_info["deps"] = Path(work_dir, self.__runtime_config_values["deps-dir"])
+        if self.__runtime_config_values["deps-dir"]:
+            values.dir_info["deps"] = Path(work_dir, self.__runtime_config_values["deps-dir"])
+        else:
+            values.dir_info["deps"] = None
         values.dir_info["patches"] = Path(values.dir_output, "patches")
         values.dir_info["gen-test"] = Path(values.dir_output, "gen-test")
 

@@ -205,9 +205,10 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
                      , *suites_runtime_deps
                      ]
 
-        for entry in os.scandir(values.dir_info["deps"]):
-            assert entry.name.endswith(".jar"), f"the dependency {entry.path} is not jar file"
-            classpath.append(entry.path)
+        if values.dir_info["deps"]:
+            for entry in os.scandir(values.dir_info["deps"]):
+                assert entry.name.endswith(".jar"), f"the dependency {entry.path} is not jar file"
+                classpath.append(entry.path)
 
         cp_str = ":".join((str(x) for x in classpath))
 
