@@ -40,13 +40,20 @@ class Patch:
         if patch_executable is None:
             raise RuntimeError('"patch" utility not found')
 
-        patch_command = f"{patch_executable} -p{self.strip} < {self.diff_file}"
-
+        patch_command = f"{patch_executable} -p{self.strip} --binary < {self.diff_file}"
         patched_dir_src = Path(tmp_dir, os.path.relpath(values.dir_info["source"], start=dir_project))
 
         emitter.command(patch_command)
         process = subprocess.run(patch_command, shell=True, stdout=DEVNULL, stderr=PIPE,
                                  cwd=patched_dir_src)
+        if process.returncode != 0:
+            # transform encoding to dos from unix
+            transform_command = f"unix2dos {self.diff_file}"
+            utilities.execute_command(transform_command)
+            emitter.command(patch_command)
+            process = subprocess.run(patch_command, shell=True, stdout=DEVNULL, stderr=PIPE,
+                                     cwd=patched_dir_src)
+
         if process.returncode != 0:
             utilities.error_exit(f"executing `{patch_command}` in {patched_dir_src} failed",
                                  process.stderr.decode("utf-8"),

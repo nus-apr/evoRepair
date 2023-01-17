@@ -64,6 +64,9 @@ WORKDIR /opt/EvoRepair
 RUN ln -s /opt/EvoRepair/bin/evorepair /usr/bin/evorepair
 RUN evorepair --help
 
+# install utility to transfrom dos to unix encodings and vice-versa
+RUN apt-get install -y --no-install-recommends dos2unix
+
 # Build ARJA
 WORKDIR /opt/EvoRepair/extern/arja
 RUN mvn clean package && exit 0
