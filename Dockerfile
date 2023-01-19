@@ -69,7 +69,7 @@ RUN apt-get install -y --no-install-recommends dos2unix
 
 # Build ARJA
 WORKDIR /opt/EvoRepair/extern/arja
-RUN mvn clean package && exit 0
+RUN mvn clean package; exit 0
 WORKDIR /opt/EvoRepair/extern/arja/external
 RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
 
