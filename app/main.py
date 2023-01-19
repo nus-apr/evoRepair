@@ -189,11 +189,11 @@ def run(arg_list):
         values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
-        dry_run_repair = False
+        dry_run_repair = values.dry_run_repair
         num_patches_wanted = i_patch_population_size - len(perfect_i_patches)
         patch_gen_timeout_in_secs = values.patch_gen_timeout
 
-        dry_run_test_gen = False
+        dry_run_test_gen = values.dry_run_test_gen
         test_gen_timeout_per_class_in_secs = values.test_gen_timeout
 
         compile_patches = True
@@ -351,6 +351,18 @@ def parse_args():
     optional.add_argument('--num-iterations', help='number of co-evolution iterations to run',
                           type=int,
                           default=0)
+    optional.add_argument('--dry-run-test', help='enable dry run for test',
+                          action='store_true',
+                          default=False)
+    optional.add_argument('--dry-run-patch', help='enable dry run for test',
+                          action='store_true',
+                          default=False)
+    optional.add_argument('--dir-patch', help='absolute path for directory with generated patches',
+                          type=Path,
+                          default=None)
+    optional.add_argument('--dir-test', help='absolute path for directory with generated tests',
+                          type=Path,
+                          default=None)
     args = parser.parse_args()
     return args
 
