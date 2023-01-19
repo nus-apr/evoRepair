@@ -34,6 +34,8 @@ class Configurations:
         self.__runtime_config_values["use-hotswap"] = arg_list.use_hotswap
         self.__runtime_config_values["use-arja"] = arg_list.arja
         self.__runtime_config_values["mutate-operators"] = arg_list.mutate_operators
+        self.__runtime_config_values["mutate-variables"] = arg_list.mutate_variables
+        self.__runtime_config_values["mutate-methods"] = arg_list.mutate_methods
         self.__runtime_config_values["init-ratio-perfect"] = arg_list.init_ratio_perfect
         self.__runtime_config_values["init-ratio-fame"] = arg_list.init_ratio_fame
         self.__runtime_config_values["num-perfect-patches"] = arg_list.num_perfect_patches
@@ -88,6 +90,8 @@ class Configurations:
         emitter.configuration("hotswap", values.use_hotswap)
         emitter.configuration("use arja", values.use_arja)
         emitter.configuration("mutate operators", values.mutate_operators)
+        emitter.configuration("mutate variables", values.mutate_variables)
+        emitter.configuration("mutate methods", values.mutate_methods)
         emitter.configuration("ratio of perfect patches", values.init_ratio_perfect)
         emitter.configuration("ratio of user-tests-adequate patches", values.init_ratio_fame)
         emitter.configuration("desired number of perfect patches", values.num_perfect_patches)
@@ -119,6 +123,8 @@ class Configurations:
         values.use_hotswap = self.__runtime_config_values["use-hotswap"]
         values.use_arja = self.__runtime_config_values["use-arja"]
         values.mutate_operators = self.__runtime_config_values["mutate-operators"]
+        values.mutate_variables = self.__runtime_config_values["mutate-variables"]
+        values.mutate_methods = self.__runtime_config_values["mutate-methods"]
         values.init_ratio_perfect = self.__runtime_config_values["init-ratio-perfect"]
         values.init_ratio_fame = self.__runtime_config_values["init-ratio-fame"]
         values.num_perfect_patches = self.__runtime_config_values["num-perfect-patches"]
