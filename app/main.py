@@ -197,6 +197,8 @@ def run(arg_list):
         mutate_variables = values.mutate_variables
         mutate_methods = values.mutate_methods
 
+        use_arja = values.use_arja
+
         dry_run_test_gen = values.dry_run_test_gen
         test_gen_timeout_per_class_in_secs = values.test_gen_timeout
 
@@ -246,7 +248,9 @@ def run(arg_list):
             fame_i_patches=fame_i_patches, init_ratio_fame=init_ratio_fame,
             fame_summary_path=fame_summary_path,
 
-            num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair
+            num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair,
+
+            use_arja=use_arja
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]

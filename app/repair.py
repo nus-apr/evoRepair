@@ -40,6 +40,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
              fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
+             use_arja=False
              ):
     for x in dir_src, dir_bin, dir_test_bin, dir_deps:
         if x:
@@ -83,7 +84,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     dir_arja = Path(values._dir_root, "extern", "arja").resolve()
     assert os.path.isdir(dir_arja), dir_arja
 
-    if values.use_arja:
+    if use_arja:
         arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
         assert os.path.isfile(arja_jar), arja_jar
 
