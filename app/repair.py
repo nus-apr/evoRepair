@@ -98,6 +98,34 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
         repair_command = f'{java_executable} -cp {str(evosuite_client_jar)} org.evosuite.patch.RepairMain'
 
+        # extensions on top of Arja
+        repair_command += f' -DmutateOperators {"true" if mutate_operators else "false"}'
+
+        if dir_fames is not None:
+            repair_command += f' -DfameOutputRoot {str(dir_fames)}'
+
+        if perfect_i_patches is not None:
+            summaries = [i_patch.patch.read_summary_file() for i_patch in perfect_i_patches]
+
+            if not dry_run:
+                with open(perfect_summary_path, 'w') as f:
+                    f.write("\n".join(summaries))
+
+            repair_command += (f' -DperfectPath {str(perfect_summary_path)}'
+                               f' -DinitRatioOfPerfect {init_ratio_perfect}'
+                               )
+
+        if fame_i_patches is not None:
+            summaries = [i_patch.patch.read_summary_file() for i_patch in fame_i_patches]
+
+            if not dry_run:
+                with open(fame_summary_path, 'w') as f:
+                    f.write("\n".join(summaries))
+
+            repair_command += (f' -DhallOfFameInPath {str(fame_summary_path)}'
+                               f' -DinitRatioOfFame {init_ratio_fame}'
+                               )
+
     arja_default_population_size = 40
     max_generations = 2000000  # use a large one to keep ARJA running forever
     # there is `populationSize * maxGenerations` as an `int` in ARJA; do not overflow
@@ -127,8 +155,6 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f' -DuseD4JInstr false'
                     )
 
-    repair_command += f' -DmutateOperators {"true" if mutate_operators else "false"}'
-
     if mutate_variables and mutate_methods:
         repair_command += f' -DingredientScreenerName VMTypeMatch'
     elif mutate_variables:
@@ -137,31 +163,6 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         repair_command += f' -DingredientScreenerName MethodTypeMatch'
     else:
         repair_command += f' -DingredientScreenerName Direct'
-
-    if dir_fames is not None:
-        repair_command += f' -DfameOutputRoot {str(dir_fames)}'
-
-    if perfect_i_patches is not None:
-        summaries = [i_patch.patch.read_summary_file() for i_patch in perfect_i_patches]
-
-        if not dry_run:
-            with open(perfect_summary_path, 'w') as f:
-                f.write("\n".join(summaries))
-
-        repair_command += (f' -DperfectPath {str(perfect_summary_path)}'
-                           f' -DinitRatioOfPerfect {init_ratio_perfect}'
-                           )
-
-    if fame_i_patches is not None:
-        summaries = [i_patch.patch.read_summary_file() for i_patch in fame_i_patches]
-
-        if not dry_run:
-            with open(fame_summary_path, 'w') as f:
-                f.write("\n".join(summaries))
-
-        repair_command += (f' -DhallOfFameInPath {str(fame_summary_path)}'
-                           f' -DinitRatioOfFame {init_ratio_fame}'
-                           )
 
     # Output directory of ARJA (`patchOutputRoot`) looks like:
     #
@@ -287,7 +288,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     patches = read_arja_output_root(dir_patches)
 
-    if dir_fames is not None:
+    if (dir_fames is not None) and (not use_arja):
         hall_of_fame_patches = read_arja_output_root(dir_fames)
     else:
         hall_of_fame_patches = []
