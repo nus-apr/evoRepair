@@ -192,6 +192,7 @@ def run(arg_list):
         dry_run_repair = values.dry_run_repair
         num_patches_wanted = i_patch_population_size - len(perfect_i_patches)
         patch_gen_timeout_in_secs = values.patch_gen_timeout
+        mutate_operators = values.mutate_operators
 
         dry_run_test_gen = values.dry_run_test_gen
         test_gen_timeout_per_class_in_secs = values.test_gen_timeout
@@ -232,6 +233,8 @@ def run(arg_list):
             values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
             all_i_tests, additional_tests_info_path,
+            mutate_operators=mutate_operators,
+
             dir_fames=dir_fames,
 
             perfect_i_patches=perfect_i_patches, init_ratio_perfect=init_ratio_perfect,
@@ -327,6 +330,9 @@ def parse_args():
                           action='store_true',
                           default=False)
     optional.add_argument('--arja', help='use ARJA for patch generation instead',
+                          action='store_true',
+                          default=False)
+    optional.add_argument('--mutate-operators', help='try mutating operators when doing repair',
                           action='store_true',
                           default=False)
     optional.add_argument('--init-ratio-perfect', help='ratio of perfect patches in initial patch population',

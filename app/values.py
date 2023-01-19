@@ -27,6 +27,7 @@ silence_emitter = False
 arg_parsed = False
 use_hotswap = False
 use_arja = False
+mutate_operators = False
 init_ratio_perfect = 0
 init_ratio_fame = 0
 num_perfect_patches = 10

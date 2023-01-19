@@ -35,6 +35,7 @@ Each patch objects has the following
 
 def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              indexed_tests, additional_tests_info_path,
+             mutate_operators=False,
              dir_fames=None,
              perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
              fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
@@ -124,6 +125,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f' -DwaitTime 30000'
                     f' -DuseD4JInstr false'
                     )
+
+    repair_command += f' -DmutateOperators {"true" if mutate_operators else "false"}'
 
     if dir_fames is not None:
         repair_command += f' -DfameOutputRoot {str(dir_fames)}'
