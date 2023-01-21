@@ -34,7 +34,7 @@ def run_uniapr(work_dir, patch_bin_dir, changed_classes, execute_tests):
     evosuite_runtime_jar = Path(values._dir_root, "extern", "evosuite", "standalone_runtime",
                                 "target", f"evosuite-standalone-runtime-{read_evosuite_version()}.jar")
     dependency.append(symlink_jar_to_repo(evosuite_runtime_jar, deps_repo_dir))
-    junit_jar = Path(values._dir_root, "extern", "arja", "external", "lib", "junit-4.11.jar")
+    junit_jar = Path(values.file_junit_jar)
     dependency.append(symlink_jar_to_repo(junit_jar, deps_repo_dir))
 
     pom = make_uniapr_pom(dependency, deps_repo_dir.as_uri())

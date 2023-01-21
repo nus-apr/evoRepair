@@ -95,7 +95,7 @@ async def main():
         evosuite_runtime_jar = Path(dir_evosuite, "standalone_runtime", "target",
                                     f"evosuite-standalone-runtime-{read_evosuite_version()}.jar")
         assert os.path.isfile(evosuite_runtime_jar), evosuite_runtime_jar
-        junit_jar = Path(values._dir_root, "extern", "arja", "external", "lib", "junit-4.11.jar")
+        junit_jar = Path(values.file_junit_jar)
         assert os.path.isfile(junit_jar), junit_jar
 
         compile_deps = [evosuite_jar]

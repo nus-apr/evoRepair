@@ -38,6 +38,7 @@ test_gen_timeout = 60
 num_iterations = 0
 dry_run_repair = False
 dry_run_test_gen = False
+junit_version = "4.12"
 
 # ------------------- Directories --------------------
 _dir_root = "/".join(os.path.realpath(__file__).split("/")[:-2])
@@ -59,6 +60,8 @@ file_log_build = dir_log_base + "/log-build"
 file_log_crash = dir_log_base + "/log-crash"
 file_log_cmd = dir_log_base + "/log-command"
 file_patch_set = ""
+file_junit_jar = "/".join([_dir_root, "extern", "arja", "external", "lib", f"junit-{junit_version}.jar"])
+
 
 # ------------------- Global Values --------------------
 tool_name = "EvoRepair"
