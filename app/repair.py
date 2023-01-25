@@ -13,6 +13,7 @@ import shutil
 import re
 import subprocess
 from subprocess import PIPE, DEVNULL
+import math
 
 """
 This is the function to implement the interface with EvoRepair and ARJA(APR Tool)
@@ -88,7 +89,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
         assert os.path.isfile(arja_jar), arja_jar
 
-        repair_command = f'{java_executable} -cp {str(arja_jar)}  us.msu.cse.repair.Main Arja'
+        repair_command = f'{java_executable} -cp {str(arja_jar)}  us.msu.cse.repair.Main ArjaE'
     else:
         dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
         assert os.path.isdir(dir_evosuite), dir_evosuite
@@ -96,10 +97,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0-jar-with-dependencies.jar")
         assert os.path.isfile(evosuite_client_jar), evosuite_client_jar
 
-        repair_command = f'{java_executable} -cp {str(evosuite_client_jar)} org.evosuite.patch.RepairMain'
+        repair_command = f'{java_executable} -cp {str(evosuite_client_jar)} org.evosuite.patch.ERepairMain'
 
         # extensions on top of Arja
-        repair_command += f' -DmutateOperators {"true" if mutate_operators else "false"}'
+        # repair_command += f' -DmutateOperators {"true" if mutate_operators else "false"}'
 
         if dir_fames is not None:
             repair_command += f' -DfameOutputRoot {str(dir_fames)}'
@@ -155,14 +156,11 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f' -DuseD4JInstr false'
                     )
 
-    if mutate_variables and mutate_methods:
-        repair_command += f' -DingredientScreenerName VMTypeMatch'
-    elif mutate_variables:
-        repair_command += f' -DingredientScreenerName VarTypeMatch'
-    elif mutate_methods:
-        repair_command += f' -DingredientScreenerName MethodTypeMatch'
-    else:
-        repair_command += f' -DingredientScreenerName Direct'
+    # -DmaxTime is in minutes; set maxTime to be double timeout_in_seconds to be safe
+    max_time = math.ceil(timeout_in_seconds / 60 * 2)
+    # maxTime in millisecond is an int in Arja
+    assert max_time * 60 * 1000 <= 0x7fffffff
+    repair_command += f' -DmaxTime {max_time}'
 
     # Output directory of ARJA (`patchOutputRoot`) looks like:
     #
