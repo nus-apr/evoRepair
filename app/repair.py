@@ -38,7 +38,8 @@ Each patch objects has the following
 
 
 def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
-             indexed_tests, additional_tests_info_path,
+             basic_i_tests, test_names_path,
+             additional_i_tests, additional_tests_info_path,
              mutate_operators=False, mutate_variables=False, mutate_methods=False,
              dir_fames=None,
              perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
@@ -52,16 +53,20 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             assert utilities.is_nonempty_dir(x), x
     assert os.path.isabs(dir_patches), dir_patches
     assert os.path.isdir(dir_patches), dir_patches
+    assert os.path.isabs(test_names_path), test_names_path
     assert os.path.isabs(additional_tests_info_path), additional_tests_info_path
     if not dry_run:
         utilities.check_is_empty_dir(dir_patches)
+        assert Path(dir_patches) not in Path(test_names_path).parents
         assert Path(dir_patches) not in Path(additional_tests_info_path).parents
 
         if dir_fames is not None:
             utilities.check_is_empty_dir(dir_fames)
 
         assert not os.path.exists(additional_tests_info_path), additional_tests_info_path
-    indexed_suites = set([it.indexed_suite for it in indexed_tests])
+    indexed_suites = set()
+    indexed_suites.update([it.indexed_suite for it in basic_i_tests])
+    indexed_suites.update([it.indexed_suite for it in additional_i_tests])
     for i_suite in indexed_suites:
         assert i_suite in indexed_suite_to_bin_dir, f"{str(i_suite)} has not been compiled"
     for i_patches, ratio, summary_path in ((perfect_i_patches, init_ratio_perfect, perfect_summary_path),
@@ -142,9 +147,12 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     dependences = ":".join([str(dir_deps), *suites_runtime_deps])
 
     if not dry_run:
+        with open(test_names_path, 'w') as f:
+            f.write("\n".join(
+                [f"{i_test.indexed_suite.suite.junit_class}#{i_test.method_name}" for i_test in basic_i_tests]))
         with open(additional_tests_info_path, 'w') as f:
             f.write("\n".join(
-                [f"{i_test.indexed_suite.suite.junit_class}#{i_test.method_name}" for i_test in indexed_tests]))
+                [f"{i_test.indexed_suite.suite.junit_class}#{i_test.method_name}" for i_test in additional_i_tests]))
 
     if dependences:
         repair_command += f' -Ddependences "{dependences}" '
@@ -154,6 +162,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f' -DpatchOutputRoot "{str(dir_patches)}"'
                     f' -DdiffFormat true -DmaxGenerations {max_generations}'
                     f' -DexternalProjRoot {str(dir_arja)}/external'
+                    f' -DtestNamesPath {str(test_names_path)}'
                     f' -DadditionalTestsInfoPath {str(additional_tests_info_path)}'
                     f' -DwaitTime 30000'
                     f' -DuseD4JInstr false'

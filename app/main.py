@@ -172,7 +172,7 @@ def run(arg_list):
 
     perfect_i_patches = set()
     fame_i_patches = set()
-    all_i_tests = set()
+    generated_i_tests = set()
     kill_matrix = {}
     user_i_tests = None
     passing_user_i_tests = None
@@ -257,6 +257,7 @@ def run(arg_list):
         dir_fames = Path(values.dir_output, "fame-patches", f"gen{values.iteration_no}")
         dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
         dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
+        test_names_path = Path(values.dir_info["patches"], f"basic_tests_gen{values.iteration_no}.txt")
         additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
         perfect_summary_path = Path(values.dir_info["patches"], f"perfect_summary_gen{values.iteration_no}.txt")
         fame_summary_path = Path(values.dir_info["patches"], f"fame_summary_gen{values.iteration_no}.txt")
@@ -281,10 +282,22 @@ def run(arg_list):
         init_ratio_perfect = values.init_ratio_perfect
         init_ratio_fame = values.init_ratio_fame
 
+        if values.iteration_no < 5:
+            basic_i_tests = failing_user_i_tests
+
+            num_passing_user_tests = len(passing_user_i_tests) * values.iteration_no // 5
+            additional_i_tests = passing_user_i_tests[:num_passing_user_tests]
+            remaining_passing_user_i_tests = passing_user_i_tests[num_passing_user_tests:]
+        else:
+            basic_i_tests = [*failing_user_i_tests, *passing_user_i_tests]
+            additional_i_tests = generated_i_tests
+            remaining_passing_user_i_tests = []
+
         patches, fame_patches = repair.generate(
             values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
-            all_i_tests, additional_tests_info_path,
+            basic_i_tests, test_names_path,
+            additional_i_tests, additional_tests_info_path,
             mutate_operators=mutate_operators, mutate_variables=mutate_variables, mutate_methods=mutate_methods,
 
             dir_fames=dir_fames,
@@ -302,13 +315,17 @@ def run(arg_list):
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
 
-        perfect_i_patches.update(indexed_patches)
-        for i_patch in indexed_patches:
-            save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
-            assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
-            save_path_for_i_patch[i_patch] = save_path
-            os.symlink(i_patch.patch.diff_file, save_path)
-        fame_i_patches.update(indexed_fame_patches)
+        if remaining_passing_user_i_tests:
+            pass
+        else:
+            perfect_i_patches.update(indexed_patches)
+            for i_patch in indexed_patches:
+                save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
+                assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
+                save_path_for_i_patch[i_patch] = save_path
+                os.symlink(i_patch.patch.diff_file, save_path)
+            fame_i_patches.update(indexed_fame_patches)
+
 
         timer.pause_phase(phase)
         emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
@@ -321,7 +338,7 @@ def run(arg_list):
         tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
                                                 target_patches_file=target_patches_file,
 
-                                                seed_i_tests=all_i_tests, seeds_file=seed_tests_file,
+                                                seed_i_tests=generated_i_tests, seeds_file=seed_tests_file,
                                                 kill_matrix=kill_matrix,
 
                                                 junit_suffix=f"_gen{values.iteration_no}_ESTest",
@@ -329,7 +346,7 @@ def run(arg_list):
                                                 dry_run=dry_run_test_gen)
         indexed_tests = [IndexedTest(values.iteration_no, test) for test in tests]
 
-        all_i_tests.update(indexed_tests)
+        generated_i_tests.update(indexed_tests)
 
         timer.pause_phase(phase)
         emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
