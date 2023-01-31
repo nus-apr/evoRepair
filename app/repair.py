@@ -14,6 +14,9 @@ import re
 import subprocess
 from subprocess import PIPE, DEVNULL
 import math
+import socket
+import asyncio
+import json
 
 """
 This is the function to implement the interface with EvoRepair and ARJA(APR Tool)
@@ -292,3 +295,56 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         hall_of_fame_patches = []
 
     return patches, hall_of_fame_patches
+
+
+async def scan_for_tests(dir_bin, dir_test_bin, dir_deps):
+    """
+    returned dict looks like:
+    {"foo.bar.Baz1": ["method01", "method02"], "foo.bar.Baz2": ["method02", "method03"]}
+    """
+    assert os.path.isabs(dir_bin), dir_bin
+    assert os.path.isabs(dir_test_bin), dir_test_bin
+    assert os.path.isabs(dir_deps), dir_deps
+    assert utilities.is_nonempty_dir(dir_bin), dir_bin
+    assert utilities.is_nonempty_dir(dir_test_bin), dir_test_bin
+    assert os.path.isdir(dir_deps), dir_deps
+    for entry in os.scandir(dir_deps):
+        assert entry.name.endswith(".jar"), entry.path
+
+    result = []
+
+    async def suites_scanner_connected(reader, _):
+        result.append((await reader.read()).decode("utf-8"))
+
+    java_executable = shutil.which("java")
+    if java_executable is None:
+        raise RuntimeError("Java executable not found")
+
+    scanner_jar = Path(values._dir_root, "extern", "test-suites-scanner", "target",
+                       "test-suites-scanner-1.0-SNAPSHOT-jar-with-dependencies.jar")
+    assert scanner_jar.is_file(), str(scanner_jar)
+
+    server_socket = socket.socket()
+    server_socket.bind(("localhost", 0))
+    _, port = server_socket.getsockname()
+    server = await asyncio.start_server(suites_scanner_connected, sock=server_socket)
+
+    dependences = [entry.path for entry in os.scandir(dir_deps)]
+
+    command = (f"{java_executable} -cp {scanner_jar} evorepair.TestSuitesScanner"
+               f" {port} {str(dir_bin)} {str(dir_test_bin)} {':'.join(dependences)}"
+               )
+
+    async with server:
+        await server.start_serving()
+
+        emitter.command(command)
+
+        process = await asyncio.create_subprocess_shell(command, stdout=DEVNULL, stderr=PIPE)
+        return_code = await process.wait()
+        if return_code != 0:
+            stderr = await process.stderr.read()
+            utilities.error_exit("TestSuitesScanner did not exit normally", stderr.decode("utf-8"),
+                                 f"exit code is {return_code}")
+
+    return json.loads(result[0])

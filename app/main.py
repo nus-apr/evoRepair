@@ -13,6 +13,9 @@ from app.test_suite import IndexedTest
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import OrderedDict, Counter
+import asyncio
+from app.test_suite import TestSuite, IndexedSuite, Test, IndexedTest
+from app.patch import Patch, IndexedPatch
 
 
 class Interval:
@@ -171,6 +174,9 @@ def run(arg_list):
     fame_i_patches = set()
     all_i_tests = set()
     kill_matrix = {}
+    user_i_tests = None
+    passing_user_i_tests = None
+    failing_user_i_tests = None
 
     dir_perfect_patches = Path(values.dir_output, "perfect-patches")
     os.makedirs(dir_perfect_patches, exist_ok=True)
@@ -178,6 +184,47 @@ def run(arg_list):
     save_path_for_i_patch = {}
 
     assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
+
+    dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
+    dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
+
+    # Scan user-provided tests
+    dir_bin = values.dir_info["classes"]
+    dir_tests_bin = values.dir_info["tests"]
+    dir_deps = values.dir_info["deps"]
+    tests_in_class = asyncio.run(repair.scan_for_tests(dir_bin, dir_tests_bin, dir_deps))
+
+    dir_test_src = "N/A"
+    dump_file = None
+    compile_deps = [entry.path for entry in os.scandir(dir_deps)]
+    runtime_deps = compile_deps
+    for classname, method_names in tests_in_class.items():
+        suite = TestSuite(dir_test_src, classname, dump_file, method_names, compile_deps, runtime_deps, key=classname)
+        tests = [Test(suite, method_name) for method_name in method_names]
+        user_i_tests = set([IndexedTest(values.iteration_no, test) for test in tests])
+
+        # these are already compiled
+        i_suite = IndexedSuite(values.iteration_no, suite)
+        validator.indexed_suite_to_bin_dir[i_suite] = dir_tests_bin
+
+    # Create an empty patch
+    dir_empty_patch = Path(dir_patches, "empty_patch")
+    os.makedirs(dir_empty_patch, exist_ok=True)
+
+    empty_diff_file = Path(dir_empty_patch, "diff")
+    empty_summary_file = Path(dir_empty_patch, "summary")
+    os.mknod(empty_diff_file)
+    empty_patch = Patch(empty_diff_file, strip=0, changed_files=[], changed_classes=[], key="empty",
+                        summary_file=empty_summary_file)
+    empty_i_patch = IndexedPatch(values.iteration_no, empty_patch)
+
+    validator.indexed_patch_to_bin_dir[empty_i_patch] = dir_bin
+
+    # Validate PUT on user-provided test cases
+    os.makedirs(dir_validation, exist_ok=True)
+    user_tests_results = validator.validate([empty_i_patch], user_i_tests, work_dir=dir_validation,
+                                            compile_patches=False, compile_tests=False, execute_tests=True)
+    _, passing_user_i_tests, failing_user_i_tests = user_tests_results[0]
 
     while True:
         if values.num_iterations > 0:
