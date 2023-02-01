@@ -197,8 +197,6 @@ def run(arg_list):
     phase = "Bootstrap"
     timer.resume_phase(phase)
 
-    emitter.sub_title("Iteration #{}".format(values.iteration_no))
-
     dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
     dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
 
@@ -222,7 +220,7 @@ def run(arg_list):
         validator.indexed_suite_to_bin_dir[i_suite] = dir_tests_bin
 
     # Create an empty patch
-    dir_empty_patch = Path(dir_patches, "empty_patch")
+    dir_empty_patch = Path(values.dir_output, "empty_patch")
     os.makedirs(dir_empty_patch, exist_ok=True)
 
     empty_diff_file = Path(dir_empty_patch, "diff")
@@ -257,7 +255,6 @@ def run(arg_list):
         elif not utilities.have_budget(values.time_duration_total):
             break
 
-        values.iteration_no = values.iteration_no + 1
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
         dry_run_repair = values.dry_run_repair
@@ -273,8 +270,8 @@ def run(arg_list):
         dry_run_test_gen = values.dry_run_test_gen
         test_gen_timeout_per_class_in_secs = values.test_gen_timeout
 
-        compile_patches = True
-        compile_tests = True
+        compile_patches = True if values.iteration_no > 0 else False
+        compile_tests = True if values.iteration_no > 0 else False
         execute_tests = True
 
         dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
@@ -298,7 +295,7 @@ def run(arg_list):
                 utilities.check_is_empty_dir(directory)
 
         phase = "Patch Generation"
-        if values.iteration_no == 1:
+        if values.iteration_no == 0:
             timer.start_phase(phase)
         else:
             timer.resume_phase(phase)
@@ -344,21 +341,25 @@ def run(arg_list):
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
 
-        fame_i_patches.update(indexed_fame_patches)
+        if values.iteration_no == 0:
+            fame_i_patches.update(indexed_patches)
+            assert not indexed_fame_patches
+        else:
+            perfect_i_patches.update(indexed_patches)
+            fame_i_patches.update(indexed_fame_patches)
 
-        perfect_i_patches.update(indexed_patches)
-        for i_patch in indexed_patches:
-            save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
-            assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
-            save_path_for_i_patch[i_patch] = save_path
-            os.symlink(i_patch.patch.diff_file, save_path)
+            for i_patch in indexed_patches:
+                save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
+                assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
+                save_path_for_i_patch[i_patch] = save_path
+                os.symlink(i_patch.patch.diff_file, save_path)
 
-        if not remaining_passing_user_i_tests:
-            for i_patch, i_tests in zip(indexed_fame_patches, failed_i_tests):
-                if not i_tests & user_i_tests:
-                    plausible_i_patches.append(i_patch)
-                    save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
-                    os.symlink(i_patch.patch.diff_file, save_path)
+            if not remaining_passing_user_i_tests:
+                for i_patch, i_tests in zip(indexed_fame_patches, failed_i_tests):
+                    if not i_tests & user_i_tests:
+                        plausible_i_patches.append(i_patch)
+                        save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
+                        os.symlink(i_patch.patch.diff_file, save_path)
 
 
         timer.pause_phase(phase)
@@ -366,6 +367,8 @@ def run(arg_list):
 
         if remaining_passing_user_i_tests:
             emitter.information(f"Skipping test generation and validation because there are remaining user tests")
+
+            values.iteration_no = values.iteration_no + 1
             continue
 
         phase = "Test Generation"
@@ -423,6 +426,8 @@ def run(arg_list):
 
         timer.pause_phase(phase)
         emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+
+        values.iteration_no = values.iteration_no + 1
 
 
 def parse_args():
