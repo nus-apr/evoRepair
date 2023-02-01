@@ -85,4 +85,12 @@ RUN ./install.sh jars/uniapr-plugin-1.0-SNAPSHOT-fixed.jar
 WORKDIR /opt/EvoRepair/extern/plain-validator/
 RUN mvn clean; mvn package; exit 0
 
+# Set up test suites scanner
+WORKDIR /opt/EvoRepair/extern/test-suites-scanner
+RUN mvn clean; mvn package; exit 0
+
+# Set up oracle parser
+WORKDIR /opt/EvoRepair/extern/oracle-parser
+RUN mvn clean; mvn package; exit 0
+
 WORKDIR /opt/EvoRepair
