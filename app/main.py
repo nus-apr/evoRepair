@@ -174,7 +174,7 @@ def run(arg_list):
     fame_i_patches = set()
     all_i_tests = set()
     kill_matrix = {}
-    user_i_tests = None
+    user_i_tests = set()
     passing_user_i_tests = None
     failing_user_i_tests = None
 
@@ -201,7 +201,7 @@ def run(arg_list):
     for classname, method_names in tests_in_class.items():
         suite = TestSuite(dir_test_src, classname, dump_file, method_names, compile_deps, runtime_deps, key=classname)
         tests = [Test(suite, method_name) for method_name in method_names]
-        user_i_tests = set([IndexedTest(values.iteration_no, test) for test in tests])
+        user_i_tests.update([IndexedTest(values.iteration_no, test) for test in tests])
 
         # these are already compiled
         i_suite = IndexedSuite(values.iteration_no, suite)
