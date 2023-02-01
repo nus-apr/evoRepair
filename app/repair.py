@@ -41,7 +41,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              basic_i_tests, test_names_path,
              additional_i_tests, additional_tests_info_path,
              mutate_operators=False, mutate_variables=False, mutate_methods=False,
-             dir_fames=None,
+             num_fames_wanted=0, dir_fames=None,
              perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
              fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
@@ -82,8 +82,15 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     emitter.sub_sub_title("Generating Patches")
 
-    if num_patches_wanted <= 0:
-        emitter.normal(f"\t{num_patches_wanted} patches wanted; patch generation skipped")
+    expecting_fames = dir_fames is not None and not use_arja
+
+    if num_patches_wanted <= 0 and ((not expecting_fames) or num_fames_wanted <= 0):
+        msg = f"\t{num_patches_wanted} plausible patches"
+        if dir_fames is not None:
+            msg += f" and {num_fames_wanted} valid patches"
+        msg += " wanted; patch generation skipped"
+        emitter.normal(msg)
+
         return [], [], {}
 
     java_executable = shutil.which("java")
@@ -197,7 +204,11 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     # patched/ holds patched versions of all changed source files, with the original package structure.
 
     if not dry_run:
-        emitter.normal(f"\trunning repair, waiting for {num_patches_wanted} plausible patches")
+        msg = f"\trunning repair, waiting for {num_patches_wanted} plausible patches"
+        if expecting_fames:
+            msg += f" and {num_fames_wanted} valid patches"
+        emitter.normal("".join(msg))
+
         emitter.normal(f"\toutput directory: {str(dir_patches)}")
 
         emitter.command(repair_command)
@@ -225,16 +236,21 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                 # Arja writes the Patch_{n}.txt files lastly. If these are ready, then other patch files must have also
                 # been written. So only check these.
                 num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
+                num_fames = len([entry for entry in os.scandir(dir_fames) if entry.is_file()])
 
                 if return_code == 0:
                     stopped_early = True
-                    emitter.normal(
-                        f"\trepair terminated normally after {max_generations} generations; got {num_patches} patches")
+
+                    msg = (f"\trepair terminated normally after {max_generations} generations;"
+                           f" got {num_patches} plausible patches")
+                    if expecting_fames:
+                        msg += f" and {num_fames} valid patches"
+                    emitter.normal(msg)
                     break
                 elif return_code is not None:
                     utilities.error_exit("repair did not exit normally",
                                         popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
-                elif num_patches >= num_patches_wanted:
+                elif num_patches >= num_patches_wanted and ((not expecting_fames) or num_fames >= num_fames_wanted):
                     stopped_early = True
                     popen.terminate()
                     try:
@@ -244,7 +260,11 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                         utilities.error_exit(
                             f"repair did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
                             f" repair aborted")
-                    emitter.normal(f"\tTerminated repair because there are enough patches; got {num_patches} patches")
+
+                    msg = f"\tTerminated repair because there are enough patches;  got {num_patches} plausible patches"
+                    if expecting_fames:
+                        msg += f" and {num_fames} valid patches"
+                    emitter.normal(msg)
                     break
             if not stopped_early:
                 popen.terminate()
@@ -256,13 +276,23 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                         f"repair did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
                         f" repair aborted")
                 num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
-                emitter.normal(f"\trepair stopped due to timeout; got {num_patches} patches")
+                num_fames = len([entry for entry in os.scandir(dir_fames) if entry.is_file()])
+
+                msg = f"\trepair stopped due to timeout; got {num_patches} plausible patches"
+                if expecting_fames:
+                    msg += f" and {num_fames} valid patches"
+                emitter.normal(msg)
         finally:
             for symlink in symlinks:
                 os.unlink(symlink)
     else:
         num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
-        emitter.normal(f"\tDry run; will reuse the {num_patches} patches in {dir_patches}")
+        num_fames = len([entry for entry in os.scandir(dir_fames) if entry.is_file()])
+
+        msg = f"\tDry run; will reuse the {num_patches} plausible patches in {str(dir_patches)}"
+        if expecting_fames:
+            msg += f" and {num_fames} valid patches in {str(dir_fames)}"
+        emitter.normal(msg)
 
     strip = len(Path(dir_src).parts)
 
@@ -304,7 +334,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     patches, _ = read_arja_output_root(dir_patches, has_failed_tests=False)
 
-    if (dir_fames is not None) and (not use_arja):
+    if expecting_fames:
         hall_of_fame_patches, failed_test_names = read_arja_output_root(dir_fames, has_failed_tests=True)
 
         i_test_for_test_name = {}

@@ -258,7 +258,15 @@ def run(arg_list):
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
         dry_run_repair = values.dry_run_repair
-        num_patches_wanted = i_patch_population_size - len(perfect_i_patches)
+        if values.iteration_no == 0:
+            num_patches_wanted = values.valid_population_size
+            num_fames_wanted = 0
+        elif values.iteration_no < values.passing_tests_partitions:
+            num_patches_wanted = 0
+            num_fames_wanted = values.valid_population_size
+        else:
+            num_patches_wanted = i_patch_population_size - len(perfect_i_patches)
+            num_fames_wanted = 0
         patch_gen_timeout_in_secs = values.patch_gen_timeout
 
         mutate_operators = values.mutate_operators
@@ -270,8 +278,8 @@ def run(arg_list):
         dry_run_test_gen = values.dry_run_test_gen
         test_gen_timeout_per_class_in_secs = values.test_gen_timeout
 
-        compile_patches = True if values.iteration_no > 0 else False
-        compile_tests = True if values.iteration_no > 0 else False
+        compile_patches = values.iteration_no >= values.passing_tests_partitions
+        compile_tests = compile_patches
         execute_tests = True
 
         dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
@@ -326,7 +334,7 @@ def run(arg_list):
             additional_i_tests, additional_tests_info_path,
             mutate_operators=mutate_operators, mutate_variables=mutate_variables, mutate_methods=mutate_methods,
 
-            dir_fames=dir_fames,
+            num_fames_wanted=num_fames_wanted, dir_fames=dir_fames,
 
             perfect_i_patches=perfect_i_patches, init_ratio_perfect=init_ratio_perfect,
             perfect_summary_path=perfect_summary_path,
@@ -496,6 +504,10 @@ def parse_args():
                           help='number of partitions to divide passing user test cases into',
                           type=int,
                           default=4)
+    optional.add_argument('--valid-population-size',
+                          help='number of valid patches to generate in each initial iterations',
+                          type=int,
+                          default=40)
     args = parser.parse_args()
     return args
 

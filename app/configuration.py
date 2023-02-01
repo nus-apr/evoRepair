@@ -47,6 +47,7 @@ class Configurations:
         self.__runtime_config_values["dir-test"] = arg_list.dir_test
         self.__runtime_config_values["dir-patch"] = arg_list.dir_patch
         self.__runtime_config_values["passing-tests-partitions"] = arg_list.passing_tests_partitions
+        self.__runtime_config_values["valid-population-size"] = arg_list.valid_population_size
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -102,6 +103,8 @@ class Configurations:
         emitter.configuration("dry run for patch generation", values.dry_run_repair)
         emitter.configuration("dry run for test generation", values.dry_run_test_gen)
         emitter.configuration("number of partitions of passing user test cases", values.passing_tests_partitions)
+        emitter.configuration("number of valid patches to generate in each initial iterations",
+                              values.valid_population_size)
 
     def get_value(self, config_name):
         condition = config_name in self.__runtime_config_values and self.__runtime_config_values[config_name]
@@ -136,6 +139,7 @@ class Configurations:
         values.dry_run_test_gen = self.__runtime_config_values["dry-run-test"]
         values.dry_run_repair = self.__runtime_config_values["dry-run-patch"]
         values.passing_tests_partitions = self.__runtime_config_values["passing-tests-partitions"]
+        values.valid_population_size = self.__runtime_config_values["valid-population-size"]
 
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths
