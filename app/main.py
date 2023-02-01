@@ -148,6 +148,9 @@ def run(arg_list):
     bootstrap(arg_list)
     oracle_extractor.extract_oracle_locations()
 
+    if values.num_iterations < values.passing_tests_partitions:
+        utilities.error_exit("num-iterations should be greater than or equal to passing-tests-partitions")
+
     timer.pause_phase(phase)
     phase = "Build"
     timer.start_phase(phase)
@@ -173,18 +176,28 @@ def run(arg_list):
 
     perfect_i_patches = set()
     fame_i_patches = set()
-    all_i_tests = set()
+    generated_i_tests = set()
     kill_matrix = {}
     user_i_tests = set()
     passing_user_i_tests = None
     failing_user_i_tests = None
+    plausible_i_patches = []
 
     dir_perfect_patches = Path(values.dir_output, "perfect-patches")
     os.makedirs(dir_perfect_patches, exist_ok=True)
     utilities.check_is_empty_dir(dir_perfect_patches), str(dir_perfect_patches)
     save_path_for_i_patch = {}
 
+    dir_plausible_patches = Path(values.dir_output, "plausible-patches")
+    os.makedirs(dir_plausible_patches, exist_ok=True)
+    utilities.check_is_empty_dir(dir_plausible_patches), str(dir_plausible_patches)
+
     assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
+
+    phase = "Bootstrap"
+    timer.resume_phase(phase)
+
+    emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
     dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
     dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
@@ -227,6 +240,16 @@ def run(arg_list):
                                             compile_patches=False, compile_tests=False, execute_tests=True)
     _, passing_user_i_tests, failing_user_i_tests = user_tests_results[0]
 
+    emitter.information(f"Found {len(user_i_tests)} user test cases,"
+                   f" of which {len(passing_user_i_tests)} are passing, {len(failing_user_i_tests)} are failing")
+
+    if len(passing_user_i_tests) < values.passing_tests_partitions:
+        emitter.information(f"passing-tests-partitions is changed from {values.passing_tests_partitions}"
+                            f" to {len(passing_user_i_tests)} because there are too few passing user tests")
+        values.passing_tests_partitions = len(passing_user_i_tests)
+
+    timer.pause_phase(phase)
+
     while True:
         if values.num_iterations > 0:
             if values.iteration_no >= values.num_iterations:
@@ -258,6 +281,7 @@ def run(arg_list):
         dir_fames = Path(values.dir_output, "fame-patches", f"gen{values.iteration_no}")
         dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
         dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
+        test_names_path = Path(values.dir_info["patches"], f"basic_tests_gen{values.iteration_no}.txt")
         additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
         perfect_summary_path = Path(values.dir_info["patches"], f"perfect_summary_gen{values.iteration_no}.txt")
         fame_summary_path = Path(values.dir_info["patches"], f"fame_summary_gen{values.iteration_no}.txt")
@@ -282,10 +306,27 @@ def run(arg_list):
         init_ratio_perfect = values.init_ratio_perfect
         init_ratio_fame = values.init_ratio_fame
 
-        patches, fame_patches = repair.generate(
+        basic_i_tests = failing_user_i_tests
+        if values.iteration_no < values.passing_tests_partitions:
+            num_passing_user_tests = len(passing_user_i_tests) * values.iteration_no // values.passing_tests_partitions
+
+            additional_i_tests = passing_user_i_tests[:num_passing_user_tests]
+
+            remaining_passing_user_i_tests = passing_user_i_tests[num_passing_user_tests:]
+
+            emitter.normal(
+                f"Will use {num_passing_user_tests} of {len(passing_user_i_tests)} passing user test cases"
+                " for patch generation")
+        else:
+            additional_i_tests = [*passing_user_i_tests, *generated_i_tests]
+
+            remaining_passing_user_i_tests = []
+
+        patches, fame_patches, failed_i_tests = repair.generate(
             values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
-            all_i_tests, additional_tests_info_path,
+            basic_i_tests, test_names_path,
+            additional_i_tests, additional_tests_info_path,
             mutate_operators=mutate_operators, mutate_variables=mutate_variables, mutate_methods=mutate_methods,
 
             dir_fames=dir_fames,
@@ -303,18 +344,32 @@ def run(arg_list):
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
 
+        fame_i_patches.update(indexed_fame_patches)
+
         perfect_i_patches.update(indexed_patches)
         for i_patch in indexed_patches:
             save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
             assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
             save_path_for_i_patch[i_patch] = save_path
             os.symlink(i_patch.patch.diff_file, save_path)
-        fame_i_patches.update(indexed_fame_patches)
+
+        if not remaining_passing_user_i_tests:
+            for i_patch, i_tests in zip(indexed_fame_patches, failed_i_tests):
+                if not i_tests & user_i_tests:
+                    plausible_i_patches.append(i_patch)
+                    save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
+                    os.symlink(i_patch.patch.diff_file, save_path)
+
 
         timer.pause_phase(phase)
         emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+
+        if remaining_passing_user_i_tests:
+            emitter.information(f"Skipping test generation and validation because there are remaining user tests")
+            continue
+
         phase = "Test Generation"
-        if values.iteration_no == 1:
+        if values.iteration_no == values.passing_tests_partitions:
             timer.start_phase(phase)
         else:
             timer.resume_phase(phase)
@@ -322,7 +377,7 @@ def run(arg_list):
         tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
                                                 target_patches_file=target_patches_file,
 
-                                                seed_i_tests=all_i_tests, seeds_file=seed_tests_file,
+                                                seed_i_tests=generated_i_tests, seeds_file=seed_tests_file,
                                                 kill_matrix=kill_matrix,
 
                                                 junit_suffix=f"_gen{values.iteration_no}_ESTest",
@@ -330,12 +385,12 @@ def run(arg_list):
                                                 dry_run=dry_run_test_gen)
         indexed_tests = [IndexedTest(values.iteration_no, test) for test in tests]
 
-        all_i_tests.update(indexed_tests)
+        generated_i_tests.update(indexed_tests)
 
         timer.pause_phase(phase)
         emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
         phase = "Validation"
-        if values.iteration_no == 1:
+        if values.iteration_no == values.passing_tests_partitions:
             timer.start_phase(phase)
         else:
             timer.resume_phase(phase)
@@ -354,6 +409,8 @@ def run(arg_list):
                 os.remove(save_path_for_i_patch[i_patch])
 
                 fame_i_patches.add(i_patch)
+                save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
+                os.symlink(i_patch.patch.diff_file, save_path)
 
                 for i_test in failing_i_tests:
                     if i_test not in kill_matrix:
@@ -430,6 +487,10 @@ def parse_args():
     optional.add_argument('--dir-test', help='absolute path for directory with generated tests',
                           type=Path,
                           default=None)
+    optional.add_argument('--passing-tests-partitions',
+                          help='number of partitions to divide passing user test cases into',
+                          type=int,
+                          default=4)
     args = parser.parse_args()
     return args
 

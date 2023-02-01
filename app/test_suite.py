@@ -110,3 +110,6 @@ class IndexedTest:
 
     def get_index_str(self):
         return f"{self.method_name}#{self.indexed_suite.get_index_str()}"
+
+    def get_full_test_name(self):
+        return f"{self.indexed_suite.suite.junit_class}#{self.method_name}"
