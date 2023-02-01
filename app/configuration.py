@@ -138,6 +138,7 @@ class Configurations:
         # avoid colons in dir names because they disturb classpaths
         time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
         values.dir_output = Path(values.dir_output_base, f"{subject_id}-{time}")
+        values.file_oracle_locations = Path(values.dir_output, values.filename_oracle_locations)
 
         values.dir_log = "/".join([values.dir_log_base, values.tag_id])
         values.stack_size = self.get_value("stack-size")

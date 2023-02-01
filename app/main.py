@@ -6,7 +6,7 @@ import traceback
 import signal
 import multiprocessing as mp
 import app.utilities
-from app import emitter, logger, values, repair, builder, tester, validator, utilities
+from app import emitter, logger, values, repair, builder, tester, validator, utilities, oracle_extractor
 from app.configuration import  Configurations
 from app.patch import IndexedPatch
 from app.test_suite import IndexedTest
@@ -146,6 +146,7 @@ def run(arg_list):
     timer.start_phase(phase)
 
     bootstrap(arg_list)
+    oracle_extractor.extract_oracle_locations()
 
     timer.pause_phase(phase)
     phase = "Build"

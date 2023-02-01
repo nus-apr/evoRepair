@@ -61,7 +61,8 @@ file_log_crash = dir_log_base + "/log-crash"
 file_log_cmd = dir_log_base + "/log-command"
 file_patch_set = ""
 file_junit_jar = "/".join([_dir_root, "extern", "arja", "external", "lib", f"junit-{junit_version}.jar"])
-
+file_oracle_locations = ""
+filename_oracle_locations = "oracleLocations.json"
 
 # ------------------- Global Values --------------------
 tool_name = "EvoRepair"
