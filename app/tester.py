@@ -155,11 +155,14 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
         evosuite_command += f" -Dsearch_budget={timeout_in_seconds} -Dstopping_condition=MaxTime"
 
     if target_patches_file is not None:
-        evosuite_command += f" -generateMOSuite -evorepair=testgen -Dalgorithm=MOSA"
+        evosuite_command += f" -generateMOSuite -evorepair=testgen"
         evosuite_command += f" -targetPatches {str(target_patches_file)}"
 
     if seeds_file is not None:
         evosuite_command += f" -seeds {str(seeds_file)}"
+
+    if os.path.isfile(values.file_oracle_locations):
+        evosuite_command += f" -oracleLocations {str(values.file_oracle_locations)}"
 
     dir_test_src = Path(dir_output, "evosuite-tests")
 
