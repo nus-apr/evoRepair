@@ -147,6 +147,8 @@ def run(arg_list):
 
     bootstrap(arg_list)
     oracle_extractor.extract_oracle_locations()
+    oracle_locations_file = Path(values.dir_output, "oracleLocations.json")
+    assert os.path.isfile(oracle_locations_file), str(oracle_locations_file)
 
     if values.num_iterations < values.passing_tests_partitions:
         utilities.error_exit("num-iterations should be greater than or equal to passing-tests-partitions")
@@ -332,6 +334,9 @@ def run(arg_list):
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
             basic_i_tests, test_names_path,
             additional_i_tests, additional_tests_info_path,
+
+            oracle_locations_file=oracle_locations_file,
+
             mutate_operators=mutate_operators, mutate_variables=mutate_variables, mutate_methods=mutate_methods,
 
             num_fames_wanted=num_fames_wanted, dir_fames=dir_fames,

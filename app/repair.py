@@ -41,6 +41,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              basic_i_tests, test_names_path,
              additional_i_tests, additional_tests_info_path,
              mutate_operators=False, mutate_variables=False, mutate_methods=False,
+             oracle_locations_file=None,
              num_fames_wanted=0, dir_fames=None,
              perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
              fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
@@ -79,6 +80,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             assert os.path.isabs(summary_path), summary_path
             if not dry_run:
                 assert not os.path.exists(summary_path), summary_path
+    if oracle_locations_file is not None:
+        assert os.path.isabs(oracle_locations_file), str(oracle_locations_file)
+        assert os.path.isfile(oracle_locations_file), str(oracle_locations_file)
 
     emitter.sub_sub_title("Generating Patches")
 
@@ -174,6 +178,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f' -DwaitTime 30000'
                     f' -DuseD4JInstr false'
                     )
+
+    if oracle_locations_file is not None:
+        repair_command += f' -DoracleLocationsFile {str(oracle_locations_file)}'
 
     # -DmaxTime is in minutes; set maxTime to be double timeout_in_seconds to be safe
     max_time = math.ceil(timeout_in_seconds / 60 * 2)
