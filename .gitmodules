@@ -10,3 +10,6 @@
 	path = extern/uniapr
 	url = git@github.com:nus-apr/UniAPR.git
 	branch = master
+[submodule "oracle-parser"]
+	path = oracle-parser
+	url = https://github.com/nus-apr/oracle-parser
