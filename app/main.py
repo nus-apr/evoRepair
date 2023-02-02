@@ -354,25 +354,21 @@ def run(arg_list):
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
 
-        if values.iteration_no == 0:
-            fame_i_patches.update(indexed_patches)
-            assert not indexed_fame_patches
-        else:
-            perfect_i_patches.update(indexed_patches)
-            fame_i_patches.update(indexed_fame_patches)
+        perfect_i_patches.update(indexed_patches)
+        fame_i_patches.update(indexed_fame_patches)
 
-            for i_patch in indexed_patches:
-                save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
-                assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
-                save_path_for_i_patch[i_patch] = save_path
-                os.symlink(i_patch.patch.diff_file, save_path)
+        for i_patch in indexed_patches:
+            save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
+            assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
+            save_path_for_i_patch[i_patch] = save_path
+            os.symlink(i_patch.patch.diff_file, save_path)
 
-            if not remaining_passing_user_i_tests:
-                for i_patch, i_tests in zip(indexed_fame_patches, failed_i_tests):
-                    if not i_tests & user_i_tests:
-                        plausible_i_patches.append(i_patch)
-                        save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
-                        os.symlink(i_patch.patch.diff_file, save_path)
+        if not remaining_passing_user_i_tests:
+            for i_patch, i_tests in zip(indexed_fame_patches, failed_i_tests):
+                if not i_tests & user_i_tests:
+                    plausible_i_patches.append(i_patch)
+                    save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
+                    os.symlink(i_patch.patch.diff_file, save_path)
 
 
         timer.pause_phase(phase)
