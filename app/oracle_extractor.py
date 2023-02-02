@@ -20,7 +20,7 @@ def extract_oracle_locations():
     if java_executable is None:
         raise RuntimeError("Java executable not found")
 
-    oracle_parser_command = f"{java_executable} -jar {str(oracle_parser_jar)} {dir_src} {dir_output} oracleLocations.json"
+    oracle_parser_command = f"{java_executable} -jar {str(oracle_parser_jar)} {str(dir_src)} {str(dir_output)} {values.filename_oracle_locations}"
     emitter.normal(f"searching for oracle locations in {dir_src}")
 
     emitter.command(oracle_parser_command)
