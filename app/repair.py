@@ -374,7 +374,9 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps):
     assert utilities.is_nonempty_dir(dir_bin), dir_bin
     assert utilities.is_nonempty_dir(dir_test_bin), dir_test_bin
     assert os.path.isdir(dir_deps), dir_deps
-    for entry in os.scandir(dir_deps):
+
+    list_deps = [x for x in os.scandir(dir_deps) if ".jar" in x.name]
+    for entry in list_deps:
         assert entry.name.endswith(".jar"), entry.path
 
     emitter.sub_sub_title("Scanning for user-provided test cases")
@@ -397,7 +399,7 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps):
     _, port = server_socket.getsockname()
     server = await asyncio.start_server(suites_scanner_connected, sock=server_socket)
 
-    dependences = [entry.path for entry in os.scandir(dir_deps)]
+    dependences = [entry.path for entry in list_deps]
 
     command = (f"{java_executable} -cp {scanner_jar} evorepair.TestSuitesScanner"
                f" {port} {str(dir_bin)} {str(dir_test_bin)} {':'.join(dependences)}"
