@@ -13,3 +13,4 @@
 [submodule "extern/oracle-parser"]
 	path = extern/oracle-parser
 	url = git@github.com:nus-apr/oracle-parser.git
+	branch = main
