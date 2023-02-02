@@ -25,7 +25,7 @@ public class TestSuitesScanner {
         String port = args[0];
         String binDir = args[1];
         String testsBinDir = args[2];
-        String dependences = args[3];
+        String dependences = args[3].trim();
 
         Socket socket = null;
         try {
@@ -35,7 +35,8 @@ public class TestSuitesScanner {
             System.exit(-1);
         }
 
-        Map<String, List<String>> testsInClass = findTests(binDir, testsBinDir, dependences.split(":"));
+        Map<String, List<String>> testsInClass =
+            findTests(binDir, testsBinDir, dependences.isEmpty() ? new String[0] : dependences.split(":"));
 
         try (OutputStream os = socket.getOutputStream()) {
             PrintStream ps = new PrintStream(os);

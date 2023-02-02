@@ -402,8 +402,8 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps):
 
     dependences = [entry.path for entry in list_deps]
 
-    command = (f"{java_executable} -cp {scanner_jar} evorepair.TestSuitesScanner"
-               f" {port} {str(dir_bin)} {str(dir_test_bin)} {':'.join(dependences)}"
+    command = (f'{java_executable} -cp {scanner_jar} evorepair.TestSuitesScanner'
+               f' {port} {str(dir_bin)} {str(dir_test_bin)} "{":".join(dependences)}"'
                )
 
     async with server:
