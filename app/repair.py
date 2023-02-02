@@ -260,7 +260,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                 elif return_code is not None:
                     utilities.error_exit("repair did not exit normally",
                                         popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
-                elif num_patches >= num_patches_wanted and ((not expecting_fames) or num_fames >= num_fames_wanted):
+                elif (num_patches >= num_patches_wanted
+                      and ((not expecting_fames) or num_patches + num_fames >= num_patches_wanted + num_fames_wanted)):
                     stopped_early = True
                     popen.terminate()
                     try:
