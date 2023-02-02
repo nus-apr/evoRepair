@@ -212,6 +212,7 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
                 for jar_file in [x for x in file_list if ".jar" in x]:
                     classpath.append(f"{dir_path}/{jar_file}")
 
+        classpath = list(set(classpath))
         cp_str = ":".join((str(x) for x in classpath))
 
         command = java_executable
