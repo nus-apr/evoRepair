@@ -17,6 +17,7 @@ import math
 import socket
 import asyncio
 import json
+import random
 
 """
 This is the function to implement the interface with EvoRepair and ARJA(APR Tool)
@@ -126,6 +127,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
         if perfect_i_patches is not None:
             summaries = [i_patch.patch.read_summary_file() for i_patch in perfect_i_patches]
+            random.shuffle(summaries)
 
             if not dry_run:
                 with open(perfect_summary_path, 'w') as f:
@@ -137,6 +139,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
         if fame_i_patches is not None:
             summaries = [i_patch.patch.read_summary_file() for i_patch in fame_i_patches]
+            random.shuffle(summaries)
 
             if not dry_run:
                 with open(fame_summary_path, 'w') as f:
