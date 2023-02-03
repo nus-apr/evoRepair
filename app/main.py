@@ -458,7 +458,6 @@ def run(arg_list):
         emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
 
         emitter.normal(f"iteration count: {values.iteration_no}")
-        emitter.normal(f"total patches explored: ?")
         emitter.normal(f"total patches that pass failing user tests: {len(fame_i_patches) + len(perfect_i_patches)}")
         emitter.normal(f"total patches that pass all user tests: {len(perfect_i_patches) if values.iteration_no + 1 >= values.passing_tests_partitions else 0}")
         emitter.normal(f"total patches that pass all tests: {len(perfect_i_patches)}")

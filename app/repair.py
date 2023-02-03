@@ -236,7 +236,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                 symlinks.append(dst)
 
         try:
-            popen = subprocess.Popen(shlex.split(repair_command), stdout=DEVNULL, stderr=PIPE)
+            repair_log_fp = open(Path(values.dir_output, f"repair_log_{values.iteration_no}.txt"), 'w')
+            popen = subprocess.Popen(shlex.split(repair_command), stdout=repair_log_fp, stderr=PIPE)
 
             time_to_stop = time.time() + timeout_in_seconds
             stopped_early = False
@@ -294,6 +295,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     msg += f" and {num_fames} valid patches"
                 emitter.normal(msg)
         finally:
+            repair_log_fp.close()
             for symlink in symlinks:
                 os.unlink(symlink)
     else:
