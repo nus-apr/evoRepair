@@ -16,6 +16,7 @@ from collections import OrderedDict, Counter
 import asyncio
 from app.test_suite import TestSuite, IndexedSuite, Test, IndexedTest
 from app.patch import Patch, IndexedPatch
+import json
 
 
 class Interval:
@@ -184,6 +185,7 @@ def run(arg_list):
     passing_user_i_tests = None
     failing_user_i_tests = None
     plausible_i_patches = []
+    total_num_killed_patches = 0
 
     dir_perfect_patches = Path(values.dir_output, "perfect-patches")
     os.makedirs(dir_perfect_patches, exist_ok=True)
@@ -447,10 +449,28 @@ def run(arg_list):
 
                 num_killed_patches += 1
 
+        if not delta_passing_user_i_tests:
+            total_num_killed_patches += num_killed_patches
+
         emitter.normal(f"{num_killed_patches} perfect patch(es) are killed")
 
         timer.pause_phase(phase)
         emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+
+        emitter.normal(f"iteration count: {values.iteration_no}")
+        emitter.normal(f"total patches explored: ?")
+        emitter.normal(f"total patches that pass failing user tests: {len(fame_i_patches) + len(perfect_i_patches)}")
+        emitter.normal(f"total patches that pass all user tests: {len(perfect_i_patches) if values.iteration_no + 1 >= values.passing_tests_partitions else 0}")
+        emitter.normal(f"total patches that pass all tests: {len(perfect_i_patches)}")
+        emitter.normal(f"total overfitting patches detected: {total_num_killed_patches}")
+        emitter.normal(f"current hall of fame: [{' '.join([x.get_index_str() for x in perfect_i_patches])}]")
+        emitter.normal(f"current population: [{' '.join([x.get_index_str() for x in fame_i_patches])}]")
+        emitter.normal(f"total test cases generated: {len(generated_i_tests)}")
+        emitter.normal(f"total test cases that killed patch: {len(set(kill_matrix.keys()) & generated_i_tests)}")
+        with open(Path(values.dir_output, f"kill_matrix_{values.iteration_no}.json"), 'w') as f:
+            json.dump({i_test.get_index_str(): [x.get_index_str() for x in i_patches]
+                       for i_test, i_patches in kill_matrix.items()},
+                      f)
 
         values.iteration_no = values.iteration_no + 1
 
