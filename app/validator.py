@@ -59,6 +59,9 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
         os.makedirs(dir_execution, exist_ok=True)
         utilities.check_is_empty_dir(dir_execution)
 
+    non_compilable_i_patches = []
+    compilable_i_patches = set(indexed_patches)
+
     if compile_patches:
         for i_patch in indexed_patches:
             if i_patch not in indexed_patch_to_bin_dir:
@@ -68,7 +71,13 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
                 assert not out_dir.exists(), f"{str(out_dir)} already exists"
                 os.makedirs(out_dir)
 
-                i_patch.patch.compile(out_dir)
+                try:
+                    i_patch.patch.compile(out_dir)
+                except Exception:
+                    non_compilable_i_patches.append(i_patch)
+                    compilable_i_patches.remove(i_patch)
+                    emitter.warning(f"{str(i_patch)} does not compile")
+                    continue
 
                 indexed_patch_to_bin_dir[i_patch] = str(out_dir)
 
@@ -88,12 +97,12 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
                 indexed_suite_to_bin_dir[i_suite] = str(out_dir)
 
     if not execute_tests:
-        return []
+        return [], non_compilable_i_patches
 
     if values.use_hotswap:
         raise NotImplementedError("UniAPR validation for indexed patches & tests has not been implemented")
     else:
-        return plain_validate(indexed_patches, indexed_tests, dir_execution, use_d4j_instr)
+        return plain_validate(compilable_i_patches, indexed_tests, dir_execution, use_d4j_instr), non_compilable_i_patches
 
 
 def plain_validate(indexed_patches, indexed_tests, work_dir, use_d4j_instr):

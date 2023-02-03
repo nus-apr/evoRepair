@@ -234,8 +234,13 @@ def run(arg_list):
     # Validate PUT on user-provided test cases
     dir_validation = Path(values.dir_output, f"validate-empty-patch")
     os.makedirs(dir_validation, exist_ok=True)
-    user_tests_results = validator.validate([empty_i_patch], user_i_tests, work_dir=dir_validation,
-                                            compile_patches=False, compile_tests=False, execute_tests=True)
+    user_tests_results, non_compilable_i_patches = validator.validate([empty_i_patch], user_i_tests,
+                                                                       work_dir=dir_validation,
+                                                                       compile_patches=False,
+                                                                       compile_tests=False,
+                                                                       execute_tests=True)
+    if non_compilable_i_patches:
+        utilities.error_exit("The original program does not compile")
     _, passing_user_i_tests, failing_user_i_tests = user_tests_results[0]
 
     emitter.information(f"Found {len(user_i_tests)} user test cases,"
@@ -411,11 +416,17 @@ def run(arg_list):
         else:
             timer.resume_phase(phase)
 
-        validation_result = validator.validate(perfect_i_patches, indexed_tests, dir_validation,
-                                               compile_patches=compile_patches,
-                                               compile_tests=compile_tests,
-                                               execute_tests=execute_tests,
-                                               use_d4j_instr=True)
+        validation_result, non_compilable_i_patches = validator.validate(perfect_i_patches, indexed_tests,
+                                                                         dir_validation,
+                                                                         compile_patches=compile_patches,
+                                                                         compile_tests=compile_tests,
+                                                                         execute_tests=execute_tests,
+                                                                         use_d4j_instr=True)
+        for i_patch in non_compilable_i_patches:
+            emitter.warning(f"removing patch {str(i_patch)} from perfect patches because compilation failed")
+            perfect_i_patches.remove(i_patch)
+            assert i_patch in save_path_for_i_patch, i_patch.get_index_str()
+            os.remove(save_path_for_i_patch[i_patch])
 
         num_killed_patches = 0
         for i_patch, _, failing_i_tests in validation_result:
