@@ -366,7 +366,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     return patches, hall_of_fame_patches, failed_i_tests
 
 
-async def scan_for_tests(dir_bin, dir_test_bin, dir_deps):
+async def scan_for_tests(dir_bin, dir_test_bin, dir_deps, class_names_file):
     """
     returned dict looks like:
     {"foo.bar.Baz1": ["method01", "method02"], "foo.bar.Baz2": ["method02", "method03"]}
@@ -382,7 +382,7 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps):
     for entry in list_deps:
         assert entry.name.endswith(".jar"), entry.path
 
-    emitter.sub_sub_title("Scanning for user-provided test cases")
+    emitter.sub_sub_title("Executing user-provided test cases")
 
     result = []
 
@@ -403,9 +403,12 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps):
     server = await asyncio.start_server(suites_scanner_connected, sock=server_socket)
 
     dependences = [entry.path for entry in list_deps]
+    deps_str = f'{":".join(dependences)}'
 
-    command = (f'{java_executable} -cp {scanner_jar} evorepair.TestSuitesScanner'
-               f' {port} {str(dir_bin)} {str(dir_test_bin)} "{":".join(dependences)}"'
+    classpath = f"{str(dir_bin)}:{str(dir_test_bin)}:{deps_str}:{scanner_jar}"
+
+    command = (f'{java_executable} -cp {classpath} evorepair.TestSuitesRunningScanner'
+               f' {port} {str(dir_bin)} {str(dir_test_bin)} "{deps_str}" {scanner_jar} {str(class_names_file)}'
                )
 
     async with server:
@@ -420,4 +423,6 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps):
             utilities.error_exit("TestSuitesScanner did not exit normally", stderr.decode("utf-8"),
                                  f"exit code is {return_code}")
 
-    return json.loads(result[0])
+    test_result = json.loads(result[0])
+
+    return test_result["passingTests"], test_result["failingTests"]

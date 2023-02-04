@@ -11,7 +11,7 @@ import glob
 import asyncio
 import shutil
 import pprint
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import itertools
 
 
@@ -207,11 +207,12 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
         assert plain_validator_jar.is_file(), str(plain_validator_jar)
 
         # must put patch_bin_dir before values.dir_info["classes"]
-        classpath = [plain_validator_jar
-                     , patch_bin_dir
+        classpath = [#plain_validator_jar
+                     patch_bin_dir
                      , values.dir_info["classes"]
                      , *suites_bin_dirs
                      , *suites_runtime_deps
+                     , plain_validator_jar
                      ]
 
         if values.dir_info["deps"]:
@@ -221,7 +222,7 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
                 for jar_file in [x for x in file_list if ".jar" in x]:
                     classpath.append(f"{dir_path}/{jar_file}")
 
-        classpath = list(set(classpath))
+        classpath = list(OrderedDict.fromkeys(classpath))
         cp_str = ":".join((str(x) for x in classpath))
 
         command = java_executable

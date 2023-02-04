@@ -1,5 +1,6 @@
 import itertools
 import os
+import sys
 import time
 import argparse
 import traceback
@@ -12,7 +13,7 @@ from app.patch import IndexedPatch
 from app.test_suite import IndexedTest
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from collections import OrderedDict, Counter
+from collections import OrderedDict, Counter, defaultdict
 import asyncio
 from app.test_suite import TestSuite, IndexedSuite, Test, IndexedTest
 from app.patch import Patch, IndexedPatch
@@ -182,8 +183,8 @@ def run(arg_list):
     generated_i_tests = set()
     kill_matrix = {}
     user_i_tests = set()
-    passing_user_i_tests = None
-    failing_user_i_tests = None
+    passing_user_i_tests = []
+    failing_user_i_tests = []
     plausible_i_patches = []
     total_num_killed_patches = 0
 
@@ -205,45 +206,37 @@ def run(arg_list):
     dir_bin = values.dir_info["classes"]
     dir_tests_bin = values.dir_info["tests"]
     dir_deps = values.dir_info["deps"]
-    tests_in_class = asyncio.run(repair.scan_for_tests(dir_bin, dir_tests_bin, dir_deps))
+
+    test_class_names_file = Path(values.dir_output, "test_class_names.txt")
+    passing_user_tests, failing_user_tests = asyncio.run(
+        repair.scan_for_tests(dir_bin, dir_tests_bin, dir_deps, test_class_names_file))
 
     dir_test_src = "N/A"
     dump_file = None
     compile_deps = [entry.path for entry in os.scandir(dir_deps)]
     runtime_deps = compile_deps
+
+    tests_in_class = defaultdict(list)
+    for full_test_name in [*passing_user_tests, *failing_user_tests]:
+        class_name, method_name = full_test_name.split("#")
+        tests_in_class[class_name].append(method_name)
+
     for classname, method_names in tests_in_class.items():
         suite = TestSuite(dir_test_src, classname, dump_file, method_names, compile_deps, runtime_deps, key=classname)
-        tests = [Test(suite, method_name) for method_name in method_names]
-        user_i_tests.update([IndexedTest(values.iteration_no, test) for test in tests])
+        for method_name in method_names:
+            test = Test(suite, method_name)
+            i_test = IndexedTest(values.iteration_no, test)
+            user_i_tests.add(i_test)
+            full_test_name = f"{classname}#{method_name}"
+            assert full_test_name in passing_user_tests or full_test_name in failing_user_tests
+            if full_test_name in passing_user_tests:
+                passing_user_i_tests.append(i_test)
+            else:
+                failing_user_i_tests.append(i_test)
 
         # these are already compiled
         i_suite = IndexedSuite(values.iteration_no, suite)
         validator.indexed_suite_to_bin_dir[i_suite] = dir_tests_bin
-
-    # Create an empty patch
-    dir_empty_patch = Path(values.dir_output, "empty_patch")
-    os.makedirs(dir_empty_patch, exist_ok=True)
-
-    empty_diff_file = Path(dir_empty_patch, "diff")
-    empty_summary_file = Path(dir_empty_patch, "summary")
-    os.mknod(empty_diff_file)
-    empty_patch = Patch(empty_diff_file, strip=0, changed_files=[], changed_classes=[], key="empty",
-                        summary_file=empty_summary_file)
-    empty_i_patch = IndexedPatch(values.iteration_no, empty_patch)
-
-    validator.indexed_patch_to_bin_dir[empty_i_patch] = dir_bin
-
-    # Validate PUT on user-provided test cases
-    dir_validation = Path(values.dir_output, f"validate-empty-patch")
-    os.makedirs(dir_validation, exist_ok=True)
-    user_tests_results, non_compilable_i_patches = validator.validate([empty_i_patch], user_i_tests,
-                                                                       work_dir=dir_validation,
-                                                                       compile_patches=False,
-                                                                       compile_tests=False,
-                                                                       execute_tests=True)
-    if non_compilable_i_patches:
-        utilities.error_exit("The original program does not compile")
-    _, passing_user_i_tests, failing_user_i_tests = user_tests_results[0]
 
     emitter.information(f"Found {len(user_i_tests)} user test cases,"
                    f" of which {len(passing_user_i_tests)} are passing, {len(failing_user_i_tests)} are failing")
