@@ -82,6 +82,7 @@ public final class PlainValidator {
         try (OutputStream os = socket.getOutputStream()) {
             PrintStream ps = new PrintStream(os);
             ps.println(new Gson().toJson(listener));
+			System.exit(0);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
