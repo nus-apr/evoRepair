@@ -210,6 +210,8 @@ def run(arg_list):
     test_class_names_file = Path(values.dir_output, "test_class_names.txt")
     passing_user_tests, failing_user_tests = asyncio.run(
         repair.scan_for_tests(dir_bin, dir_tests_bin, dir_deps, test_class_names_file))
+    passing_user_tests = list(set(passing_user_tests))
+    failing_user_tests = list(set(failing_user_tests))
 
     dir_test_src = "N/A"
     dump_file = None
