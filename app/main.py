@@ -454,10 +454,11 @@ def run(arg_list):
 
         emitter.normal(f"iteration count: {values.iteration_no}")
         emitter.normal(f"total patches that pass failing user tests: {len(fame_i_patches) + len(perfect_i_patches)}")
-        emitter.normal(f"total patches that pass all user tests: {len(perfect_i_patches) if values.iteration_no + 1 >= values.passing_tests_partitions else 0}")
+        emitter.normal(f"total patches that pass all user tests: {len(plausible_i_patches)}")
         emitter.normal(f"total patches that pass all tests: {len(perfect_i_patches)}")
         emitter.normal(f"total overfitting patches detected: {total_num_killed_patches}")
         emitter.normal(f"current hall of fame: [{' '.join([x.get_index_str() for x in perfect_i_patches])}]")
+        emitter.normal(f"current plausible patches: [{' '.join([x.get_index_str() for x in plausible_i_patches])}]")
         emitter.normal(f"current population: [{' '.join([x.get_index_str() for x in fame_i_patches])}]")
         emitter.normal(f"total test cases generated: {len(generated_i_tests)}")
         emitter.normal(f"total test cases that killed patch: {len(set(kill_matrix.keys()) & generated_i_tests)}")
