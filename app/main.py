@@ -259,11 +259,13 @@ def run(arg_list):
 
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
+        num_partitions = values.iteration_no + 1
+
         dry_run_repair = values.dry_run_repair
-        if values.iteration_no == 0:
+        if num_partitions == 0:
             num_patches_wanted = values.valid_population_size
             num_fames_wanted = 0
-        elif values.iteration_no < values.passing_tests_partitions:
+        elif num_partitions < values.passing_tests_partitions:
             num_patches_wanted = i_patch_population_size - len(perfect_i_patches)
             num_fames_wanted = values.valid_population_size
         else:
@@ -281,7 +283,7 @@ def run(arg_list):
         test_gen_timeout_per_class_in_secs = values.test_gen_timeout
 
         compile_patches = True
-        compile_tests = values.iteration_no >= values.passing_tests_partitions
+        compile_tests = num_partitions >= values.passing_tests_partitions
         execute_tests = True
 
         dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
@@ -315,10 +317,10 @@ def run(arg_list):
 
         basic_i_tests = failing_user_i_tests
         delta_passing_user_i_tests = []
-        if values.iteration_no < values.passing_tests_partitions:
-            num_passing_user_tests = len(passing_user_i_tests) * values.iteration_no // values.passing_tests_partitions
+        if num_partitions < values.passing_tests_partitions:
+            num_passing_user_tests = len(passing_user_i_tests) * num_partitions // values.passing_tests_partitions
             next_num_passing_user_tests = (len(passing_user_i_tests)
-                                           * (values.iteration_no + 1)
+                                           * (num_partitions + 1)
                                            // values.passing_tests_partitions)
 
             delta_passing_user_i_tests = passing_user_i_tests[num_passing_user_tests:next_num_passing_user_tests]
@@ -370,7 +372,7 @@ def run(arg_list):
             for i_patch, i_tests in zip(indexed_fame_patches, failed_i_tests):
                 if not i_tests & user_i_tests:
                     new_plausible_i_patches.append(i_patch)
-        if values.iteration_no == values.passing_tests_partitions:
+        if num_partitions + 1 == values.passing_tests_partitions:
             new_plausible_i_patches.extend(perfect_i_patches)
 
         for i_patch in new_plausible_i_patches:
@@ -387,7 +389,7 @@ def run(arg_list):
             indexed_tests = delta_passing_user_i_tests
         else:
             phase = "Test Generation"
-            if values.iteration_no == values.passing_tests_partitions:
+            if num_partitions == values.passing_tests_partitions:
                 timer.start_phase(phase)
             else:
                 timer.resume_phase(phase)
@@ -433,7 +435,7 @@ def run(arg_list):
                 os.remove(save_path_for_i_patch[i_patch])
 
                 fame_i_patches.add(i_patch)
-                if values.iteration_no > values.passing_tests_partitions:
+                if num_partitions > values.passing_tests_partitions:
                     save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
                     os.symlink(i_patch.patch.diff_file, save_path)
 
