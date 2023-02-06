@@ -33,12 +33,12 @@ public final class PlainValidator {
             System.exit(-1);
         }
 
-        JUnitCore core = new JUnitCore();
-        RecordListener listener = new RecordListener();
-        core.addListener(listener);
+//        JUnitCore core = new JUnitCore();
+//        RecordListener listener = new RecordListener();
+//        core.addListener(listener);
 
-        Map<String, Set<String>> clazz2tests = new HashMap<>();
-        Set<Class> classes = new HashSet<>();
+//        Map<String, Set<String>> clazz2tests = new HashMap<>();
+//        Set<Class> classes = new HashSet<>();
 
         List<String> testNames = null;
 
@@ -54,28 +54,34 @@ public final class PlainValidator {
             testNames = Arrays.asList(Arrays.copyOfRange(args, 1, args.length));
         }
 
+        RecordListener listener = new RecordListener();
         for (String testName: testNames) {
             try {
                 String[] clazzAndMethod = testName.split("#");
                 String clazz = clazzAndMethod[0];
                 String method = clazzAndMethod[1];
 
-                classes.add(Class.forName(clazzAndMethod[0]));
+                Request request = Request.method(Class.forName(clazz), method);
+                JUnitCore core = new JUnitCore();
+                core.addListener(listener);
+                core.run(request);
 
-                if (!clazz2tests.containsKey(clazz)) {
-                    clazz2tests.put(clazz, new HashSet<>(Arrays.asList(method)));
-                } else {
-                    clazz2tests.get(clazz).add(method);
-                }
+//                classes.add(Class.forName(clazzAndMethod[0]));
+
+//                if (!clazz2tests.containsKey(clazz)) {
+//                    clazz2tests.put(clazz, new HashSet<>(Arrays.asList(method)));
+//                } else {
+//                    clazz2tests.get(clazz).add(method);
+//                }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 System.exit(-1);
             }
         }
 
-        Filter filter = new NameFilter(clazz2tests);
-        Request request = Request.classes(classes.toArray(new Class<?>[0])).filterWith(filter);
-        core.run(request);
+//        Filter filter = new NameFilter(clazz2tests);
+//        Request request = Request.classes(classes.toArray(new Class<?>[0])).filterWith(filter);
+//        core.run(request);
 
 		// send listener values back from socket
 
@@ -117,27 +123,27 @@ class RecordListener extends RunListener {
     }
 }
 
-class NameFilter extends Filter {
-    private Map<String, Set<String>> clazz2tests;
-    
-    public NameFilter(Map<String, Set<String>> clazz2tests) {
-        this.clazz2tests = clazz2tests; 
-    }
-
-    @Override
-    public String describe() {
-        return "Only execute test methods passed as arguments";
-    }
-
-    @Override
-    public boolean shouldRun(Description description) {
-        String methodName = description.getMethodName();
-        if (methodName == null) {
-            return true;
-        }
-
-        String testClass = description.getClassName();
-
-        return clazz2tests.get(testClass).contains(methodName);
-    }
-}
+//class NameFilter extends Filter {
+//    private Map<String, Set<String>> clazz2tests;
+//
+//    public NameFilter(Map<String, Set<String>> clazz2tests) {
+//        this.clazz2tests = clazz2tests;
+//    }
+//
+//    @Override
+//    public String describe() {
+//        return "Only execute test methods passed as arguments";
+//    }
+//
+//    @Override
+//    public boolean shouldRun(Description description) {
+//        String methodName = description.getMethodName();
+//        if (methodName == null) {
+//            return true;
+//        }
+//
+//        String testClass = description.getClassName();
+//
+//        return clazz2tests.get(testClass).contains(methodName);
+//    }
+//}
