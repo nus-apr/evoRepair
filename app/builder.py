@@ -47,15 +47,5 @@ def soft_restore_project(project_path):
 
 def clean_project(project_path, binary_path):
     emitter.normal("cleaning files")
-    binary_dir_path = "/".join(str(binary_path).split("/")[:-1])
-
-    if values.cmd_clean != "skip":
-        clean_command = "cd " + project_path
-        clean_command += "; make clean"
-        clean_command += "; rm compile_commands.json"
-        if values.cmd_pre_build and values.cmd_pre_build != "skip":
-            clean_command += "; rm CMakeCache.txt"
-            clean_command += "; rm -rf CMakeFiles"
-        execute_command(clean_command)
-    clean_residues = "cd " + binary_dir_path + ";" + "rm -rf ./patches/*;" + "rm -rf ./klee*"
-    execute_command(clean_residues)
+    clean_command = f"cd {project_path}; {values.cmd_clean}; exit 0"
+    execute_command(clean_command)
