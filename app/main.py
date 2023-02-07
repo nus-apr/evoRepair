@@ -252,7 +252,7 @@ def run(arg_list):
 
     while True:
         if values.num_iterations > 0:
-            if values.iteration_no >= values.num_iterations:
+            if values.iteration_no > values.num_iterations:
                 break
         elif not utilities.have_budget(values.time_duration_total):
             break
