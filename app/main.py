@@ -433,9 +433,6 @@ def run(arg_list):
                 os.remove(save_path_for_i_patch[i_patch])
 
                 fame_i_patches.add(i_patch)
-                if num_partitions > values.passing_tests_partitions:
-                    save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
-                    os.symlink(i_patch.patch.diff_file, save_path)
 
                 for i_test in failing_i_tests:
                     if i_test not in kill_matrix:
