@@ -1,0 +1,23 @@
+{
+  "project": {
+    "name": "chart_1_buggy",
+    "tag": "instr",
+    "source-directory": "source",
+    "test-directory": "build-tests",
+    "deps-directory": "lib",
+    "class-directory": "build"
+  },
+  "build": {
+    "directory": ".",
+    "commands": {
+      "pre-build": "exit 0",
+      "clean": "rm -rf build build-tests",
+      "build": "defects4j compile"
+    }
+  },
+  "localization": {
+    "fix-locations": [
+      "org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java:1797"
+    ]
+  }
+}
