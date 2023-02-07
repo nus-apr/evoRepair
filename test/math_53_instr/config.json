@@ -1,0 +1,23 @@
+{
+  "project": {
+    "name": "math_53_buggy",
+    "tag": "instr",
+    "source-directory": "src/main/java",
+    "test-directory": "target/test-classes",
+    "deps-directory": "target/dependency",
+    "class-directory": "target/classes"
+  },
+  "build": {
+    "directory": ".",
+    "commands": {
+      "pre-build": "mvn dependency:copy-dependencies",
+      "clean": "mvn clean",
+      "build": "defects4j compile"
+    }
+  },
+  "localization": {
+    "fix-locations": [
+      "org/apache/commons/math3/distribution/HypergeometricDistribution.java:281"
+    ]
+  }
+}
