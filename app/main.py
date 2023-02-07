@@ -369,12 +369,10 @@ def run(arg_list):
 
         new_plausible_i_patches = []
         if not delta_passing_user_i_tests:
+            new_plausible_i_patches.extend(indexed_patches)
             for i_patch, i_tests in zip(indexed_fame_patches, failed_i_tests):
                 if not i_tests & user_i_tests:
                     new_plausible_i_patches.append(i_patch)
-        if num_partitions + 1 == values.passing_tests_partitions:
-            new_plausible_i_patches.extend(perfect_i_patches)
-
         for i_patch in new_plausible_i_patches:
             plausible_i_patches.append(i_patch)
             save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
@@ -445,6 +443,12 @@ def run(arg_list):
                     kill_matrix[i_test].append(i_patch)
 
                 num_killed_patches += 1
+
+        if num_partitions + 1 == values.passing_tests_partitions:
+            for i_patch in perfect_i_patches:
+                plausible_i_patches.append(i_patch)
+                save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
+                os.symlink(i_patch.patch.diff_file, save_path)
 
         if not delta_passing_user_i_tests:
             total_num_killed_patches += num_killed_patches
