@@ -105,19 +105,24 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     dir_arja = Path(values._dir_root, "extern", "arja").resolve()
     assert os.path.isdir(dir_arja), dir_arja
 
+    arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
+    assert os.path.isfile(arja_jar), arja_jar
     if use_arja:
-        arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
-        assert os.path.isfile(arja_jar), arja_jar
-
         repair_command = f'{java_executable} -cp {str(arja_jar)}  us.msu.cse.repair.Main ArjaE'
     else:
         dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
         assert os.path.isdir(dir_evosuite), dir_evosuite
 
-        evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0-jar-with-dependencies.jar")
+        evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0.jar")
         assert os.path.isfile(evosuite_client_jar), evosuite_client_jar
 
-        repair_command = f'{java_executable} -cp {str(evosuite_client_jar)} org.evosuite.patch.ERepairMain'
+        evosuite_standalone_rt_jar = Path(dir_evosuite, "standalone_runtime", "target",
+                                          "evosuite-standalone-runtime-1.2.0.jar")
+        assert os.path.isfile(evosuite_standalone_rt_jar), evosuite_standalone_rt_jar
+
+        repair_command = (f'{java_executable}'
+                          f' -cp "{str(arja_jar)}:{str(evosuite_client_jar)}:{str(evosuite_standalone_rt_jar)}"'
+                          f' org.evosuite.patch.ERepairMain')
 
         # extensions on top of Arja
         # repair_command += f' -DmutateOperators {"true" if mutate_operators else "false"}'
