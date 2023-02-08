@@ -426,3 +426,74 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps, class_names_file):
     test_result = json.loads(result[0])
 
     return test_result["passingTests"], test_result["failingTests"]
+
+
+def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_pos_tests_file, final_tests_file):
+    for x in dir_src, dir_bin, dir_test_bin:
+        assert os.path.isabs(x), x
+        assert utilities.is_nonempty_dir(x), x
+    if dir_deps:
+        assert os.path.isabs(dir_deps), dir_deps
+        assert os.path.isdir(dir_deps), dir_deps
+    for x in orig_pos_tests_file, final_tests_file:
+        assert os.path.isabs(x), x
+        assert not os.path.exists(x), x
+
+        java_executable = shutil.which("java")
+        if java_executable is None:
+            raise RuntimeError("Java executable not found")
+
+        dir_arja = Path(values._dir_root, "extern", "arja").resolve()
+        assert os.path.isdir(dir_arja), dir_arja
+
+        arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
+        assert os.path.isfile(arja_jar), arja_jar
+
+        dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
+        assert os.path.isdir(dir_evosuite), dir_evosuite
+
+        evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0.jar")
+        assert os.path.isfile(evosuite_client_jar), evosuite_client_jar
+
+        evosuite_standalone_rt_jar = Path(dir_evosuite, "standalone_runtime", "target",
+                                          "evosuite-standalone-runtime-1.2.0.jar")
+        assert os.path.isfile(evosuite_standalone_rt_jar), evosuite_standalone_rt_jar
+
+        dummy_dir_patches = values.dir_output
+        dependences = ":".join([entry.path for entry in os.scandir(dir_deps)])
+
+        repair_command = (f'{java_executable}'
+                          f' -cp "{str(arja_jar)}:{str(evosuite_client_jar)}:{str(evosuite_standalone_rt_jar)}"'
+                          f' org.evosuite.patch.ERepairMain'
+                          f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
+                          f' -DbinTestDir "{str(dir_test_bin)}"'
+                          f' -DpatchOutputRoot "{str(dummy_dir_patches)}"'
+                          f' -Ddependences "{dependences}"'
+                          f' -DexternalProjRoot {str(dir_arja)}/external'
+                          f' -DorgPosTestsInfoPath {str(orig_pos_tests_file)}'
+                          f' -DfinalTestsInfoPath {str(final_tests_file)}'
+                          f' -DfilterTestsOnly true'
+                          )
+
+        emitter.command(repair_command)
+        log_file = Path(values.dir_output, "test_scanning_log.txt")
+        with open(log_file, 'w') as f:
+            process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE)
+        if process.returncode != 0:
+            utilities.error_exit("test scanning did not exit normally",
+                                 process.stderr.decode("utf-8"), f"return code: {process.returncode}")
+        for x in orig_pos_tests_file, final_tests_file:
+            if not os.path.isfile(x):
+                utilities.error_exit(f"test scanning exited normally without generating expected file {str(x)}",
+                                     f" see logs in {str(log_file)}")
+
+        with open(orig_pos_tests_file) as f:
+            tmp = [line.strip() for line in f]
+            passing_tests = set([line for line in tmp if line])
+        with open(final_tests_file) as f:
+            tmp = [line.strip() for line in f]
+            final_tests = set([line for line in tmp if line])
+        relevant_passing_tests = final_tests & passing_tests
+        failing_tests = final_tests - relevant_passing_tests
+
+        return passing_tests, failing_tests, relevant_passing_tests

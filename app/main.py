@@ -206,12 +206,13 @@ def run(arg_list):
     dir_bin = values.dir_info["classes"]
     dir_tests_bin = values.dir_info["tests"]
     dir_deps = values.dir_info["deps"]
+    orig_tests_file = Path(values.dir_output, "passing_user_tests.txt")
+    final_tests_file = Path(values.dir_output, "relevant_user_tests.txt")
 
-    test_class_names_file = Path(values.dir_output, "test_class_names.txt")
-    passing_user_tests, failing_user_tests = asyncio.run(
-        repair.scan_for_tests(dir_bin, dir_tests_bin, dir_deps, test_class_names_file))
-    passing_user_tests = list(set(passing_user_tests))
-    failing_user_tests = list(set(failing_user_tests))
+    passing_user_tests, failing_user_tests, relevant_passing_user_tests = repair.arja_scan_and_filter_tests(
+        values.dir_info["source"], values.dir_info["classes"], values.dir_info["tests"], values.dir_info["deps"],
+        orig_tests_file, final_tests_file
+    )
 
     dir_test_src = "N/A"
     dump_file = None
@@ -241,7 +242,9 @@ def run(arg_list):
         validator.indexed_suite_to_bin_dir[i_suite] = dir_tests_bin
 
     emitter.information(f"Found {len(user_i_tests)} user test cases,"
-                   f" of which {len(passing_user_i_tests)} are passing, {len(failing_user_i_tests)} are failing")
+                        f" of which {len(passing_user_i_tests)} are passing"
+                        f" ({len(relevant_passing_user_tests)} relavant),"
+                        f" {len(failing_user_i_tests)} are failing")
 
     if len(passing_user_i_tests) < values.passing_tests_partitions:
         emitter.information(f"passing-tests-partitions is changed from {values.passing_tests_partitions}"
