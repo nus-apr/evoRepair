@@ -3,7 +3,7 @@
     "name": "lang_22_buggy",
     "tag": "instr",
     "source-directory": "src/main/java",
-    "test-directory": "target/tests",
+    "test-directory": "target/test-classes",
     "deps-directory": "target/dependency",
     "class-directory": "target/classes"
   },
