@@ -85,6 +85,7 @@ class Configurations:
             raise ValueError(f"missing field in {self.__config_file}: {exc}")
 
     def print_configuration(self):
+        emitter.configuration("log file", values.file_log_main)
         emitter.configuration("working directory", values.dir_exp)
         emitter.configuration("stack size", values.stack_size)
         emitter.configuration("tag id", values.tag_id)
