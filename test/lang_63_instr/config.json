@@ -2,22 +2,17 @@
   "project": {
     "name": "lang_63_buggy",
     "tag": "instr",
-    "source-directory": "src/main/java",
+    "source-directory": "src/java",
     "test-directory": "target/tests",
-    "deps-directory": "target/dependency",
+    "deps-directory": "",
     "class-directory": "target/classes"
   },
   "build": {
     "directory": ".",
     "commands": {
-      "pre-build": "mvn dependency:copy-dependencies",
-      "clean": "mvn clean",
+      "pre-build": "exit 0",
+      "clean": "ant clean; exit 0",
       "build": "defects4j compile"
     }
-  },
-  "localization": {
-    "fix-locations": [
-      "org/apache/commons/math3/distribution/HypergeometricDistribution.java:281"
-    ]
   }
 }

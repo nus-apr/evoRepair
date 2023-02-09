@@ -11,13 +11,8 @@
     "directory": ".",
     "commands": {
       "pre-build": "exit 0",
-      "clean": "rm -rf build build-tests",
+      "clean": "rm -rf build build-tests;exit 0",
       "build": "defects4j compile"
     }
-  },
-  "localization": {
-    "fix-locations": [
-      "org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java:1797"
-    ]
   }
 }

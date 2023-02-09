@@ -3,21 +3,16 @@
     "name": "time_15_buggy",
     "tag": "instr",
     "source-directory": "src/main/java",
-    "test-directory": "target/test-classes",
+    "test-directory": "build/tests",
     "deps-directory": "target/dependency",
-    "class-directory": "target/classes"
+    "class-directory": "build/classes"
   },
   "build": {
     "directory": ".",
     "commands": {
       "pre-build": "mvn dependency:copy-dependencies",
-      "clean": "mvn clean",
+      "clean": "mvn clean; ant clean; exit 0",
       "build": "defects4j compile"
     }
-  },
-  "localization": {
-    "fix-locations": [
-      "org/apache/commons/math3/distribution/HypergeometricDistribution.java:281"
-    ]
   }
 }
