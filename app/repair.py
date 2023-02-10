@@ -49,10 +49,12 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
              use_arja=False
              ):
-    for x in dir_src, dir_bin, dir_test_bin, dir_deps:
-        if x:
-            assert os.path.isabs(x), x
-            assert utilities.is_nonempty_dir(x), x
+    for x in dir_src, dir_bin, dir_test_bin:
+        assert os.path.isabs(x), x
+        assert utilities.is_nonempty_dir(x), x
+    if dir_deps:
+        assert os.path.isabs(x), x
+        assert os.path.isdir(x), x
     assert os.path.isabs(dir_patches), dir_patches
     assert os.path.isdir(dir_patches), dir_patches
     assert os.path.isabs(test_names_path), test_names_path
@@ -163,7 +165,6 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     for i_suite in indexed_suites:
         suites_runtime_deps.update([str(dep) for dep in i_suite.suite.runtime_deps])
 
-    dependences = ":".join([*[entry.path for entry in os.scandir(dir_deps)], *suites_runtime_deps])
 
     if not dry_run:
         with open(test_names_path, 'w') as f:
@@ -173,8 +174,12 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             f.write("\n".join(
                 [i_test.get_full_test_name() for i_test in additional_i_tests]))
 
-    if dependences:
-        repair_command += f' -Ddependences "{dependences}" '
+    if dir_deps:
+        dependences = ":".join([*[entry.path for entry in os.scandir(dir_deps)], *suites_runtime_deps])
+    else:
+        dependences = ""
+    repair_command += f' -Ddependences "{dependences}" '
+
     repair_command += (
                     f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
                     f' -DbinTestDir "{str(dir_test_bin)}"'
@@ -465,7 +470,6 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
         assert os.path.isfile(evosuite_standalone_rt_jar), evosuite_standalone_rt_jar
 
         dummy_dir_patches = values.dir_output
-        dependences = ":".join([entry.path for entry in os.scandir(dir_deps)])
 
         repair_command = (f'{java_executable}'
                           f' -cp "{str(arja_jar)}:{str(evosuite_client_jar)}:{str(evosuite_standalone_rt_jar)}"'
@@ -473,12 +477,16 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
                           f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
                           f' -DbinTestDir "{str(dir_test_bin)}"'
                           f' -DpatchOutputRoot "{str(dummy_dir_patches)}"'
-                          f' -Ddependences "{dependences}"'
                           f' -DexternalProjRoot {str(dir_arja)}/external'
                           f' -DorgPosTestsInfoPath {str(orig_pos_tests_file)}'
                           f' -DfinalTestsInfoPath {str(final_tests_file)}'
                           f' -DfilterTestsOnly true'
                           )
+        if dir_deps:
+            dependences = ":".join([entry.path for entry in os.scandir(dir_deps)])
+        else:
+            dependences = ""
+        repair_command += f' -Ddependences "{dependences}"'
 
         emitter.command(repair_command)
         log_file = Path(values.dir_output, "test_scanning_log.txt")
