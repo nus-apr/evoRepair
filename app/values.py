@@ -41,6 +41,7 @@ dry_run_test_gen = False
 junit_version = "4.12"
 passing_tests_partitions = 4
 valid_population_size = 40
+source_version = None
 
 # ------------------- Directories --------------------
 _dir_root = "/".join(os.path.realpath(__file__).split("/")[:-2])

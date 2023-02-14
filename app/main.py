@@ -211,7 +211,7 @@ def run(arg_list):
 
     passing_user_tests, failing_user_tests, relevant_passing_user_tests = repair.arja_scan_and_filter_tests(
         values.dir_info["source"], values.dir_info["classes"], values.dir_info["tests"], values.dir_info["deps"],
-        orig_tests_file, final_tests_file
+        orig_tests_file, final_tests_file, source_version=values.source_version
     )
 
     dir_test_src = "N/A"
@@ -356,7 +356,9 @@ def run(arg_list):
 
             num_patches_wanted=num_patches_wanted, timeout_in_seconds=patch_gen_timeout_in_secs, dry_run=dry_run_repair,
 
-            use_arja=use_arja
+            use_arja=use_arja,
+
+            source_version=values.source_version
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]

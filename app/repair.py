@@ -47,7 +47,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
              fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
-             use_arja=False
+             use_arja=False, source_version=None
              ):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -179,6 +179,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     else:
         dependences = ""
     repair_command += f' -Ddependences "{dependences}" '
+
+    if source_version:
+        repair_command += f' -DsrcVersion {source_version}'
 
     repair_command += (
                     f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
@@ -438,7 +441,8 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps, class_names_file):
     return test_result["passingTests"], test_result["failingTests"]
 
 
-def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_pos_tests_file, final_tests_file):
+def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_pos_tests_file, final_tests_file,
+                               source_version=None):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
         assert utilities.is_nonempty_dir(x), x
@@ -487,6 +491,9 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
         else:
             dependences = ""
         repair_command += f' -Ddependences "{dependences}"'
+
+        if source_version:
+            repair_command += f' -DsrcVersion {source_version}'
 
         emitter.command(repair_command)
         log_file = Path(values.dir_output, "test_scanning_log.txt")

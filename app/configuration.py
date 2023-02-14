@@ -70,6 +70,7 @@ class Configurations:
             self.__runtime_config_values["test-dir"] = project_info["test-directory"]
             self.__runtime_config_values["deps-dir"] = project_info["deps-directory"]
             self.__runtime_config_values["classes-dir"] = project_info["class-directory"]
+            self.__runtime_config_values["source-version"] = project_info.get("source-version", None)
 
             localization_info = config_json["localization"]
             self.__runtime_config_values["fix-locations"] = localization_info["fix-locations"]
@@ -141,6 +142,7 @@ class Configurations:
         values.dry_run_repair = self.__runtime_config_values["dry-run-patch"]
         values.passing_tests_partitions = self.__runtime_config_values["passing-tests-partitions"]
         values.valid_population_size = self.__runtime_config_values["valid-population-size"]
+        values.source_version = self.__runtime_config_values["source-version"]
 
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths

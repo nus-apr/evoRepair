@@ -5,7 +5,8 @@
     "source-directory": "src/java",
     "test-directory": "target/tests",
     "deps-directory": "",
-    "class-directory": "target/classes"
+    "class-directory": "target/classes",
+    "source-version": "1.4"
   },
   "build": {
     "directory": ".",
