@@ -211,8 +211,11 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
                      patch_bin_dir
                      , values.dir_info["classes"]
                      , *suites_bin_dirs
-                     , *suites_runtime_deps
+
+                     # put this before suites_runtime_deps so the right junit is used
                      , plain_validator_jar
+
+                     , *suites_runtime_deps
                      ]
 
         if values.dir_info["deps"]:
