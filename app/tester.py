@@ -148,7 +148,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     evosuite_jar = Path(dir_evosuite, "master", "target", f"evosuite-master-{read_evosuite_version()}.jar")
     assert os.path.isfile(evosuite_jar), evosuite_jar
 
-    evosuite_command = (f"{java_executable} -jar {str(evosuite_jar)} -class {classname} -projectCP {str(dir_bin)}"
+    evosuite_command = (f"{java_executable} -Dclient_on_thread=true -jar {str(evosuite_jar)} -class {classname} -projectCP {str(dir_bin)}"
                         f" -base_dir {str(dir_output)} -Dassertions=false -Djunit_suffix={junit_suffix}"
                         )
     if timeout_in_seconds:
