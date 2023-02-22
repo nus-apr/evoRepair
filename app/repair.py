@@ -157,9 +157,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                                )
 
     arja_default_population_size = 40
-    max_generations = 2000000  # use a large one to keep ARJA running forever
+    # use a large one to keep ARJA running forever
     # there is `populationSize * maxGenerations` as an `int` in ARJA; do not overflow
-    assert arja_default_population_size * max_generations <= 0x7fffffff
+    max_generations = 0x7fffffff // (arja_default_population_size + 1)
 
     suites_runtime_deps = set()
     for i_suite in indexed_suites:
@@ -189,6 +189,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f' -DpatchOutputRoot "{str(dir_patches)}"'
                     f' -DdiffFormat true -DmaxGenerations {max_generations}'
                     f' -DexternalProjRoot {str(dir_arja)}/external'
+                    f' -DpopulationSize {arja_default_population_size}'
                     f' -DtestNamesPath {str(test_names_path)}'
                     f' -DadditionalTestsInfoPath {str(additional_tests_info_path)}'
                     f' -DwaitTime 30000'
