@@ -17,6 +17,7 @@ from collections import OrderedDict, Counter, defaultdict
 import asyncio
 from app.test_suite import TestSuite, IndexedSuite, Test, IndexedTest
 from app.patch import Patch, IndexedPatch
+import random
 import json
 from app.test_suite import USER_TEST_GENERATION
 
@@ -149,6 +150,7 @@ def run(arg_list):
     timer.start_phase(phase)
 
     bootstrap(arg_list)
+    random.seed(values.random_seed)
     oracle_extractor.extract_oracle_locations()
     oracle_locations_file = Path(values.dir_output, "oracleLocations.json")
     assert os.path.isfile(oracle_locations_file), str(oracle_locations_file)
@@ -253,6 +255,9 @@ def run(arg_list):
         values.passing_tests_partitions = len(passing_user_i_tests)
 
     timer.pause_phase(phase)
+
+    INT_MIN = -0x80000000
+    INT_MAX = 0x7fffffff
 
     while True:
         if values.num_iterations > 0:
@@ -361,7 +366,10 @@ def run(arg_list):
 
             source_version=values.source_version,
 
-            num_patches_forced=1
+            num_patches_forced=1,
+
+            arja_random_seed=random.randint(INT_MIN, INT_MAX),
+            evo_random_seed=random.randint(INT_MIN, INT_MAX)
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
@@ -408,7 +416,9 @@ def run(arg_list):
 
                                                     junit_suffix=f"_gen{values.iteration_no}_ESTest",
                                                     timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
-                                                    dry_run=dry_run_test_gen)
+                                                    dry_run=dry_run_test_gen,
+
+                                                    random_seed=random.randint(INT_MIN, INT_MAX))
             indexed_tests = [IndexedTest(values.iteration_no, test) for test in tests]
             generated_i_tests.update(indexed_tests)
 
@@ -551,6 +561,10 @@ def parse_args():
                           help='number of valid patches to generate in each initial iterations',
                           type=int,
                           default=40)
+    optional.add_argument('--random-seed',
+                          help='seed of pseudorandom number generator',
+                          type=int,
+                          default=None)
     args = parser.parse_args()
     return args
 

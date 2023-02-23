@@ -40,7 +40,7 @@ This is the interface for EvoSuite
 def generate_additional_test(indexed_patches, dir_output, junit_suffix,
                              target_patches_file=None,
                              seed_i_tests=None, seeds_file=None, kill_matrix=None,
-                             dry_run=False, timeout_per_class_in_seconds=0):
+                             dry_run=False, timeout_per_class_in_seconds=0, random_seed=0):
     assert os.path.isabs(dir_output)
     assert os.path.isdir(dir_output)
     if not dry_run:
@@ -119,14 +119,15 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
         result.extend(
             generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
                                      dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
-                                     seeds_file=seeds_file, target_patches_file=target_patches_file)
+                                     seeds_file=seeds_file, target_patches_file=target_patches_file,
+                                     random_seed=random_seed)
         )
 
     return result
 
 
 def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_run=False, target_patches_file=None,
-                             seeds_file=None, timeout_in_seconds=0):
+                             seeds_file=None, timeout_in_seconds=0, random_seed=0):
     assert os.path.isabs(dir_bin)
     assert utilities.is_nonempty_dir(dir_bin)
     assert os.path.isabs(dir_output)
@@ -148,7 +149,10 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     evosuite_jar = Path(dir_evosuite, "master", "target", f"evosuite-master-{read_evosuite_version()}.jar")
     assert os.path.isfile(evosuite_jar), evosuite_jar
 
-    evosuite_command = (f"{java_executable} -Dclient_on_thread=true -jar {str(evosuite_jar)} -class {classname} -projectCP {str(dir_bin)}"
+    evosuite_command = (f"{java_executable}"
+                        f" -Drandom_seed={random_seed}"
+                        f" -Dclient_on_thread=true"
+                        f" -jar {str(evosuite_jar)} -class {classname} -projectCP {str(dir_bin)}"
                         f" -base_dir {str(dir_output)} -Dassertions=false -Djunit_suffix={junit_suffix}"
                         )
     if timeout_in_seconds:

@@ -48,6 +48,7 @@ class Configurations:
         self.__runtime_config_values["dir-patch"] = arg_list.dir_patch
         self.__runtime_config_values["passing-tests-partitions"] = arg_list.passing_tests_partitions
         self.__runtime_config_values["valid-population-size"] = arg_list.valid_population_size
+        self.__runtime_config_values["random-seed"] = arg_list.random_seed
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -107,6 +108,7 @@ class Configurations:
         emitter.configuration("number of partitions of passing user test cases", values.passing_tests_partitions)
         emitter.configuration("number of valid patches to generate in each initial iterations",
                               values.valid_population_size)
+        emitter.configuration("seed of pseudorandom number generator", values.random_seed)
 
     def get_value(self, config_name):
         condition = config_name in self.__runtime_config_values and self.__runtime_config_values[config_name]
@@ -143,6 +145,7 @@ class Configurations:
         values.passing_tests_partitions = self.__runtime_config_values["passing-tests-partitions"]
         values.valid_population_size = self.__runtime_config_values["valid-population-size"]
         values.source_version = self.__runtime_config_values["source-version"]
+        values.random_seed = self.__runtime_config_values["random-seed"]
 
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths

@@ -48,7 +48,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
              fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
-             use_arja=False, source_version=None, num_patches_forced=0
+             use_arja=False, source_version=None, num_patches_forced=0,
+             arja_random_seed=0, evo_random_seed=0
              ):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -124,6 +125,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         assert os.path.isfile(evosuite_standalone_rt_jar), evosuite_standalone_rt_jar
 
         repair_command = (f'{java_executable}'
+                          f' -Drandom_seed={evo_random_seed}'
                           f' -cp "{str(arja_jar)}:{str(evosuite_client_jar)}:{str(evosuite_standalone_rt_jar)}"'
                           f' org.evosuite.patch.ERepairMain')
 
@@ -195,6 +197,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f' -DadditionalTestsInfoPath {str(additional_tests_info_path)}'
                     f' -DwaitTime 30000'
                     f' -DuseD4JInstr false'
+                    f' -Dseed {arja_random_seed}'
                     )
 
     if oracle_locations_file is not None:
