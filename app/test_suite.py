@@ -10,6 +10,7 @@ import subprocess
 from subprocess import DEVNULL, PIPE
 from collections import namedtuple
 
+USER_TEST_GENERATION = -1
 
 class TestSuite:
     def __init__(self, dir_src, junit_class, dump_file, test_names, compile_deps: list, runtime_deps: list, key):

@@ -18,6 +18,7 @@ import socket
 import asyncio
 import json
 import random
+from app.test_suite import USER_TEST_GENERATION
 
 """
 This is the function to implement the interface with EvoRepair and ARJA(APR Tool)
@@ -69,8 +70,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
         assert not os.path.exists(additional_tests_info_path), additional_tests_info_path
     indexed_suites = set()
-    indexed_suites.update([it.indexed_suite for it in basic_i_tests if it.indexed_suite.generation != 0])
-    indexed_suites.update([it.indexed_suite for it in additional_i_tests if it.indexed_suite.generation != 0])
+    indexed_suites.update([it.indexed_suite for it in basic_i_tests if it.indexed_suite.generation != USER_TEST_GENERATION])
+    indexed_suites.update([it.indexed_suite for it in additional_i_tests if it.indexed_suite.generation != USER_TEST_GENERATION])
     for i_suite in indexed_suites:
         assert i_suite in indexed_suite_to_bin_dir, f"{str(i_suite)} has not been compiled"
     for i_patches, ratio, summary_path in ((perfect_i_patches, init_ratio_perfect, perfect_summary_path),

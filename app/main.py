@@ -18,6 +18,7 @@ import asyncio
 from app.test_suite import TestSuite, IndexedSuite, Test, IndexedTest
 from app.patch import Patch, IndexedPatch
 import json
+from app.test_suite import USER_TEST_GENERATION
 
 
 class Interval:
@@ -228,7 +229,7 @@ def run(arg_list):
         suite = TestSuite(dir_test_src, classname, dump_file, method_names, compile_deps, runtime_deps, key=classname)
         for method_name in method_names:
             test = Test(suite, method_name)
-            i_test = IndexedTest(values.iteration_no, test)
+            i_test = IndexedTest(USER_TEST_GENERATION, test)
             user_i_tests.add(i_test)
             full_test_name = f"{classname}#{method_name}"
             assert full_test_name in passing_user_tests or full_test_name in failing_user_tests
@@ -238,7 +239,7 @@ def run(arg_list):
                 failing_user_i_tests.append(i_test)
 
         # these are already compiled
-        i_suite = IndexedSuite(values.iteration_no, suite)
+        i_suite = IndexedSuite(USER_TEST_GENERATION, suite)
         validator.indexed_suite_to_bin_dir[i_suite] = dir_tests_bin
 
     emitter.information(f"Found {len(user_i_tests)} user test cases,"
