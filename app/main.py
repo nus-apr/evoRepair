@@ -358,7 +358,9 @@ def run(arg_list):
 
             use_arja=use_arja,
 
-            source_version=values.source_version
+            source_version=values.source_version,
+
+            num_patches_forced=1
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]

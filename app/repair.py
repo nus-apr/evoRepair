@@ -47,7 +47,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              perfect_i_patches=None, init_ratio_perfect=None, perfect_summary_path=None,
              fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
-             use_arja=False, source_version=None
+             use_arja=False, source_version=None, num_patches_forced=0
              ):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -293,6 +293,19 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     emitter.normal(msg)
                     break
             if not stopped_early:
+                msg_emitted = False
+                while True:
+                    num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
+                    if num_patches >= num_patches_forced:
+                        break
+                    if not msg_emitted:
+                        emitter.normal(f"\ttime is out but there are only {num_patches} plausible patches;"
+                                       f" will wait for {num_patches_forced} plausible patches before exiting")
+                        msg_emitted = True
+                if msg_emitted:
+                    emitter.normal(
+                        f"\treached the minimum requirement of {num_patches_forced} plausible patches; exiting")
+
                 popen.terminate()
                 try:
                     timeout = 10
