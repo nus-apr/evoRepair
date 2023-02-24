@@ -1788,18 +1788,18 @@ public abstract class AbstractCategoryItemRenderer extends AbstractRenderer
      * @see #getLegendItem(int, int)
      */
     public LegendItemCollection getLegendItems() {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return getLegendItems_original();
-            } catch (NullPointerException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return getLegendItems_original();
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return getLegendItems_original(); // defects4j.instrumentation
+            } catch (NullPointerException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return getLegendItems_original(); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public LegendItemCollection getLegendItems_original() {
+    public LegendItemCollection getLegendItems_original() { // defects4j.instrumentation
         LegendItemCollection result = new LegendItemCollection();
         if (this.plot == null) {
             return result;

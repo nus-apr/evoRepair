@@ -117,17 +117,17 @@ public class GaussianFitter extends CurveFitter {
      * observed points (in the same order as above).
      */
     public double[] fit() {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return fit_original();
-            } catch (org.apache.commons.math.exception.NotStrictlyPositiveException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        }
-        return fit_original();
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return fit_original(); // defects4j.instrumentation
+            } catch (org.apache.commons.math.exception.NotStrictlyPositiveException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } // defects4j.instrumentation
+        return fit_original(); // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public double[] fit_original() {
+    public double[] fit_original() { // defects4j.instrumentation
         final double[] guess = (new ParameterGuesser(getObservations())).guess();
         return fit(new Gaussian.Parametric(), guess);
     }

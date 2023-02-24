@@ -3227,18 +3227,18 @@ public class StringUtils {
      * @since 3.0 Changed signature to use varargs
      */
     public static <T> String join(T... elements) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return join_original(elements);
-            } catch (NullPointerException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return join_original(elements);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return join_original(elements); // defects4j.instrumentation
+            } catch (NullPointerException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return join_original(elements); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static <T> String join_original(T... elements) {
+    public static <T> String join_original(T... elements) { // defects4j.instrumentation
         return join(elements, null);
     }
 

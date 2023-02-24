@@ -186,21 +186,21 @@ public class EigenDecompositionImpl implements EigenDecomposition {
      * @exception InvalidMatrixException (wrapping a {@link
      * org.apache.commons.math.ConvergenceException} if algorithm fails to converge
      */
-    public EigenDecompositionImpl(final double[] main, double[] secondary, final double splitTolerance)
-            throws InvalidMatrixException {
-        if (Boolean.valueOf(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                this.init_original(main, secondary, splitTolerance);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            this.init_original(main, secondary, splitTolerance);
-        }
-    }
+    public EigenDecompositionImpl(final double[] main, double[] secondary, final double splitTolerance) // defects4j.instrumentation
+            throws InvalidMatrixException { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                this.init_original(main, secondary, splitTolerance); // defects4j.instrumentation
+            } catch (ArrayIndexOutOfBoundsException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            this.init_original(main, secondary, splitTolerance); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    private void init_original(final double[] main, double[] secondary, final double splitTolerance)
-            throws InvalidMatrixException {
+    private void init_original(final double[] main, double[] secondary, final double splitTolerance) // defects4j.instrumentation
+            throws InvalidMatrixException { // defects4j.instrumentation
         this.main      = main.clone();
         this.secondary = secondary.clone();
         transformer    = null;

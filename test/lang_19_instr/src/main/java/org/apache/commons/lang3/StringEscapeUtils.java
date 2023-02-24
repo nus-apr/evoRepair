@@ -465,23 +465,23 @@ public class StringEscapeUtils {
      * @since 3.0
      */
     public static final String unescapeHtml4(String input) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                // Original Code START
-                return UNESCAPE_HTML4.translate(input);
-                // Original Code END
-            } catch (StringIndexOutOfBoundsException e) {
-                if (input.contains("&")) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                } else {
-                    throw e;
-                }
-            }
-        } else {
-            // Original Code START
-            return UNESCAPE_HTML4.translate(input);
-            // Original Code END
-        }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                // Original Code START // defects4j.instrumentation
+                return UNESCAPE_HTML4.translate(input); // defects4j.instrumentation
+                // Original Code END // defects4j.instrumentation
+            } catch (StringIndexOutOfBoundsException e) { // defects4j.instrumentation
+                if (input.contains("&")) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } else { // defects4j.instrumentation
+                    throw e; // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            // Original Code START // defects4j.instrumentation
+            return UNESCAPE_HTML4.translate(input); // defects4j.instrumentation
+            // Original Code END // defects4j.instrumentation
+        } // defects4j.instrumentation
     }
 
     /**

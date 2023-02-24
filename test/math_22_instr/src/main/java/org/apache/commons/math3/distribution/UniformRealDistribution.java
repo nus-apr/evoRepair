@@ -106,33 +106,33 @@ public class UniformRealDistribution extends AbstractRealDistribution {
 
     /** {@inheritDoc} */
     public double density(double x) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            double returnValue = density_original(x);
-            double upperBound = getSupportUpperBound();
-            double lowerBound = getSupportLowerBound();
-            if (x == upperBound) {
-                boolean upperBoundRule = !isSupportUpperBoundInclusive() || !Double.isInfinite(returnValue) && !Double.isNaN(returnValue);
-                if (!upperBoundRule) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                } else {
-                    return returnValue;
-                }
-            } else if (x == lowerBound) {
-                boolean lowerBoundRule = !isSupportLowerBoundInclusive() || !Double.isInfinite(returnValue) && !Double.isNaN(returnValue);
-                if (!lowerBoundRule) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                } else {
-                    return returnValue;
-                }
-            } else {
-                return returnValue;
-            }
-        } else {
-            return density_original(x);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            double returnValue = density_original(x); // defects4j.instrumentation
+            double upperBound = getSupportUpperBound(); // defects4j.instrumentation
+            double lowerBound = getSupportLowerBound(); // defects4j.instrumentation
+            if (x == upperBound) { // defects4j.instrumentation
+                boolean upperBoundRule = !isSupportUpperBoundInclusive() || !Double.isInfinite(returnValue) && !Double.isNaN(returnValue); // defects4j.instrumentation
+                if (!upperBoundRule) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } else { // defects4j.instrumentation
+                    return returnValue; // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } else if (x == lowerBound) { // defects4j.instrumentation
+                boolean lowerBoundRule = !isSupportLowerBoundInclusive() || !Double.isInfinite(returnValue) && !Double.isNaN(returnValue); // defects4j.instrumentation
+                if (!lowerBoundRule) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } else { // defects4j.instrumentation
+                    return returnValue; // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } else { // defects4j.instrumentation
+                return returnValue; // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return density_original(x); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public double density_original(double x) {
+    public double density_original(double x) { // defects4j.instrumentation
         if (x < lower || x > upper) {
             return 0.0;
         }

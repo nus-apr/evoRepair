@@ -59,21 +59,21 @@ public class BinomialDistribution extends AbstractIntegerDistribution {
         numberOfTrials = trials;
     }
 
-    @Override
-    public int inverseCumulativeProbability(final double p) throws OutOfRangeException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            int resultValue = super.inverseCumulativeProbability(p);
-            if (p == 0.5 && this.probabilityOfSuccess == 0.5) {
-                int expectedValue = (int) (numberOfTrials * 0.5);
-                if (resultValue < expectedValue - 1 || resultValue > expectedValue + 1) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                }
-            }
-            return resultValue;
-        } else {
-            return super.inverseCumulativeProbability(p);
-        }
-    }
+    @Override // defects4j.instrumentation
+    public int inverseCumulativeProbability(final double p) throws OutOfRangeException { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            int resultValue = super.inverseCumulativeProbability(p); // defects4j.instrumentation
+            if (p == 0.5 && this.probabilityOfSuccess == 0.5) { // defects4j.instrumentation
+                int expectedValue = (int) (numberOfTrials * 0.5); // defects4j.instrumentation
+                if (resultValue < expectedValue - 1 || resultValue > expectedValue + 1) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return resultValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return super.inverseCumulativeProbability(p); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
     /**
      * Access the number of trials for this distribution.

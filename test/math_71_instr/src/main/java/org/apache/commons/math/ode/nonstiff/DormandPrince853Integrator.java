@@ -238,19 +238,19 @@ public class DormandPrince853Integrator extends EmbeddedRungeKuttaIntegrator {
           minStep, maxStep, vecAbsoluteTolerance, vecRelativeTolerance);
   }
 
-  @Override
-  public double integrate(final FirstOrderDifferentialEquations equations, final double t0, final double[] y0,
-          final double t, final double[] y) throws DerivativeException, IntegratorException {
-      if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-          double finalT = super.integrate(equations, t0, y0, t, y);
-          if (finalT < t - 1.0e-6 || finalT > t + 1.0e-6) {
-              throw new RuntimeException("[Defects4J_BugReport_Violation]");
-          }
-          return finalT;
-      } else {
-          return super.integrate(equations, t0, y0, t, y);
-      }
-  }
+  @Override // defects4j.instrumentation
+  public double integrate(final FirstOrderDifferentialEquations equations, final double t0, final double[] y0, // defects4j.instrumentation
+          final double t, final double[] y) throws DerivativeException, IntegratorException { // defects4j.instrumentation
+      if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+          double finalT = super.integrate(equations, t0, y0, t, y); // defects4j.instrumentation
+          if (finalT < t - 1.0e-6 || finalT > t + 1.0e-6) { // defects4j.instrumentation
+              throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+          } // defects4j.instrumentation
+          return finalT; // defects4j.instrumentation
+      } else { // defects4j.instrumentation
+          return super.integrate(equations, t0, y0, t, y); // defects4j.instrumentation
+      } // defects4j.instrumentation
+  } // defects4j.instrumentation
 
   /** {@inheritDoc} */
   @Override

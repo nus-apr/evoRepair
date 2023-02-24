@@ -316,20 +316,20 @@ public class CMAESOptimizer
         this.generateStatistics = generateStatistics;
     }
 
-    @Override
-    public PointValuePair optimize(int maxEval, MultivariateFunction f, GoalType goalType, double[] startPoint,
-            double[] lower, double[] upper) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            PointValuePair resultValue = super.optimize(maxEval, f, goalType, startPoint, lower, upper);
-            if (resultValue.getPoint()[0] > upper[0]) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            } else {
-                return resultValue;
-            }
-        } else {
-            return super.optimize(maxEval, f, goalType, startPoint, lower, upper);
-        }
-    }
+    @Override // defects4j.instrumentation
+    public PointValuePair optimize(int maxEval, MultivariateFunction f, GoalType goalType, double[] startPoint, // defects4j.instrumentation
+            double[] lower, double[] upper) { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            PointValuePair resultValue = super.optimize(maxEval, f, goalType, startPoint, lower, upper); // defects4j.instrumentation
+            if (resultValue.getPoint()[0] > upper[0]) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } else { // defects4j.instrumentation
+                return resultValue; // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return super.optimize(maxEval, f, goalType, startPoint, lower, upper); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
     /**
      * @return History of sigma values.

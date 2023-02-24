@@ -442,27 +442,27 @@ public class NumberUtils {
      * @throws NumberFormatException if the value cannot be converted
      */
     public static Number createNumber(String str) throws NumberFormatException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return createNumber_original(str);
-            } catch (NumberFormatException e) {
-                if (str != null && (str.startsWith("0X") || str.startsWith("-0X"))) {
-                    try {
-                        Integer.decode(str);
-                    } catch (NumberFormatException e_decode) {
-                        throw e;
-                    }
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                } else {
-                    throw e;
-                }
-            }
-        } else {
-            return createNumber_original(str);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return createNumber_original(str); // defects4j.instrumentation
+            } catch (NumberFormatException e) { // defects4j.instrumentation
+                if (str != null && (str.startsWith("0X") || str.startsWith("-0X"))) { // defects4j.instrumentation
+                    try { // defects4j.instrumentation
+                        Integer.decode(str); // defects4j.instrumentation
+                    } catch (NumberFormatException e_decode) { // defects4j.instrumentation
+                        throw e; // defects4j.instrumentation
+                    } // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } else { // defects4j.instrumentation
+                    throw e; // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return createNumber_original(str); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static Number createNumber_original(String str) throws NumberFormatException {
+    public static Number createNumber_original(String str) throws NumberFormatException { // defects4j.instrumentation
         if (str == null) {
             return null;
         }

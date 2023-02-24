@@ -252,19 +252,19 @@ public abstract class AbstractLeastSquaresOptimizer implements DifferentiableMul
      * @return chi-square value
      */
     public double getChiSquare() {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            double returnValue = getChiSquare_original();
-            if (getRMS() != Math.sqrt(returnValue / rows)) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            } else {
-                return returnValue;
-            }
-        } else {
-            return getChiSquare_original();
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            double returnValue = getChiSquare_original(); // defects4j.instrumentation
+            if (getRMS() != Math.sqrt(returnValue / rows)) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } else { // defects4j.instrumentation
+                return returnValue; // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return getChiSquare_original(); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public double getChiSquare_original() {
+    public double getChiSquare_original() { // defects4j.instrumentation
         double chiSquare = 0;
         for (int i = 0; i < rows; ++i) {
             final double residual = residuals[i];

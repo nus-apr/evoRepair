@@ -424,20 +424,20 @@ public final class Partial
      * @throws IllegalArgumentException if the value is null or invalid
      */
     public Partial with(DateTimeFieldType fieldType, int value) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            Partial result = with_original(fieldType, value);
-            try {
-                new Partial(result.getFieldTypes(), result.getValues());
-            } catch (IllegalArgumentException e1) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return result;
-        } else {
-            return with_original(fieldType, value);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            Partial result = with_original(fieldType, value); // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                new Partial(result.getFieldTypes(), result.getValues()); // defects4j.instrumentation
+            } catch (IllegalArgumentException e1) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return result; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return with_original(fieldType, value); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public Partial with_original(DateTimeFieldType fieldType, int value) {
+    public Partial with_original(DateTimeFieldType fieldType, int value) { // defects4j.instrumentation
         if (fieldType == null) {
             throw new IllegalArgumentException("The field type must not be null");
         }

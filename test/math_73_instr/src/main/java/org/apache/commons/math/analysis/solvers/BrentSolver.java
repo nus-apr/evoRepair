@@ -95,21 +95,21 @@ public class BrentSolver extends UnivariateRealSolverImpl {
      * @throws IllegalArgumentException if initial is not between min and max
      * (even if it <em>is</em> a root)
      */
-    public double solve(final UnivariateRealFunction f, final double min, final double max, final double initial)
-            throws MaxIterationsExceededException, FunctionEvaluationException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            double resultValue = solve_original(f, min, max, initial);
-            if (f.value(min) >= 0 && f.value(max) >= 0 && f.value(initial) >= 0
-                    || f.value(min) < 0 && f.value(max) < 0 && f.value(initial) < 0) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return resultValue;
-        } else {
-            return solve_original(f, min, max, initial);
-        }
-    }
-
-    public double solve_original(final UnivariateRealFunction f,
+    public double solve(final UnivariateRealFunction f, final double min, final double max, final double initial) // defects4j.instrumentation
+            throws MaxIterationsExceededException, FunctionEvaluationException { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            double resultValue = solve_original(f, min, max, initial); // defects4j.instrumentation
+            if (f.value(min) >= 0 && f.value(max) >= 0 && f.value(initial) >= 0 // defects4j.instrumentation
+                    || f.value(min) < 0 && f.value(max) < 0 && f.value(initial) < 0) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return resultValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return solve_original(f, min, max, initial); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
+ 
+    public double solve_original(final UnivariateRealFunction f, // defects4j.instrumentation
                         final double min, final double max, final double initial)
         throws MaxIterationsExceededException, FunctionEvaluationException {
 

@@ -579,19 +579,19 @@ public final class Fraction extends Number implements Comparable<Fraction> {
      * @return the greatest common divisor, never zero
      */
     private static int greatestCommonDivisor(int u, int v) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            int returnValue;
-            returnValue = greatestCommonDivisor_original(u, v);
-            if (u == Integer.MIN_VALUE && v == 2 && returnValue != 2) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return returnValue;
-        } else {
-            return greatestCommonDivisor_original(u, v);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            int returnValue; // defects4j.instrumentation
+            returnValue = greatestCommonDivisor_original(u, v); // defects4j.instrumentation
+            if (u == Integer.MIN_VALUE && v == 2 && returnValue != 2) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return returnValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return greatestCommonDivisor_original(u, v); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    private static int greatestCommonDivisor_original(int u, int v) {
+    private static int greatestCommonDivisor_original(int u, int v) { // defects4j.instrumentation
         // From Commons Math:
         //if either operand is abs 1, return 1:
         if (Math.abs(u) <= 1 || Math.abs(v) <= 1) {

@@ -3603,20 +3603,20 @@ public class StringUtils {
      * @since 2.4
      */
     private static String replaceEach(String text, String[] searchList, String[] replacementList, 
-            boolean repeat, int timeToLive) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return replaceEach_original(text, searchList, replacementList, repeat, timeToLive);
-            } catch (NullPointerException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return replaceEach_original(text, searchList, replacementList, repeat, timeToLive);
-        }
-    }
+            boolean repeat, int timeToLive) { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return replaceEach_original(text, searchList, replacementList, repeat, timeToLive); // defects4j.instrumentation
+            } catch (NullPointerException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return replaceEach_original(text, searchList, replacementList, repeat, timeToLive); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    private static String replaceEach_original(String text, String[] searchList, String[] replacementList,
-                                      boolean repeat, int timeToLive)
+    private static String replaceEach_original(String text, String[] searchList, String[] replacementList, // defects4j.instrumentation
+                                      boolean repeat, int timeToLive) // defects4j.instrumentation
     {
 
         // mchyzer Performance note: This creates very few new objects (one major goal)

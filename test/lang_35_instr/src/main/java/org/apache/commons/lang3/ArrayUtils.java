@@ -3286,22 +3286,22 @@ public class ArrayUtils {
      * @throws IllegalArgumentException if both arguments are null
      */
     public static <T> T[] add(T[] array, T element) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return add_original(array, element);
-            } catch (ClassCastException e) {
-                if (array == null && element == null) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                } else {
-                    throw e;
-                }
-            }
-        } else {
-            return add_original(array, element);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return add_original(array, element); // defects4j.instrumentation
+            } catch (ClassCastException e) { // defects4j.instrumentation
+                if (array == null && element == null) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } else { // defects4j.instrumentation
+                    throw e; // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return add_original(array, element); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static <T> T[] add_original(T[] array, T element) {
+    public static <T> T[] add_original(T[] array, T element) { // defects4j.instrumentation
         Class<?> type;
         if (array != null){
             type = array.getClass();
@@ -3581,22 +3581,22 @@ public class ArrayUtils {
      * @throws IllegalArgumentException if both array and element are null
      */
     public static <T> T[] add(T[] array, int index, T element) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return add_original(array, index, element);
-            } catch (ClassCastException e) {
-                if (array == null && element == null) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                } else {
-                    throw e;
-                }
-            }
-        } else {
-            return add_original(array, index, element);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return add_original(array, index, element); // defects4j.instrumentation
+            } catch (ClassCastException e) { // defects4j.instrumentation
+                if (array == null && element == null) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } else { // defects4j.instrumentation
+                    throw e; // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return add_original(array, index, element); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static <T> T[] add_original(T[] array, int index, T element) {
+    public static <T> T[] add_original(T[] array, int index, T element) { // defects4j.instrumentation
         Class<?> clss = null;
         if (array != null) {
             clss = array.getClass().getComponentType();

@@ -147,20 +147,20 @@ public class Complex implements FieldElement<Complex>, Serializable  {
      * @return the complex number sum
      * @throws NullArgumentException if <code>rhs</code> is null
      */
-    public Complex add(Complex rhs) throws NullArgumentException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            Complex result = add_original(rhs);
-            if ((this.isNaN() || rhs.isNaN())
-                    && !(Double.isNaN(result.getReal()) && Double.isNaN(result.getImaginary()))) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return result;
-        } else {
-            return add_original(rhs);
-        }
-    }
+    public Complex add(Complex rhs) throws NullArgumentException { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            Complex result = add_original(rhs); // defects4j.instrumentation
+            if ((this.isNaN() || rhs.isNaN()) // defects4j.instrumentation
+                    && !(Double.isNaN(result.getReal()) && Double.isNaN(result.getImaginary()))) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return result; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return add_original(rhs); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public Complex add_original(Complex rhs)
+    public Complex add_original(Complex rhs) // defects4j.instrumentation
         throws NullArgumentException {
         MathUtils.checkNotNull(rhs);
         return createComplex(real + rhs.getReal(),

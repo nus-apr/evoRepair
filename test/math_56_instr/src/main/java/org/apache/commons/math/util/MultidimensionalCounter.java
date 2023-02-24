@@ -242,11 +242,11 @@ public class MultidimensionalCounter implements Iterable<Integer> {
         --idx;
         indices[last] = idx;
 
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            if (indices[last] != index - count) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            if (indices[last] != index - count) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } // defects4j.instrumentation
 
         return indices;
     }

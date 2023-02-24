@@ -1181,18 +1181,18 @@ public class StrBuilder implements Cloneable {
      * @return this, to enable chaining
      */
     public StrBuilder deleteAll(String str) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return deleteAll_original(str);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return deleteAll_original(str);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return deleteAll_original(str); // defects4j.instrumentation
+            } catch (ArrayIndexOutOfBoundsException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return deleteAll_original(str); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public StrBuilder deleteAll_original(String str) {
+    public StrBuilder deleteAll_original(String str) { // defects4j.instrumentation
         int len = (str == null ? 0 : str.length());
         if (len > 0) {
             int index = indexOf(str, 0);
@@ -1340,18 +1340,18 @@ public class StrBuilder implements Cloneable {
      * @return this, to enable chaining
      */
     public StrBuilder replaceAll(String searchStr, String replaceStr) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return replaceAll_original(searchStr, replaceStr);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return replaceAll_original(searchStr, replaceStr);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return replaceAll_original(searchStr, replaceStr); // defects4j.instrumentation
+            } catch (ArrayIndexOutOfBoundsException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return replaceAll_original(searchStr, replaceStr); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public StrBuilder replaceAll_original(String searchStr, String replaceStr) {
+    public StrBuilder replaceAll_original(String searchStr, String replaceStr) { // defects4j.instrumentation
         int searchLen = (searchStr == null ? 0 : searchStr.length());
         if (searchLen > 0) {
             int replaceLen = (replaceStr == null ? 0 : replaceStr.length());

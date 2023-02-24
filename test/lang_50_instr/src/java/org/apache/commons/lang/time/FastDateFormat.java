@@ -231,18 +231,18 @@ public class FastDateFormat extends Format {
      * @since 2.1
      */
     public static FastDateFormat getDateInstance(int style) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            FastDateFormat date = getDateInstance_original(style);
-            if (!date.getLocale().equals(Locale.getDefault())) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return date;
-        } else {
-            return getDateInstance_original(style);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            FastDateFormat date = getDateInstance_original(style); // defects4j.instrumentation
+            if (!date.getLocale().equals(Locale.getDefault())) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return date; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return getDateInstance_original(style); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static FastDateFormat getDateInstance_original(int style) {
+    public static FastDateFormat getDateInstance_original(int style) { // defects4j.instrumentation
         return getDateInstance(style, null, null);
     }
 
@@ -415,19 +415,19 @@ public class FastDateFormat extends Format {
      *  pattern defined
      * @since 2.1
      */
-    public static FastDateFormat getDateTimeInstance(int dateStyle, int timeStyle) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            FastDateFormat date = getDateTimeInstance_original(dateStyle, timeStyle);
-            if (!date.getLocale().equals(Locale.getDefault())) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return date;
-        } else {
-            return getDateTimeInstance_original(dateStyle, timeStyle);
-        }
-    }
+    public static FastDateFormat getDateTimeInstance(int dateStyle, int timeStyle) { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            FastDateFormat date = getDateTimeInstance_original(dateStyle, timeStyle); // defects4j.instrumentation
+            if (!date.getLocale().equals(Locale.getDefault())) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return date; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return getDateTimeInstance_original(dateStyle, timeStyle); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static FastDateFormat getDateTimeInstance_original(int dateStyle, int timeStyle) {
+    public static FastDateFormat getDateTimeInstance_original(int dateStyle, int timeStyle) { // defects4j.instrumentation
         return getDateTimeInstance(dateStyle, timeStyle, null, null);
     }
     

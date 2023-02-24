@@ -56,7 +56,7 @@ public abstract class BaseSecantSolver
     private AllowedSolution allowed;
 
     /** The <em>Secant</em>-based root-finding method to use. */
-    private Method method;
+    private Method method; // defects4j.instrumentation
 
     /**
      * Construct a solver.
@@ -111,36 +111,36 @@ public abstract class BaseSecantSolver
 
     /** {@inheritDoc} */
     public double solve(final int maxEval, final UnivariateRealFunction f,
-            final double min, final double max, final double startValue,
-            final AllowedSolution allowedSolution) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            if (method.equals(Method.REGULA_FALSI)) {
-                try {
-                    return solve_original(maxEval, f, min, max, startValue, allowedSolution);
-                } catch (org.apache.commons.math.exception.TooManyEvaluationsException e1) {
-                    boolean pegasusDidNotFail = true;
-                    method = Method.PEGASUS;
-                    try {
-                        solve_original(maxEval, f, min, max, startValue, allowedSolution);
-                    } catch (org.apache.commons.math.exception.TooManyEvaluationsException e2) {
-                        pegasusDidNotFail = false;
-                    }
-                    if (pegasusDidNotFail) {
-                        throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                    } else {
-                        throw e1;
-                    }
-                }
-            } else {
-                return solve_original(maxEval, f, min, max, startValue, allowedSolution);
-            }
-        } else {
-            return solve_original(maxEval, f, min, max, startValue, allowedSolution);
-        }
-    }
+            final double min, final double max, final double startValue, // defects4j.instrumentation
+            final AllowedSolution allowedSolution) { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            if (method.equals(Method.REGULA_FALSI)) { // defects4j.instrumentation
+                try { // defects4j.instrumentation
+                    return solve_original(maxEval, f, min, max, startValue, allowedSolution); // defects4j.instrumentation
+                } catch (org.apache.commons.math.exception.TooManyEvaluationsException e1) { // defects4j.instrumentation
+                    boolean pegasusDidNotFail = true; // defects4j.instrumentation
+                    method = Method.PEGASUS; // defects4j.instrumentation
+                    try { // defects4j.instrumentation
+                        solve_original(maxEval, f, min, max, startValue, allowedSolution); // defects4j.instrumentation
+                    } catch (org.apache.commons.math.exception.TooManyEvaluationsException e2) { // defects4j.instrumentation
+                        pegasusDidNotFail = false; // defects4j.instrumentation
+                    } // defects4j.instrumentation
+                    if (pegasusDidNotFail) { // defects4j.instrumentation
+                        throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                    } else { // defects4j.instrumentation
+                        throw e1; // defects4j.instrumentation
+                    } // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } else { // defects4j.instrumentation
+                return solve_original(maxEval, f, min, max, startValue, allowedSolution); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return solve_original(maxEval, f, min, max, startValue, allowedSolution); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public double solve_original(final int maxEval, final UnivariateRealFunction f, final double min, final double max,
-            final double startValue, final AllowedSolution allowedSolution) {
+    public double solve_original(final int maxEval, final UnivariateRealFunction f, final double min, final double max, // defects4j.instrumentation
+            final double startValue, final AllowedSolution allowedSolution) { // defects4j.instrumentation
         this.allowed = allowedSolution;
         return super.solve(maxEval, f, min, max, startValue);
     }

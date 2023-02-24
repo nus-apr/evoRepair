@@ -524,18 +524,18 @@ public class XYSeries extends Series implements Cloneable, Serializable {
      * @since 1.0.10
      */
     public XYDataItem addOrUpdate(double x, double y) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return addOrUpdate_original(x, y);
-            } catch (IndexOutOfBoundsException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return addOrUpdate_original(x, y);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return addOrUpdate_original(x, y); // defects4j.instrumentation
+            } catch (IndexOutOfBoundsException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return addOrUpdate_original(x, y); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public XYDataItem addOrUpdate_original(double x, double y) {
+    public XYDataItem addOrUpdate_original(double x, double y) { // defects4j.instrumentation
         return addOrUpdate(new Double(x), new Double(y));
     }
 

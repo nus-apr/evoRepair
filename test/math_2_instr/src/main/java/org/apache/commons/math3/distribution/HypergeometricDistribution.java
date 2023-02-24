@@ -110,18 +110,18 @@ public class HypergeometricDistribution extends AbstractIntegerDistribution {
         this.sampleSize = sampleSize;
     }
 
-    @Override
-    public int sample() {
-        if (Boolean.valueOf(System.getProperty("defects4j.instrumentation.enabled"))) {
-            int returnValue = super.sample();
-            if (returnValue < this.getSupportLowerBound() || returnValue > this.getSupportUpperBound()) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return returnValue;
-        } else {
-            return super.sample();
-        }
-    }
+    @Override // defects4j.instrumentation
+    public int sample() { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            int returnValue = super.sample(); // defects4j.instrumentation
+            if (returnValue < this.getSupportLowerBound() || returnValue > this.getSupportUpperBound()) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return returnValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return super.sample(); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
     /** {@inheritDoc} */
     public double cumulativeProbability(int x) {

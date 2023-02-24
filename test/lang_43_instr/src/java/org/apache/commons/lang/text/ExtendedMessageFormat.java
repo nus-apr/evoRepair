@@ -414,20 +414,20 @@ public class ExtendedMessageFormat extends MessageFormat {
      * @param escapingOn whether to process escaped quotes
      * @return <code>appendTo</code>
      */
-    private StringBuffer appendQuotedString(String pattern, ParsePosition pos, StringBuffer appendTo,
-            boolean escapingOn) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return appendQuotedString_original(pattern, pos, appendTo, escapingOn);
-            } catch (java.lang.OutOfMemoryError e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return appendQuotedString_original(pattern, pos, appendTo, escapingOn);
-        }
-    }
+    private StringBuffer appendQuotedString(String pattern, ParsePosition pos, StringBuffer appendTo, // defects4j.instrumentation
+            boolean escapingOn) { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return appendQuotedString_original(pattern, pos, appendTo, escapingOn); // defects4j.instrumentation
+            } catch (java.lang.OutOfMemoryError e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return appendQuotedString_original(pattern, pos, appendTo, escapingOn); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    private StringBuffer appendQuotedString_original(String pattern, ParsePosition pos,
+    private StringBuffer appendQuotedString_original(String pattern, ParsePosition pos, // defects4j.instrumentation
             StringBuffer appendTo, boolean escapingOn) {
         int start = pos.getIndex();
         char[] c = pattern.toCharArray();

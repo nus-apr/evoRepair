@@ -647,18 +647,18 @@ public class BooleanUtils {
      * @return the boolean value of the string, <code>false</code> if no match
      */
     public static boolean toBoolean(String str) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return toBoolean_original(str);
-            } catch (StringIndexOutOfBoundsException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return toBoolean_original(str);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return toBoolean_original(str); // defects4j.instrumentation
+            } catch (StringIndexOutOfBoundsException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return toBoolean_original(str); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static boolean toBoolean_original(String str) {
+    public static boolean toBoolean_original(String str) { // defects4j.instrumentation
         // Previously used equalsIgnoreCase, which was fast for interned 'true'.
         // Non interned 'true' matched 15 times slower.
         // 

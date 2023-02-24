@@ -83,30 +83,30 @@ public class StringEscapeUtils {
      * @return String with escaped values, <code>null</code> if null string input
      */
     public static String escapeJava(String str) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            String returnValue = escapeJava_original(str);
-            if (str != null && str.contains("/")) {
-                int idx_input = str.indexOf("/");
-                int idx_result = returnValue.indexOf("/");
-                while (idx_input != -1) {
-                    if (idx_input == 0 && idx_result != 0) {
-                        throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                    } else {
-                        if (str.charAt(idx_input - 1) != '\\' && returnValue.charAt(idx_result - 1) == '\\') {
-                            throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                        }
-                    }
-                    idx_input = str.indexOf("/", idx_input + 1);
-                    idx_result = returnValue.indexOf("/", idx_result + 1);
-                }
-            }
-            return returnValue;
-        } else {
-            return escapeJava_original(str);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            String returnValue = escapeJava_original(str); // defects4j.instrumentation
+            if (str != null && str.contains("/")) { // defects4j.instrumentation
+                int idx_input = str.indexOf("/"); // defects4j.instrumentation
+                int idx_result = returnValue.indexOf("/"); // defects4j.instrumentation
+                while (idx_input != -1) { // defects4j.instrumentation
+                    if (idx_input == 0 && idx_result != 0) { // defects4j.instrumentation
+                        throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                    } else { // defects4j.instrumentation
+                        if (str.charAt(idx_input - 1) != '\\' && returnValue.charAt(idx_result - 1) == '\\') { // defects4j.instrumentation
+                            throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                        } // defects4j.instrumentation
+                    } // defects4j.instrumentation
+                    idx_input = str.indexOf("/", idx_input + 1); // defects4j.instrumentation
+                    idx_result = returnValue.indexOf("/", idx_result + 1); // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return returnValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return escapeJava_original(str); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static String escapeJava_original(String str) {
+    public static String escapeJava_original(String str) { // defects4j.instrumentation
         return escapeJavaStyleString(str, false);
     }
 

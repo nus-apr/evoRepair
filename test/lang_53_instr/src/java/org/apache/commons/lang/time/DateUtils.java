@@ -434,30 +434,30 @@ public class DateUtils {
      * @throws ArithmeticException if the year is over 280 million
      */
     public static Date round(Date date, int field) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            Date returnValue = round_original(date, field);
-            int before, after;
-            if (field == Calendar.MINUTE) {
-                before = date.getMinutes();
-                after = returnValue.getMinutes();
-            } else if (field == Calendar.SECOND) {
-                before = date.getSeconds();
-                after = returnValue.getSeconds();
-            } else {
-                return returnValue;
-            }
-            if (before == 59 && after != 0 && after != 59) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            } else if (before != 59 && (after < before || after > before + 1)) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return returnValue;
-        } else {
-            return round_original(date, field);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            Date returnValue = round_original(date, field); // defects4j.instrumentation
+            int before, after; // defects4j.instrumentation
+            if (field == Calendar.MINUTE) { // defects4j.instrumentation
+                before = date.getMinutes(); // defects4j.instrumentation
+                after = returnValue.getMinutes(); // defects4j.instrumentation
+            } else if (field == Calendar.SECOND) { // defects4j.instrumentation
+                before = date.getSeconds(); // defects4j.instrumentation
+                after = returnValue.getSeconds(); // defects4j.instrumentation
+            } else { // defects4j.instrumentation
+                return returnValue; // defects4j.instrumentation
+            } // defects4j.instrumentation
+            if (before == 59 && after != 0 && after != 59) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } else if (before != 59 && (after < before || after > before + 1)) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return returnValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return round_original(date, field); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static Date round_original(Date date, int field) {
+    public static Date round_original(Date date, int field) { // defects4j.instrumentation
         if (date == null) {
             throw new IllegalArgumentException("The date must not be null");
         }

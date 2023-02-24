@@ -112,22 +112,22 @@ public class StopWatch {
      * @throws IllegalStateException if the StopWatch is not running.
      */
     public void stop() {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            if (this.runningState == STATE_SUSPENDED) {
-                long stopTimeTmp = stopTime;
-                stop_original();
-                if (stopTime != stopTimeTmp) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                }
-            } else {
-                stop_original();
-            }
-        } else {
-            stop_original();
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            if (this.runningState == STATE_SUSPENDED) { // defects4j.instrumentation
+                long stopTimeTmp = stopTime; // defects4j.instrumentation
+                stop_original(); // defects4j.instrumentation
+                if (stopTime != stopTimeTmp) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } else { // defects4j.instrumentation
+                stop_original(); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            stop_original(); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public void stop_original() {
+    public void stop_original() { // defects4j.instrumentation
         if(this.runningState != STATE_RUNNING && this.runningState != STATE_SUSPENDED) {
             throw new IllegalStateException("Stopwatch is not running. ");
         }

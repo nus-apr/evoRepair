@@ -67,7 +67,7 @@ public class SubCategoryAxisTests extends TestCase {
      * @return The test suite.
      */
     public static Test suite() {
-        return new TestSuite(SubCategoryAxisTests.class);
+        return new TestSuite(CategoryAxisTests.class);
     }
 
     /**

@@ -141,20 +141,20 @@ public class FDistributionImpl
      * @return initial domain value
      */
     protected double getInitialDomain(double p) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            double initial = getInitialDomain_original(p);
-            double lowerBound = getDomainLowerBound(p);
-            double upperBound = getDomainUpperBound(p);
-            if (initial < lowerBound || initial > upperBound) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return initial;
-        } else {
-            return getInitialDomain_original(p);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            double initial = getInitialDomain_original(p); // defects4j.instrumentation
+            double lowerBound = getDomainLowerBound(p); // defects4j.instrumentation
+            double upperBound = getDomainUpperBound(p); // defects4j.instrumentation
+            if (initial < lowerBound || initial > upperBound) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return initial; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return getInitialDomain_original(p); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    protected double getInitialDomain_original(double p) {
+    protected double getInitialDomain_original(double p) { // defects4j.instrumentation
         double ret;
         double d = getDenominatorDegreesOfFreedom();
             // use mean

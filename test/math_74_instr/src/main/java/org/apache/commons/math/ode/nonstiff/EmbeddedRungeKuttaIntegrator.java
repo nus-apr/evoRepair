@@ -247,25 +247,25 @@ public abstract class EmbeddedRungeKuttaIntegrator
               scale = new double[y0.length];
               java.util.Arrays.fill(scale, scalAbsoluteTolerance);
 
-              if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-                  for (int i=0; i<scale.length; i++) {
-                      double yi = Math.max(Math.abs(y0[i]), Math.abs(y0[i]));
-                      if (scale[i] != scalAbsoluteTolerance + scalRelativeTolerance * yi) {
-                          throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                      }
-                  }
-              }
+              if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+                  for (int i=0; i<scale.length; i++) { // defects4j.instrumentation
+                      double yi = Math.max(Math.abs(y0[i]), Math.abs(y0[i])); // defects4j.instrumentation
+                      if (scale[i] != scalAbsoluteTolerance + scalRelativeTolerance * yi) { // defects4j.instrumentation
+                          throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                      } // defects4j.instrumentation
+                  } // defects4j.instrumentation
+              } // defects4j.instrumentation
             } else {
               scale = vecAbsoluteTolerance;
 
-              if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-                  for (int i=0; i<scale.length; i++) {
-                      double yi = Math.max(Math.abs(y0[i]), Math.abs(y0[i]));
-                      if (scale[i] != vecAbsoluteTolerance[i] + vecAbsoluteTolerance[i] * yi) {
-                          throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                      }
-                  }
-              }
+              if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+                  for (int i=0; i<scale.length; i++) { // defects4j.instrumentation
+                      double yi = Math.max(Math.abs(y0[i]), Math.abs(y0[i])); // defects4j.instrumentation
+                      if (scale[i] != vecAbsoluteTolerance[i] + vecAbsoluteTolerance[i] * yi) { // defects4j.instrumentation
+                          throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                      } // defects4j.instrumentation
+                  } // defects4j.instrumentation
+              } // defects4j.instrumentation
             }
           hNew = initializeStep(equations, forward, getOrder(), scale,
                                 stepStart, y, yDotK[0], yTmp, yDotK[1]);

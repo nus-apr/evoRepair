@@ -771,18 +771,18 @@ public class RealMatrixImpl implements RealMatrix, Serializable {
      * @return resulting vector
      */
     public double[] operate(double[] v) throws IllegalArgumentException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return operate_original(v);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return operate_original(v);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return operate_original(v); // defects4j.instrumentation
+            } catch (ArrayIndexOutOfBoundsException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return operate_original(v); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public double[] operate_original(double[] v) throws IllegalArgumentException {
+    public double[] operate_original(double[] v) throws IllegalArgumentException { // defects4j.instrumentation
         final int nRows = this.getRowDimension();
         final int nCols = this.getColumnDimension();
         if (v.length != nCols) {

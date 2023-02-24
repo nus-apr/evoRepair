@@ -443,24 +443,24 @@ public class NumberUtils {
      * @throws NumberFormatException if the value cannot be converted
      */
     public static Number createNumber(String str) throws NumberFormatException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            Number returnValue = null;
-            try {
-                returnValue = createNumber_original(str);
-            } catch (NumberFormatException e) {
-                throw e;
-            }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            Number returnValue = null; // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                returnValue = createNumber_original(str); // defects4j.instrumentation
+            } catch (NumberFormatException e) { // defects4j.instrumentation
+                throw e; // defects4j.instrumentation
+            } // defects4j.instrumentation
 
-            if (str != null && str.startsWith("--") && returnValue == null) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return returnValue;
-        } else {
-            return createNumber_original(str);
-        }
-    }
+            if (str != null && str.startsWith("--") && returnValue == null) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return returnValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return createNumber_original(str); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static Number createNumber_original(String str) throws NumberFormatException {
+    public static Number createNumber_original(String str) throws NumberFormatException { // defects4j.instrumentation
         if (str == null) {
             return null;
         }

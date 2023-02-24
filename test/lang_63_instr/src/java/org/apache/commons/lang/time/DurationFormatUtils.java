@@ -244,21 +244,21 @@ public class DurationFormatUtils {
      * @return the time as a String
      */
     public static String formatPeriod(long startMillis, long endMillis, String format) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            String returnValue = formatPeriod_original(startMillis, endMillis, format);
-            try {
-                int value = Integer.parseInt(returnValue);
-                if (value < 0) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                }
-            } catch (NumberFormatException e) {}
-            return returnValue;
-        } else {
-            return formatPeriod_original(startMillis, endMillis, format);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            String returnValue = formatPeriod_original(startMillis, endMillis, format); // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                int value = Integer.parseInt(returnValue); // defects4j.instrumentation
+                if (value < 0) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } catch (NumberFormatException e) {} // defects4j.instrumentation
+            return returnValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return formatPeriod_original(startMillis, endMillis, format); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static String formatPeriod_original(long startMillis, long endMillis, String format) {
+    public static String formatPeriod_original(long startMillis, long endMillis, String format) { // defects4j.instrumentation
         return formatPeriod(startMillis, endMillis, format, true, TimeZone.getDefault());
     }
 

@@ -75,18 +75,18 @@ public class ZoneInfoCompiler {
      * @return true to log verbosely
      */
     public static boolean verbose() {
-        if (Boolean.valueOf(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return verbose_original();
-            } catch (NullPointerException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return verbose_original();
-        }
-    }
+        if (Boolean.valueOf(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return verbose_original(); // defects4j.instrumentation
+            } catch (NullPointerException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return verbose_original(); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static boolean verbose_original() {
+    public static boolean verbose_original() { // defects4j.instrumentation
         return cVerbose.get();
     }
 

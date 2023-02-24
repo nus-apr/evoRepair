@@ -248,11 +248,11 @@ public abstract class EmbeddedRungeKuttaIntegrator
 
         stepSize = hNew;
 
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            if (forward && stepStart + stepSize >= t || !forward && stepStart + stepSize <= t) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            if (forward && stepStart + stepSize >= t || !forward && stepStart + stepSize <= t) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } // defects4j.instrumentation
 
         // next stages
         for (int k = 1; k < stages; ++k) {

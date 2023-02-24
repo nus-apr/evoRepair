@@ -365,20 +365,20 @@ public class OpenMapRealVector extends AbstractRealVector
 
     /** {@inheritDoc} */
     public OpenMapRealVector ebeMultiply(RealVector v) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            OpenMapRealVector returnValue = null;
-            try {
-                returnValue = ebeMultiply_original(v);
-            } catch (java.util.ConcurrentModificationException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-            return returnValue;
-        } else {
-            return ebeMultiply_original(v);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            OpenMapRealVector returnValue = null; // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                returnValue = ebeMultiply_original(v); // defects4j.instrumentation
+            } catch (java.util.ConcurrentModificationException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return returnValue; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return ebeMultiply_original(v); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public OpenMapRealVector ebeMultiply_original(RealVector v) {
+    public OpenMapRealVector ebeMultiply_original(RealVector v) { // defects4j.instrumentation
         checkVectorDimensions(v.getDimension());
         OpenMapRealVector res = new OpenMapRealVector(this);
         Iterator iter = res.entries.iterator();

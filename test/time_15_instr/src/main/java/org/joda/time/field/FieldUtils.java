@@ -133,23 +133,23 @@ public class FieldUtils {
      * @since 1.2
      */
     public static long safeMultiply(long val1, int val2) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            if (val1 == Long.MIN_VALUE && val2 == -1) {
-                try {
-                    safeMultiply_original(val1, val2);
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                } catch (ArithmeticException e) {
-                    throw e;
-                }
-            } else {
-                return safeMultiply_original(val1, val2);
-            }
-        } else {
-            return safeMultiply_original(val1, val2);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            if (val1 == Long.MIN_VALUE && val2 == -1) { // defects4j.instrumentation
+                try { // defects4j.instrumentation
+                    safeMultiply_original(val1, val2); // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } catch (ArithmeticException e) { // defects4j.instrumentation
+                    throw e; // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } else { // defects4j.instrumentation
+                return safeMultiply_original(val1, val2); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return safeMultiply_original(val1, val2); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static long safeMultiply_original(long val1, int val2) {
+    public static long safeMultiply_original(long val1, int val2) { // defects4j.instrumentation
         switch (val2) {
             case -1:
                 return -val1;

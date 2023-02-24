@@ -106,22 +106,22 @@ public class NormalDistributionImpl extends AbstractContinuousDistribution
      * convergence exception is caught and 0 or 1 is returned.
      */
     public double cumulativeProbability(double x) throws MathException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return cumulativeProbability_original(x);
-            } catch (org.apache.commons.math.ConvergenceException e) {
-                if (x >= mean + 100 || x <= mean - 100) {
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]");
-                } else {
-                    throw e;
-                }
-            }
-        } else {
-            return cumulativeProbability_original(x);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return cumulativeProbability_original(x); // defects4j.instrumentation
+            } catch (org.apache.commons.math.ConvergenceException e) { // defects4j.instrumentation
+                if (x >= mean + 100 || x <= mean - 100) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } else { // defects4j.instrumentation
+                    throw e; // defects4j.instrumentation
+                } // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return cumulativeProbability_original(x); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public double cumulativeProbability_original(double x) throws MathException {
+    public double cumulativeProbability_original(double x) throws MathException { // defects4j.instrumentation
             return 0.5 * (1.0 + Erf.erf((x - mean) /
                     (standardDeviation * Math.sqrt(2.0))));
     }

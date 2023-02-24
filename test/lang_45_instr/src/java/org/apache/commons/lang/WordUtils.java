@@ -603,18 +603,18 @@ public class WordUtils {
      * @since 2.4
      */
     public static String abbreviate(String str, int lower, int upper, String appendToEnd) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) {
-            try {
-                return abbreviate_original(str, lower, upper, appendToEnd);
-            } catch (StringIndexOutOfBoundsException e) {
-                throw new RuntimeException("[Defects4J_BugReport_Violation]");
-            }
-        } else {
-            return abbreviate_original(str, lower, upper, appendToEnd);
-        }
-    }
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return abbreviate_original(str, lower, upper, appendToEnd); // defects4j.instrumentation
+            } catch (StringIndexOutOfBoundsException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return abbreviate_original(str, lower, upper, appendToEnd); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
 
-    public static String abbreviate_original(String str, int lower, int upper, String appendToEnd) {
+    public static String abbreviate_original(String str, int lower, int upper, String appendToEnd) { // defects4j.instrumentation
         // initial parameter checks
         if (str == null) {
             return null;
