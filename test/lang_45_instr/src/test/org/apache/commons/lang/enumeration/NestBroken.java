@@ -14,41 +14,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Color enumeration.
+ * Color enumeration which demonstrates how to break the enum system.
+ * <p>
+ * The class loader sees the two classes here as independent - the enum
+ * class is nested, not an inner class. Calling getEnumList() on ColorEnum
+ * will return an empty list, unless and until the NestBroken class is
+ * referenced.
  *
- * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
+ * @author Stephen Colebourne
  * @version $Id$
  */
 
-public final class ColorEnum extends Enum {
+public final class NestBroken {
+    
     public static final ColorEnum RED = new ColorEnum("Red");
     public static final ColorEnum GREEN = new ColorEnum("Green");
     public static final ColorEnum BLUE = new ColorEnum("Blue");
-
-    private ColorEnum(String color) {
-        super(color);
+    
+    public NestBroken() {
+        super();
     }
+    
+    public static final class ColorEnum extends Enumeration {
 
-    public static ColorEnum getEnum(String color) {
-        return (ColorEnum) getEnum(ColorEnum.class, color);
-    }
+        private ColorEnum(String color) {
+            super(color);
+        }
 
-    public static Map getEnumMap() {
-        return getEnumMap(ColorEnum.class);
-    }
+        public static ColorEnum getEnum(String color) {
+            return (ColorEnum) getEnum(ColorEnum.class, color);
+        }
 
-    public static List getEnumList() {
-        return getEnumList(ColorEnum.class);
-    }
+        public static Map getEnumMap() {
+            return getEnumMap(ColorEnum.class);
+        }
 
-    public static Iterator iterator() {
-        return iterator(ColorEnum.class);
+        public static List getEnumList() {
+            return getEnumList(ColorEnum.class);
+        }
+
+        public static Iterator iterator() {
+            return iterator(ColorEnum.class);
+        }
     }
 }
