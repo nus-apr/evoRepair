@@ -40,7 +40,7 @@ public final class NestReferenced {
         super();
     }
     
-    public static final class ColorEnum extends Enum {
+    public static final class ColorEnum extends Enumeration {
 
         // must be defined here, not just in outer class
         private static final ColorEnum RED = new ColorEnum("Red");

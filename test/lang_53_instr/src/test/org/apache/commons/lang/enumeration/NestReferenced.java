@@ -14,32 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Color enumeration demonstrating a normal simple nesting case.
- * All is well here as the nested enum class is really no different
- * to any other class.
+ * Color enumeration which demonstrates how to provide a view of the constants
+ * in a different class to the Enum. This technique is the safest, however it
+ * is obviously inconvenient as it involves defining two sets of constants.
+ * See NestedLinked for an alternative.
  *
  * @author Stephen Colebourne
  * @version $Id$
  */
 
-public final class Nest {
+public final class NestReferenced {
     
-    public Nest() {
+    public static final ColorEnum RED = ColorEnum.RED;
+    public static final ColorEnum GREEN = ColorEnum.GREEN;
+    public static final ColorEnum BLUE = ColorEnum.BLUE;
+    
+    public NestReferenced() {
         super();
     }
     
-    public static final class ColorEnum extends Enum {
-        public static final ColorEnum RED = new ColorEnum("Red");
-        public static final ColorEnum GREEN = new ColorEnum("Green");
-        public static final ColorEnum BLUE = new ColorEnum("Blue");
+    public static final class ColorEnum extends Enumeration {
 
+        // must be defined here, not just in outer class
+        private static final ColorEnum RED = new ColorEnum("Red");
+        private static final ColorEnum GREEN = new ColorEnum("Green");
+        private static final ColorEnum BLUE = new ColorEnum("Blue");
+        
         private ColorEnum(String color) {
             super(color);
         }

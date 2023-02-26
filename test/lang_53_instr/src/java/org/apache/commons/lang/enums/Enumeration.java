@@ -51,7 +51,7 @@ import org.apache.commons.lang.StringUtils;
  * <p>To use this class, it must be subclassed. For example:</p>
  *
  * <pre>
- * public final class ColorEnum extends Enum {
+ * public final class ColorEnum extends Enumeration {
  *   public static final ColorEnum RED = new ColorEnum("Red");
  *   public static final ColorEnum GREEN = new ColorEnum("Green");
  *   public static final ColorEnum BLUE = new ColorEnum("Blue");
@@ -193,7 +193,7 @@ import org.apache.commons.lang.StringUtils;
  *   public static final BWEnum WHITE = new BWEnum("White");
  *
  *   // static nested enum class
- *   public static final class BWEnum extends Enum {
+ *   public static final class BWEnum extends Enumeration {
  * 
  *     static {
  *       // explicitly reference BWEnum class to force constants to load
@@ -214,7 +214,7 @@ import org.apache.commons.lang.StringUtils;
  *   public static final BWEnum WHITE = BWEnum.WHITE;
  *
  *   // static nested enum class
- *   public static final class BWEnum extends Enum {
+ *   public static final class BWEnum extends Enumeration {
  *     // only define constants in enum classes - private if desired
  *     private static final BWEnum BLACK = new BWEnum("Black");
  *     private static final BWEnum WHITE = new BWEnum("White");
@@ -283,7 +283,7 @@ import org.apache.commons.lang.StringUtils;
  * @since 2.1 (class existed in enum package from v1.0)
  * @version $Id$
  */
-public abstract class Enum implements Comparable, Serializable {
+public abstract class Enumeration implements Comparable, Serializable {
 
     /**
      * Required for serialization support.
@@ -359,7 +359,7 @@ public abstract class Enum implements Comparable, Serializable {
      * @throws IllegalArgumentException if the getEnumClass() method returns
      *  a null or invalid Class
      */
-    protected Enum(String name) {
+    protected Enumeration(String name) {
         super();
         init(name);
         iName = name;
@@ -385,7 +385,7 @@ public abstract class Enum implements Comparable, Serializable {
         }
         Class cls = getClass();
         boolean ok = false;
-        while (cls != null && cls != Enum.class && cls != ValuedEnum.class) {
+        while (cls != null && cls != Enumeration.class && cls != ValuedEnum.class) {
             if (cls == enumClass) {
                 ok = true;
                 break;
@@ -436,12 +436,12 @@ public abstract class Enum implements Comparable, Serializable {
      * @throws IllegalArgumentException if the enum class
      *  is <code>null</code>
      */
-    protected static Enum getEnum(Class enumClass, String name) {
+    protected static Enumeration getEnum(Class enumClass, String name) {
         Entry entry = getEntry(enumClass);
         if (entry == null) {
             return null;
         }
-        return (Enum) entry.map.get(name);
+        return (Enumeration) entry.map.get(name);
     }
 
     /**
@@ -502,7 +502,7 @@ public abstract class Enum implements Comparable, Serializable {
      * @throws IllegalArgumentException if the enum class is not a subclass of Enum
      */
     protected static Iterator iterator(Class enumClass) {
-        return Enum.getEnumList(enumClass).iterator();
+        return Enumeration.getEnumList(enumClass).iterator();
     }
 
     //-----------------------------------------------------------------------
@@ -516,7 +516,7 @@ public abstract class Enum implements Comparable, Serializable {
         if (enumClass == null) {
             throw new IllegalArgumentException("The Enum Class must not be null");
         }
-        if (Enum.class.isAssignableFrom(enumClass) == false) {
+        if (Enumeration.class.isAssignableFrom(enumClass) == false) {
             throw new IllegalArgumentException("The Class must be a subclass of Enum");
         }
         Entry entry = (Entry) cEnumClasses.get(enumClass);
@@ -534,7 +534,7 @@ public abstract class Enum implements Comparable, Serializable {
     private static Entry createEntry(Class enumClass) {
         Entry entry = new Entry();
         Class cls = enumClass.getSuperclass();
-        while (cls != null && cls != Enum.class && cls != ValuedEnum.class) {
+        while (cls != null && cls != Enumeration.class && cls != ValuedEnum.class) {
             Entry loopEntry = (Entry) cEnumClasses.get(cls);
             if (loopEntry != null) {
                 entry.list.addAll(loopEntry.list);
@@ -592,7 +592,7 @@ public abstract class Enum implements Comparable, Serializable {
             // Ok to do a class cast to Enum here since the test above
             // guarantee both
             // classes are in the same class loader.
-            return iName.equals(((Enum) other).iName);
+            return iName.equals(((Enumeration) other).iName);
         } else {
             // This and other are in different class loaders, we must check indirectly
             if (other.getClass().getName().equals(this.getClass().getName()) == false) {
@@ -638,7 +638,7 @@ public abstract class Enum implements Comparable, Serializable {
             throw new ClassCastException(
                     "Different enum class '" + ClassUtils.getShortClassName(other.getClass()) + "'");
         }
-        return iName.compareTo(((Enum) other).iName);
+        return iName.compareTo(((Enumeration) other).iName);
     }
 
     /**

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.Map;
  * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
  * @version $Id$
  */
-public final class Broken3Enum extends Enum {
+public final class Broken3Enum extends Enumeration {
     public static final Broken3Enum RED = new Broken3Enum("Red");
     public static final Broken3Enum GREEN = new Broken3Enum("Green");
     public static final Broken3Enum BLUE = new Broken3Enum(null);  // null not allowed

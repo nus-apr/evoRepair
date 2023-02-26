@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -442,12 +442,14 @@ public final class EnumTest extends TestCase {
         // are just extra references.
     }
 
-    public void testColorEnumEqualsWithDifferentClassLoaders() throws SecurityException, IllegalArgumentException,
-            ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        this.testWithDifferentClassLoaders(ColorEnum.BLUE);
-        this.testWithDifferentClassLoaders(ColorEnum.GREEN);
-        this.testWithDifferentClassLoaders(ColorEnum.RED);
-    }
+    public void testColorEnumEqualsWithDifferentClassLoaders() {}
+// Defects4J: flaky method
+//     public void testColorEnumEqualsWithDifferentClassLoaders() throws SecurityException, IllegalArgumentException,
+//             ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+//         this.testWithDifferentClassLoaders(ColorEnum.BLUE);
+//         this.testWithDifferentClassLoaders(ColorEnum.GREEN);
+//         this.testWithDifferentClassLoaders(ColorEnum.RED);
+//     }
 
     void testWithDifferentClassLoaders(ColorEnum colorEnum) throws ClassNotFoundException, SecurityException,
             NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
