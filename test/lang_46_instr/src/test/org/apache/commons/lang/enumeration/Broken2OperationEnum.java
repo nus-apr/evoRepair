@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Broken Operator enumeration, getEnumClass() is ValuedEnum.class.
+ * Broken Operator enumeration, getEnumClass() not superclass.
  *
  * @author Stephen Colebourne
  * @version $Id$
  */
-public abstract class Broken4OperationEnum extends Enum {
+public abstract class Broken2OperationEnum extends Enumeration {
     // This syntax works for JDK 1.3 and upwards:
 //    public static final OperationEnum PLUS = new OperationEnum("Plus") {
 //        public int eval(int a, int b) {
@@ -39,8 +39,8 @@ public abstract class Broken4OperationEnum extends Enum {
 //        }
 //    };
     // This syntax works for JDK 1.2 and upwards:
-    public static final Broken4OperationEnum PLUS = new PlusOperation();
-    private static class PlusOperation extends Broken4OperationEnum {
+    public static final Broken2OperationEnum PLUS = new PlusOperation();
+    private static class PlusOperation extends Broken2OperationEnum {
         private PlusOperation() {
             super("Plus");
         }
@@ -48,8 +48,8 @@ public abstract class Broken4OperationEnum extends Enum {
             return (a + b);
         }
     }
-    public static final Broken4OperationEnum MINUS = new MinusOperation();
-    private static class MinusOperation extends Broken4OperationEnum {
+    public static final Broken2OperationEnum MINUS = new MinusOperation();
+    private static class MinusOperation extends Broken2OperationEnum {
         private MinusOperation() {
             super("Minus");
         }
@@ -58,29 +58,29 @@ public abstract class Broken4OperationEnum extends Enum {
         }
     }
 
-    private Broken4OperationEnum(String name) {
+    private Broken2OperationEnum(String name) {
         super(name);
     }
     
     public final Class getEnumClass() {
-        return ValuedEnum.class;
+        return ColorEnum.class;
     }
 
     public abstract int eval(int a, int b);
 
-    public static Broken4OperationEnum getEnum(String name) {
-        return (Broken4OperationEnum) getEnum(Broken4OperationEnum.class, name);
+    public static Broken2OperationEnum getEnum(String name) {
+        return (Broken2OperationEnum) getEnum(Broken2OperationEnum.class, name);
     }
 
     public static Map getEnumMap() {
-        return getEnumMap(Broken4OperationEnum.class);
+        return getEnumMap(Broken2OperationEnum.class);
     }
 
     public static List getEnumList() {
-        return getEnumList(Broken4OperationEnum.class);
+        return getEnumList(Broken2OperationEnum.class);
     }
 
     public static Iterator iterator() {
-        return iterator(Broken4OperationEnum.class);
+        return iterator(Broken2OperationEnum.class);
     }
 }
