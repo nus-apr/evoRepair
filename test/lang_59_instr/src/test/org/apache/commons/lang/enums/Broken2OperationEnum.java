@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Stephen Colebourne
  * @version $Id$
  */
-public abstract class Broken2OperationEnum extends Enum {
+public abstract class Broken2OperationEnum extends Enumeration {
     // This syntax works for JDK 1.3 and upwards:
 //    public static final OperationEnum PLUS = new OperationEnum("Plus") {
 //        public int eval(int a, int b) {

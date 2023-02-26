@@ -34,7 +34,7 @@ import org.apache.commons.lang.ClassUtilsTest;
 import org.apache.commons.lang.SerializationUtils;
 
 /**
- * Test cases for the {@link Enum} class.
+ * Test cases for the {@link Enumeration} class.
  *
  * @author Stephen Colebourne
  * @author Gary D. Gregory

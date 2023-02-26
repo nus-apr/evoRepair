@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>Utility class for accessing and manipulating {@link Enum}s.</p>
+ * <p>Utility class for accessing and manipulating {@link Enumeration}s.</p>
  *
- * @see Enum
+ * @see Enumeration
  * @see ValuedEnum
  * @author Stephen Colebourne
  * @author Gary Gregory
@@ -48,8 +48,8 @@ public class EnumUtils {
      * @return the enum object
      * @throws IllegalArgumentException if the enum class is <code>null</code>
      */
-    public static Enum getEnum(Class enumClass, String name) {
-        return Enum.getEnum(enumClass, name);
+    public static Enumeration getEnum(Class enumClass, String name) {
+        return Enumeration.getEnum(enumClass, name);
     }
 
     /**
@@ -78,7 +78,7 @@ public class EnumUtils {
      *  of <code>Enum</code>
      */
     public static Map getEnumMap(Class enumClass) {
-        return Enum.getEnumMap(enumClass);
+        return Enumeration.getEnumMap(enumClass);
     }
 
     /**
@@ -98,7 +98,7 @@ public class EnumUtils {
      *  of <code>Enum</code>
      */
     public static List getEnumList(Class enumClass) {
-        return Enum.getEnumList(enumClass);
+        return Enumeration.getEnumList(enumClass);
     }
 
     /**
@@ -118,7 +118,7 @@ public class EnumUtils {
      * @throws IllegalArgumentException if the enum class is not a subclass of <code>Enum</code>
      */
     public static Iterator iterator(Class enumClass) {
-        return Enum.getEnumList(enumClass).iterator();
+        return Enumeration.getEnumList(enumClass).iterator();
     }
     
 }

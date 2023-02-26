@@ -140,7 +140,7 @@ limitations under the License.
     <p>Enums are an old C thing. Very useful. One of the major uses is to give type to your constants, and even more, to give them order. For example:</p>
     <h5>A simple Enum</h5>
 <source>
-public final class ColorEnum extends Enum {
+public final class ColorEnum extends Enumeration {
      public static final ColorEnum RED = new ColorEnum("Red");
      public static final ColorEnum GREEN = new ColorEnum("Green");
      public static final ColorEnum BLUE = new ColorEnum("Blue");

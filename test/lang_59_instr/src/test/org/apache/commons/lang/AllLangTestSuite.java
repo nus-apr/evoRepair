@@ -60,7 +60,7 @@ public class AllLangTestSuite extends TestCase {
         suite.addTest(LangTestSuite.suite());
         suite.addTest(BuilderTestSuite.suite());
         suite.addTest(EnumTestSuite.suite());
-        suite.addTest(org.apache.commons.lang.enum.EnumTestSuite.suite());
+        suite.addTest(org.apache.commons.lang.enumeration.EnumTestSuite.suite());
         suite.addTest(ExceptionTestSuite.suite());
         suite.addTest(MathTestSuite.suite());
         suite.addTest(MutableTestSuite.suite());
