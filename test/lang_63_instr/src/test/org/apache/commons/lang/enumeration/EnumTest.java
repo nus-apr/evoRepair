@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,7 +36,7 @@ import org.apache.commons.lang.ClassUtilsTest;
 import org.apache.commons.lang.SerializationUtils;
 
 /**
- * Test cases for the {@link Enum} class.
+ * Test cases for the {@link Enumeration} class.
  * 
  * @author Stephen Colebourne
  * @author Gary D. Gregory

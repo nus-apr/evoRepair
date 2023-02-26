@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * <p>Utility class for accessing and manipulating {@link Enum}s.</p>
+ * <p>Utility class for accessing and manipulating {@link Enumeration}s.</p>
  *
  * @deprecated Replaced by {@link org.apache.commons.lang.enums.EnumUtils org.apache.commons.lang.enums.EnumUtils} 
  *          and will be removed in version 3.0. All classes in this package are deprecated and repackaged to 
  *          {@link org.apache.commons.lang.enums} since <code>enum</code> is a Java 1.5 keyword. 
  * @see org.apache.commons.lang.enums.EnumUtils
- * @see Enum
+ * @see Enumeration
  * @see ValuedEnum
  * @author Stephen Colebourne
  * @author Gary Gregory
@@ -52,8 +52,8 @@ public class EnumUtils {
      * @return the enum object
      * @throws IllegalArgumentException if the enum class is <code>null</code>
      */
-    public static Enum getEnum(Class enumClass, String name) {
-        return Enum.getEnum(enumClass, name);
+    public static Enumeration getEnum(Class enumClass, String name) {
+        return Enumeration.getEnum(enumClass, name);
     }
 
     /**
@@ -82,7 +82,7 @@ public class EnumUtils {
      *  of <code>Enum</code>
      */
     public static Map getEnumMap(Class enumClass) {
-        return Enum.getEnumMap(enumClass);
+        return Enumeration.getEnumMap(enumClass);
     }
 
     /**
@@ -102,7 +102,7 @@ public class EnumUtils {
      *  of <code>Enum</code>
      */
     public static List getEnumList(Class enumClass) {
-        return Enum.getEnumList(enumClass);
+        return Enumeration.getEnumList(enumClass);
     }
 
     /**
@@ -122,7 +122,7 @@ public class EnumUtils {
      * @throws IllegalArgumentException if the enum class is not a subclass of <code>Enum</code>
      */
     public static Iterator iterator(Class enumClass) {
-        return Enum.getEnumList(enumClass).iterator();
+        return Enumeration.getEnumList(enumClass).iterator();
     }
     
 }

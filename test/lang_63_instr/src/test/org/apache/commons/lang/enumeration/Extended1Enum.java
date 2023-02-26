@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Stephen Colebourne
  * @version $Id$
  */
-public class Extended1Enum extends Enum {
+public class Extended1Enum extends Enumeration {
     public static final Extended1Enum ALPHA = new Extended1Enum("Alpha");
     public static final Extended1Enum BETA = new Extended1Enum("Beta");
 

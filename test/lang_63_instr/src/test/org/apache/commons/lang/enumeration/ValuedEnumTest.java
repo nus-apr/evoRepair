@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +26,7 @@ import junit.framework.TestSuite;
 import org.apache.commons.lang.SerializationUtils;
 
 /**
- * Test cases for the {@link Enum} class.
+ * Test cases for the {@link Enumeration} class.
  *
  * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
  * @version $Id$
