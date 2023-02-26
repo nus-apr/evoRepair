@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Stephen Colebourne
  * @version $Id$
  */
-public abstract class Broken3OperationEnum extends Enum {
+public abstract class Broken3OperationEnum extends Enumeration {
     // This syntax works for JDK 1.3 and upwards:
 //    public static final OperationEnum PLUS = new OperationEnum("Plus") {
 //        public int eval(int a, int b) {
@@ -63,7 +63,7 @@ public abstract class Broken3OperationEnum extends Enum {
     }
     
     public final Class getEnumClass() {
-        return Enum.class;
+        return Enumeration.class;
     }
 
     public abstract int eval(int a, int b);
