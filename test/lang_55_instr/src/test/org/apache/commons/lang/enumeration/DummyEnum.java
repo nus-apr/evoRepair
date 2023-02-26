@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
 /**
  * Dummy enumeration - no values.

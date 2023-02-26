@@ -14,41 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Color enumeration.
+ * Broken color enumeration.
  *
  * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
  * @version $Id$
  */
+public final class Broken3Enum extends Enumeration {
+    public static final Broken3Enum RED = new Broken3Enum("Red");
+    public static final Broken3Enum GREEN = new Broken3Enum("Green");
+    public static final Broken3Enum BLUE = new Broken3Enum(null);  // null not allowed
 
-public final class ColorEnum extends Enumeration {
-    public static final ColorEnum RED = new ColorEnum("Red");
-    public static final ColorEnum GREEN = new ColorEnum("Green");
-    public static final ColorEnum BLUE = new ColorEnum("Blue");
-
-    private ColorEnum(String color) {
+    private Broken3Enum(String color) {
         super(color);
     }
 
-    public static ColorEnum getEnum(String color) {
-        return (ColorEnum) getEnum(ColorEnum.class, color);
+    public static Broken3Enum getEnum(String color) {
+        return (Broken3Enum) getEnum(Broken3Enum.class, color);
     }
 
     public static Map getEnumMap() {
-        return getEnumMap(ColorEnum.class);
+        return getEnumMap(Broken3Enum.class);
     }
 
     public static List getEnumList() {
-        return getEnumList(ColorEnum.class);
+        return getEnumList(Broken3Enum.class);
     }
 
     public static Iterator iterator() {
-        return iterator(ColorEnum.class);
+        return iterator(Broken3Enum.class);
     }
 }

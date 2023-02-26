@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Broken Operator enumeration, getEnumClass() is Enum.class.
+ * Operator enumeration.
  *
  * @author Stephen Colebourne
  * @version $Id$
  */
-public abstract class Broken3OperationEnum extends Enumeration {
+public abstract class OperationEnum extends Enumeration {
     // This syntax works for JDK 1.3 and upwards:
 //    public static final OperationEnum PLUS = new OperationEnum("Plus") {
 //        public int eval(int a, int b) {
@@ -39,8 +39,8 @@ public abstract class Broken3OperationEnum extends Enumeration {
 //        }
 //    };
     // This syntax works for JDK 1.2 and upwards:
-    public static final Broken3OperationEnum PLUS = new PlusOperation();
-    private static class PlusOperation extends Broken3OperationEnum {
+    public static final OperationEnum PLUS = new PlusOperation();
+    private static class PlusOperation extends OperationEnum {
         private PlusOperation() {
             super("Plus");
         }
@@ -48,8 +48,8 @@ public abstract class Broken3OperationEnum extends Enumeration {
             return (a + b);
         }
     }
-    public static final Broken3OperationEnum MINUS = new MinusOperation();
-    private static class MinusOperation extends Broken3OperationEnum {
+    public static final OperationEnum MINUS = new MinusOperation();
+    private static class MinusOperation extends OperationEnum {
         private MinusOperation() {
             super("Minus");
         }
@@ -58,29 +58,29 @@ public abstract class Broken3OperationEnum extends Enumeration {
         }
     }
 
-    private Broken3OperationEnum(String name) {
+    private OperationEnum(String name) {
         super(name);
     }
     
     public final Class getEnumClass() {
-        return Enumeration.class;
+        return OperationEnum.class;
     }
 
     public abstract int eval(int a, int b);
 
-    public static Broken3OperationEnum getEnum(String name) {
-        return (Broken3OperationEnum) getEnum(Broken3OperationEnum.class, name);
+    public static OperationEnum getEnum(String name) {
+        return (OperationEnum) getEnum(OperationEnum.class, name);
     }
 
     public static Map getEnumMap() {
-        return getEnumMap(Broken3OperationEnum.class);
+        return getEnumMap(OperationEnum.class);
     }
 
     public static List getEnumList() {
-        return getEnumList(Broken3OperationEnum.class);
+        return getEnumList(OperationEnum.class);
     }
 
     public static Iterator iterator() {
-        return iterator(Broken3OperationEnum.class);
+        return iterator(OperationEnum.class);
     }
 }

@@ -14,35 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Color enumeration which demonstrates how to break the enum system.
- * <p>
- * The class loader sees the two classes here as independent - the enum
- * class is nested, not an inner class. Calling getEnumList() on ColorEnum
- * will return an empty list, unless and until the NestBroken class is
- * referenced.
+ * Color enumeration demonstrating a normal simple nesting case.
+ * All is well here as the nested enum class is really no different
+ * to any other class.
  *
  * @author Stephen Colebourne
  * @version $Id$
  */
 
-public final class NestBroken {
+public final class Nest {
     
-    public static final ColorEnum RED = new ColorEnum("Red");
-    public static final ColorEnum GREEN = new ColorEnum("Green");
-    public static final ColorEnum BLUE = new ColorEnum("Blue");
-    
-    public NestBroken() {
+    public Nest() {
         super();
     }
     
     public static final class ColorEnum extends Enumeration {
+        public static final ColorEnum RED = new ColorEnum("Red");
+        public static final ColorEnum GREEN = new ColorEnum("Green");
+        public static final ColorEnum BLUE = new ColorEnum("Blue");
 
         private ColorEnum(String color) {
             super(color);

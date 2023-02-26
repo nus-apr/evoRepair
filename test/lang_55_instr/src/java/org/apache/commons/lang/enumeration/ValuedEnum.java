@@ -14,10 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
@@ -72,9 +70,6 @@ import org.apache.commons.lang.ClassUtils;
  * }
  * </pre>
  *
- * <p><em>NOTE:</em>These are declared <code>final</code>, so compilers may 
- * inline the code. Ensure you recompile everything when using final. </p>
- *
  * <p>The above class could then be used as follows:</p>
  *
  * <pre>
@@ -94,23 +89,23 @@ import org.apache.commons.lang.ClassUtils;
  * <p>As shown, each enum has a name and a value. These can be accessed using
  * <code>getName</code> and <code>getValue</code>.</p>
  *
- * <p><em>NOTE:</em> Because the switch is ultimately sitting on top of an 
- * int, the example above is not type-safe. That is, there is nothing that 
- * checks that JAVA1_0_VALUE is a legal constant for JavaVersionEnum. </p>
- *
  * <p>The <code>getEnum</code> and <code>iterator</code> methods are recommended.
  * Unfortunately, Java restrictions require these to be coded as shown in each subclass.
  * An alternative choice is to use the {@link EnumUtils} class.</p>
  *
+ * @deprecated Replaced by {@link org.apache.commons.lang.enums.ValuedEnum org.apache.commons.lang.enums.ValuedEnum}
+ *          and will be removed in version 3.0. All classes in this package are deprecated and repackaged to 
+ *          {@link org.apache.commons.lang.enums} since <code>enum</code> is a Java 1.5 keyword. 
+ * @see org.apache.commons.lang.enums.ValuedEnum
  * @author Apache Avalon project
  * @author Stephen Colebourne
- * @since 2.1 (class existed in enum package from v1.0)
+ * @since 1.0
  * @version $Id$
  */
 public abstract class ValuedEnum extends Enumeration {
     
     /**
-     * Required for serialization support.
+     * Required for serialization support. Lang version 1.0.1 serial compatibility.
      * 
      * @see java.io.Serializable
      */
@@ -172,11 +167,7 @@ public abstract class ValuedEnum extends Enumeration {
      *
      * <p>The default ordering is numeric by value, but this
      * can be overridden by subclasses.</p>
-     *
-     * <p>NOTE: From v2.2 the enums must be of the same type.
-     * If the parameter is in a different class loader than this instance,
-     * reflection is used to compare the values.</p>
-     *
+     * 
      * @see java.lang.Comparable#compareTo(Object)
      * @param other  the other object to compare to
      * @return -ve if this is less than the other object, +ve if greater than,
@@ -185,38 +176,7 @@ public abstract class ValuedEnum extends Enumeration {
      * @throws NullPointerException if other is <code>null</code>
      */
     public int compareTo(Object other) {
-        if (other == this) {
-            return 0;
-        }
-        if (other.getClass() != this.getClass()) {
-            if (other.getClass().getName().equals(this.getClass().getName())) {
-                return iValue - getValueInOtherClassLoader(other);
-            }
-            throw new ClassCastException(
-                    "Different enum class '" + ClassUtils.getShortClassName(other.getClass()) + "'");
-        }
         return iValue - ((ValuedEnum) other).iValue;
-    }
-
-    /**
-     * <p>Use reflection to return an objects value.</p>
-     *
-     * @param other  the object to determine the value for
-     * @return the value
-     */
-    private int getValueInOtherClassLoader(Object other) {
-        try {
-            Method mth = other.getClass().getMethod("getValue", null);
-            Integer value = (Integer) mth.invoke(other, null);
-            return value.intValue();
-        } catch (NoSuchMethodException e) {
-            // ignore - should never happen
-        } catch (IllegalAccessException e) {
-            // ignore - should never happen
-        } catch (InvocationTargetException e) {
-            // ignore - should never happen
-        }
-        throw new IllegalStateException("This should not happen");
     }
 
     /**

@@ -14,41 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import junit.textui.TestRunner;
 
 /**
- * Color enumeration.
+ * Test suite for the Enum package.
  *
  * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
  * @version $Id$
  */
-
-public final class ColorEnum extends Enumeration {
-    public static final ColorEnum RED = new ColorEnum("Red");
-    public static final ColorEnum GREEN = new ColorEnum("Green");
-    public static final ColorEnum BLUE = new ColorEnum("Blue");
-
-    private ColorEnum(String color) {
-        super(color);
+public class EnumTestSuite extends TestCase {
+    
+    /**
+     * Construct a new instance.
+     */
+    public EnumTestSuite(String name) {
+        super(name);
     }
 
-    public static ColorEnum getEnum(String color) {
-        return (ColorEnum) getEnum(ColorEnum.class, color);
+    /**
+     * Command-line interface.
+     */
+    public static void main(String[] args) {
+        TestRunner.run(suite());
     }
 
-    public static Map getEnumMap() {
-        return getEnumMap(ColorEnum.class);
-    }
-
-    public static List getEnumList() {
-        return getEnumList(ColorEnum.class);
-    }
-
-    public static Iterator iterator() {
-        return iterator(ColorEnum.class);
+    /**
+     * Get the suite of tests
+     */
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+        suite.setName("Commons-Lang-Enum Tests");
+        suite.addTest(EnumTest.suite());
+        suite.addTest(EnumUtilsTest.suite());
+        suite.addTest(ValuedEnumTest.suite());
+        return suite;
     }
 }

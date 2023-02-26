@@ -14,36 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Color enumeration which demonstrates how to break the enum system.
- * <p>
- * The class loader sees the two classes here as independent - the enum
- * class is nested, not an inner class. Calling getEnumList() on ColorEnum
- * will return an empty list, unless and until the NestBroken class is
- * referenced.
+ * Color enumeration which demonstrates how to provide a view of the constants
+ * in a different class to the Enum. This technique is the safest, however it
+ * is obviously inconvenient as it involves defining two sets of constants.
+ * See NestedLinked for an alternative.
  *
  * @author Stephen Colebourne
  * @version $Id$
  */
 
-public final class NestBroken {
+public final class NestReferenced {
     
-    public static final ColorEnum RED = new ColorEnum("Red");
-    public static final ColorEnum GREEN = new ColorEnum("Green");
-    public static final ColorEnum BLUE = new ColorEnum("Blue");
+    public static final ColorEnum RED = ColorEnum.RED;
+    public static final ColorEnum GREEN = ColorEnum.GREEN;
+    public static final ColorEnum BLUE = ColorEnum.BLUE;
     
-    public NestBroken() {
+    public NestReferenced() {
         super();
     }
     
     public static final class ColorEnum extends Enumeration {
 
+        // must be defined here, not just in outer class
+        private static final ColorEnum RED = new ColorEnum("Red");
+        private static final ColorEnum GREEN = new ColorEnum("Green");
+        private static final ColorEnum BLUE = new ColorEnum("Blue");
+        
         private ColorEnum(String color) {
             super(color);
         }

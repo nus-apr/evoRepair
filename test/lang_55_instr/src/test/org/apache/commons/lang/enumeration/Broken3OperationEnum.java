@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
 import java.util.Iterator;
 import java.util.List;
@@ -63,7 +63,7 @@ public abstract class Broken3OperationEnum extends Enumeration {
     }
     
     public final Class getEnumClass() {
-        return Enumeration.class;
+        return Enum.class;
     }
 
     public abstract int eval(int a, int b);

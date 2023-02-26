@@ -14,9 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
-import java.net.URLClassLoader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ import junit.framework.TestSuite;
 import org.apache.commons.lang.SerializationUtils;
 
 /**
- * Test cases for the {@link Enumeration} class.
+ * Test cases for the {@link Enum} class.
  *
  * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
  * @version $Id$
@@ -66,101 +65,9 @@ public final class ValuedEnumTest extends TestCase {
         assertTrue(ValuedColorEnum.BLUE.compareTo(ValuedColorEnum.RED) > 0);
     }
 
-    public void testCompareTo_classloader_equal() throws Exception {
-        ClassLoader cl = ValuedColorEnum.class.getClassLoader();
-        if (cl instanceof URLClassLoader) {
-            URLClassLoader urlCL = (URLClassLoader) cl;
-            URLClassLoader urlCL1 = new URLClassLoader(urlCL.getURLs(), null);
-            URLClassLoader urlCL2 = new URLClassLoader(urlCL.getURLs(), null);
-            Class otherEnumClass1 = urlCL1.loadClass("org.apache.commons.lang.enums.ValuedColorEnum");
-            Class otherEnumClass2 = urlCL2.loadClass("org.apache.commons.lang.enums.ValuedColorEnum");
-            Object blue1 = otherEnumClass1.getDeclaredField("BLUE").get(null);
-            Object blue2 = otherEnumClass2.getDeclaredField("BLUE").get(null);
-            assertTrue(((Comparable) blue1).compareTo(blue2) == 0);
-        }
-    }
-
-    public void testCompareTo_classloader_different() throws Exception {
-        ClassLoader cl = ValuedColorEnum.class.getClassLoader();
-        if (cl instanceof URLClassLoader) {
-            URLClassLoader urlCL = (URLClassLoader) cl;
-            URLClassLoader urlCL1 = new URLClassLoader(urlCL.getURLs(), null);
-            URLClassLoader urlCL2 = new URLClassLoader(urlCL.getURLs(), null);
-            Class otherEnumClass1 = urlCL1.loadClass("org.apache.commons.lang.enums.ValuedColorEnum");
-            Class otherEnumClass2 = urlCL2.loadClass("org.apache.commons.lang.enums.ValuedColorEnum");
-            Object blue1 = otherEnumClass1.getDeclaredField("BLUE").get(null);
-            Object blue2 = otherEnumClass2.getDeclaredField("RED").get(null);
-            assertTrue(((Comparable) blue1).compareTo(blue2) != 0);
-        }
-    }
-
-    public void testCompareTo_nonEnumType() {
-        try {
-            ValuedColorEnum.BLUE.compareTo(new TotallyUnrelatedClass(ValuedColorEnum.BLUE.getValue()));
-            fail();
-        } catch (ClassCastException ex) {
-            // expected
-        }
-    }
-
-    public void testCompareTo_otherEnumType() {
-        try {
-            ValuedColorEnum.BLUE.compareTo(ValuedLanguageEnum.ENGLISH);
-            fail();
-        } catch (ClassCastException ex) {
-            // expected
-        }
-    }
-
-    public void testCompareTo_otherType() {
-        try {
-            ValuedColorEnum.BLUE.compareTo("Blue");
-            fail();
-        } catch (ClassCastException ex) {
-            // expected
-        }
-    }
-
-    public void testCompareTo_null() {
-        try {
-            ValuedColorEnum.BLUE.compareTo(null);
-            fail();
-        } catch (NullPointerException ex) {
-            // expected
-        }
-    }
-
     public void testEquals() {
         assertSame(ValuedColorEnum.RED, ValuedColorEnum.RED);
         assertSame(ValuedColorEnum.getEnum("Red"), ValuedColorEnum.RED);
-    }
-
-    public void testEquals_classloader_equal() throws Exception {
-        ClassLoader cl = ValuedColorEnum.class.getClassLoader();
-        if (cl instanceof URLClassLoader) {
-            URLClassLoader urlCL = (URLClassLoader) cl;
-            URLClassLoader urlCL1 = new URLClassLoader(urlCL.getURLs(), null);
-            URLClassLoader urlCL2 = new URLClassLoader(urlCL.getURLs(), null);
-            Class otherEnumClass1 = urlCL1.loadClass("org.apache.commons.lang.enums.ValuedColorEnum");
-            Class otherEnumClass2 = urlCL2.loadClass("org.apache.commons.lang.enums.ValuedColorEnum");
-            Object blue1 = otherEnumClass1.getDeclaredField("BLUE").get(null);
-            Object blue2 = otherEnumClass2.getDeclaredField("BLUE").get(null);
-            assertEquals(true, blue1.equals(blue2));
-        }
-    }
-
-    public void testEquals_classloader_different() throws Exception {
-        ClassLoader cl = ValuedColorEnum.class.getClassLoader();
-        if (cl instanceof URLClassLoader) {
-            URLClassLoader urlCL = (URLClassLoader) cl;
-            URLClassLoader urlCL1 = new URLClassLoader(urlCL.getURLs(), null);
-            URLClassLoader urlCL2 = new URLClassLoader(urlCL.getURLs(), null);
-            Class otherEnumClass1 = urlCL1.loadClass("org.apache.commons.lang.enums.ValuedColorEnum");
-            Class otherEnumClass2 = urlCL2.loadClass("org.apache.commons.lang.enums.ValuedColorEnum");
-            Object blue1 = otherEnumClass1.getDeclaredField("BLUE").get(null);
-            Object blue2 = otherEnumClass2.getDeclaredField("RED").get(null);
-            assertEquals(false, blue1.equals(blue2));
-        }
     }
 
     public void testToString() {
@@ -224,19 +131,6 @@ public final class ValuedEnumTest extends TestCase {
         assertSame(ValuedColorEnum.RED, SerializationUtils.clone(ValuedColorEnum.RED));
         assertSame(ValuedColorEnum.GREEN, SerializationUtils.clone(ValuedColorEnum.GREEN));
         assertSame(ValuedColorEnum.BLUE, SerializationUtils.clone(ValuedColorEnum.BLUE));
-    }
-
-    //-----------------------------------------------------------------------s
-    static class TotallyUnrelatedClass {
-        private final int value;
-
-        public TotallyUnrelatedClass(final int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
     }
 
 }

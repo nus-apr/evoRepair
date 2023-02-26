@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enums;
+package org.apache.commons.lang.enumeration;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Test cases for the {@link Enumeration} class.
+ * Test cases for the {@link Enum} class.
  *
  * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
  * @version $Id$
