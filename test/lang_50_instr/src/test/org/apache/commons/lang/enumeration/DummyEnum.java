@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.lang.enum;
+package org.apache.commons.lang.enumeration;
 
 /**
  * Dummy enumeration - no values.
@@ -22,7 +22,7 @@ package org.apache.commons.lang.enum;
  * @author Stephen Colebourne
  * @version $Id$
  */
-public abstract class DummyEnum extends Enum {
+public abstract class DummyEnum extends Enumeration {
 
     private DummyEnum(String name) {
         super(name);
