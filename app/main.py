@@ -134,7 +134,6 @@ def bootstrap(arg_list):
     config.prepare_experiment()
     config.print_configuration()
     values.arg_parsed = True
-    app.utilities.have_budget(values.time_duration_total)
 
 
 def run(arg_list):
@@ -263,8 +262,6 @@ def run(arg_list):
         if values.num_iterations > 0:
             if values.iteration_no > values.num_iterations:
                 break
-        elif not utilities.have_budget(values.time_duration_total):
-            break
 
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 

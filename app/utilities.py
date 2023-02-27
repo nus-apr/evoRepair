@@ -71,23 +71,23 @@ def raise_timeout(signum, frame):
     raise TimeoutError
 
 
-def have_budget(time_budget):
-    if values.iteration_limit >= 0:
-        if values.iteration_no < values.iteration_limit:  # Only for testing purpose.
-            return True
-        else:
-            return False
-    else:
-        if values.timestamp_check is None:
-            values.timestamp_check = time.time()
-            return False
-        else:
-            time_start = values.timestamp_check
-            duration = float(format((time.time() - time_start) / 60, '.3f'))
-            if int(duration) > int(time_budget):
-                values.timestamp_check = None
-                return False
-        return True
+#def have_budget(time_budget):
+#    if values.iteration_limit >= 0:
+#        if values.iteration_no < values.iteration_limit:  # Only for testing purpose.
+#            return True
+#        else:
+#            return False
+#    else:
+#        if values.timestamp_check is None:
+#            values.timestamp_check = time.time()
+#            return False
+#        else:
+#            time_start = values.timestamp_check
+#            duration = float(format((time.time() - time_start) / 60, '.3f'))
+#            if int(duration) > int(time_budget):
+#                values.timestamp_check = None
+#                return False
+#        return True
 
 
 def __dir_is_empty(path):

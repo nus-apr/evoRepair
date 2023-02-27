@@ -155,8 +155,6 @@ class Configurations:
 
         values.dir_log = "/".join([values.dir_log_base, values.tag_id])
         values.stack_size = self.get_value("stack-size")
-        values.time_duration_total = self.get_value("time-duration")
-        values.iteration_limit = self.get_value("iteration-limit")
         sys.setrecursionlimit(values.stack_size)
 
         # update bug information

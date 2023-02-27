@@ -13,7 +13,6 @@ cmd_build = None
 cmd_clean = None
 cmd_pre_build = None
 config_file = None
-iteration_limit = -1
 patch_rank_limit = -1
 stack_size = 100
 time_out = {
@@ -75,9 +74,3 @@ count_patch_gen = 0
 dir_info = dict()
 
 # ------------------- Time Durations --------------------
-time_duration_generate = 0
-time_duration_explore = 0
-time_duration_reduce = 0
-time_duration_total = 0
-timestamp_check = None
-
