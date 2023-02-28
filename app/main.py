@@ -553,7 +553,7 @@ def parse_args():
                           default=60)
     optional.add_argument('--num-iterations', help='number of co-evolution iterations to run',
                           type=int,
-                          default=10)
+                          default=0)
     optional.add_argument('--total-timeout', help='total timeout for running this tool',
                           type=int,
                           default=None)
@@ -582,6 +582,10 @@ def parse_args():
                           type=int,
                           default=None)
     args = parser.parse_args()
+
+    if args.num_iterations == 0 and args.total_timeout is None:
+        utilities.error_exit("must set one of --num-iterations and --total-timeout")
+
     return args
 
 def main():
