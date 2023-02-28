@@ -251,11 +251,10 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
         process = await asyncio.create_subprocess_shell(command, stdout=DEVNULL, stderr=PIPE)
         try:
             timeout = (values.time_system_end - time.time()) if values.time_system_end is not None else None
-            async with asyncio.timeout(timeout):
-                return_code = await process.wait()
-                if return_code != 0:
-                    stderr = await process.stderr.read()
-                    utilities.error_exit("PlainValidator did not exit normally", stderr.decode("utf-8"),
+            return_code = await asyncio.wait_for(process.wait(), timeout=timeout)
+            if return_code != 0:
+                stderr = await process.stderr.read()
+                utilities.error_exit("PlainValidator did not exit normally", stderr.decode("utf-8"),
                                     f"exit code is {return_code}")
         except asyncio.TimeoutError:
             process.kill()
