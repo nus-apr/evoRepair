@@ -1,3 +1,4 @@
+import csv
 import itertools
 import os
 import sys
@@ -156,20 +157,44 @@ def run(arg_list):
     user_i_tests = set()
     passing_user_i_tests = []
     failing_user_i_tests = []
-    plausible_i_patches = []
+    plausible_i_patches = set()
     total_num_killed_patches = 0
 
+    stat_file = Path(values.dir_output, "statistics.csv")
+    assert not os.path.exists(stat_file), f"statistics file {str(stat_file)} already exists"
+
+    field_names = ["Iteration", "#Hall-of-Fame", "#Plausible", "#Valid", "#Overfitting",
+                   "Hall-of-Fame", "Plausible\\Hall-of-Fame", "Valid\\Plausible", "#Generated-Tests",
+                   "#Generated-Killing-Tests"]
+    width = max([len(field) for field in field_names])
+    with open(stat_file, 'w', newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=field_names)
+        writer.writeheader()
+
+    iteration_stats = []
     def report():
-        emitter.normal(f"iteration count: {values.iteration_no}")
-        emitter.normal(f"total patches that pass failing user tests: {len(fame_i_patches) + len(perfect_i_patches)}")
-        emitter.normal(f"total patches that pass all user tests: {len(plausible_i_patches)}")
-        emitter.normal(f"total patches that pass all tests: {len(perfect_i_patches)}")
-        emitter.normal(f"total overfitting patches detected: {total_num_killed_patches}")
-        emitter.normal(f"current hall of fame: [{' '.join([x.get_index_str() for x in perfect_i_patches])}]")
-        emitter.normal(f"current plausible patches: [{' '.join([x.get_index_str() for x in plausible_i_patches])}]")
-        emitter.normal(f"current population: [{' '.join([x.get_index_str() for x in fame_i_patches])}]")
-        emitter.normal(f"total test cases generated: {len(generated_i_tests)}")
-        emitter.normal(f"total test cases that killed patch: {len(set(kill_matrix.keys()) & generated_i_tests)}")
+        stat = {
+            "Iteration": values.iteration_no,
+            "#Hall-of-Fame": len(perfect_i_patches),
+            "#Plausible": len(plausible_i_patches),
+            "#Valid": len(fame_i_patches) + len(perfect_i_patches),
+            "#Overfitting": total_num_killed_patches,
+            "Hall-of-Fame": ' '.join([x.get_index_str() for x in perfect_i_patches]),
+            "Plausible\\Hall-of-Fame": ' '.join([x.get_index_str() for x in plausible_i_patches - perfect_i_patches]),
+            "Valid\\Plausible": ' '.join([x.get_index_str() for x in fame_i_patches - plausible_i_patches]),
+            "#Generated-Tests": len(generated_i_tests),
+            "#Generated-Killing-Tests": len(set(kill_matrix.keys()) & generated_i_tests)
+        }
+        iteration_stats.append(stat)
+
+        for key, value in stat.items():
+            emitter.normal(f"{key:>{width}}: {value}")
+
+        with open(stat_file, 'w', newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=field_names)
+            writer.writeheader()
+            writer.writerows(iteration_stats)
+
         with open(Path(values.dir_output, f"kill_matrix_{values.iteration_no}.json"), 'w') as f:
             json.dump({i_test.get_index_str(): [x.get_index_str() for x in i_patches]
                        for i_test, i_patches in kill_matrix.items()},
@@ -395,7 +420,7 @@ def run(arg_list):
                 if not i_tests & user_i_tests:
                     new_plausible_i_patches.append(i_patch)
         for i_patch in new_plausible_i_patches:
-            plausible_i_patches.append(i_patch)
+            plausible_i_patches.add(i_patch)
             save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
             os.symlink(i_patch.patch.diff_file, save_path)
 
@@ -474,7 +499,7 @@ def run(arg_list):
 
         if num_partitions + 1 == values.passing_tests_partitions:
             for i_patch in perfect_i_patches:
-                plausible_i_patches.append(i_patch)
+                plausible_i_patches.add(i_patch)
                 save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
                 os.symlink(i_patch.patch.diff_file, save_path)
 
