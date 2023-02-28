@@ -173,13 +173,6 @@ def run(arg_list):
     builder.build_project(values.dir_exp, values.cmd_build)
 
     timer.pause_phase(phase)
-    phase = "Testing"
-    timer.start_phase(phase)
-
-    emitter.sub_title("Test Diagnostics")
-    tester.generate_test_diagnostic()
-
-    timer.pause_phase(phase)
 
     emitter.information("Starting co-evolution")
     emitter.information(f"Output directory: {str(values.dir_output)}")
