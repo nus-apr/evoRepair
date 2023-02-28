@@ -141,41 +141,11 @@ def run(arg_list):
     phase = "Startup"
     timer.start_phase(phase)
 
-    create_directories()
-    logger.create_log_files()
-
-    timer.pause_phase(phase)
-    phase = "Bootstrap"
-    timer.start_phase(phase)
-
     bootstrap(arg_list)
-    random.seed(values.random_seed)
-
-    if values.total_timeout is not None:
-        values.time_system_end = values.time_system_start + values.total_timeout
-    else:
-        values.time_system_end = None
 
     oracle_extractor.extract_oracle_locations()
     oracle_locations_file = Path(values.dir_output, "oracleLocations.json")
     assert os.path.isfile(oracle_locations_file), str(oracle_locations_file)
-
-    if values.num_iterations < values.passing_tests_partitions:
-        utilities.error_exit("num-iterations should be greater than or equal to passing-tests-partitions")
-
-    timer.pause_phase(phase)
-    phase = "Build"
-    timer.start_phase(phase)
-
-    emitter.sub_title("Build Project")
-    builder.clean_project(values.dir_exp, values.cmd_clean)
-    builder.config_project(values.dir_exp, values.cmd_pre_build)
-    builder.build_project(values.dir_exp, values.cmd_build)
-
-    timer.pause_phase(phase)
-
-    emitter.information("Starting co-evolution")
-    emitter.information(f"Output directory: {str(values.dir_output)}")
 
     i_patch_population_size = values.num_perfect_patches
 
@@ -216,8 +186,24 @@ def run(arg_list):
 
     assert values.iteration_no == 0, f"values.iteration_no is {values.iteration_no}, expected 0"
 
-    phase = "Bootstrap"
-    timer.resume_phase(phase)
+    timer.pause_phase(phase)
+    emitter.normal(f"\n\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+
+    phase = "Build"
+    timer.start_phase(phase)
+
+    emitter.sub_title("Build Project")
+    builder.clean_project(values.dir_exp, values.cmd_clean)
+    builder.config_project(values.dir_exp, values.cmd_pre_build)
+    builder.build_project(values.dir_exp, values.cmd_build)
+
+    timer.pause_phase(phase)
+    emitter.normal(f"\n\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+
+    phase = "Test Scanning"
+    timer.start_phase(phase)
+
+    emitter.sub_title("Scanning Test Suite")
 
     # Scan user-provided tests
     dir_bin = values.dir_info["classes"]
@@ -269,9 +255,12 @@ def run(arg_list):
         values.passing_tests_partitions = len(passing_user_i_tests)
 
     timer.pause_phase(phase)
+    emitter.normal(f"\n\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
 
     INT_MIN = -0x80000000
     INT_MAX = 0x7fffffff
+
+    emitter.information("\n\tStarting co-evolution")
 
     while True:
         if values.num_iterations > 0:
@@ -411,7 +400,7 @@ def run(arg_list):
             os.symlink(i_patch.patch.diff_file, save_path)
 
         timer.pause_phase(phase)
-        emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+        emitter.normal(f"\n\t\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
 
         if delta_passing_user_i_tests:
             emitter.information(f"Skipping test generation because there are remaining user tests")
@@ -443,7 +432,7 @@ def run(arg_list):
             generated_i_tests.update(indexed_tests)
 
             timer.pause_phase(phase)
-            emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+            emitter.normal(f"\n\t\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
 
         if utilities.timed_out():
             report()
@@ -495,7 +484,7 @@ def run(arg_list):
         emitter.normal(f"{num_killed_patches} perfect patch(es) are killed")
 
         timer.pause_phase(phase)
-        emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+        emitter.normal(f"\n\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
 
         report()
         if utilities.timed_out():
@@ -583,6 +572,9 @@ def parse_args():
                           default=None)
     args = parser.parse_args()
 
+    if args.num_iterations < args.passing_tests_partitions:
+        utilities.error_exit("num-iterations should be greater than or equal to passing-tests-partitions")
+
     if args.num_iterations == 0 and args.total_timeout is None:
         utilities.error_exit("must set one of --num-iterations and --total-timeout")
 
@@ -590,8 +582,14 @@ def parse_args():
 
 def main():
     values.time_system_start = time.time()
+
+    create_directories()
+    logger.create_log_files()
+
     parsed_args = parse_args()
+
     is_error = False
+
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
     try:

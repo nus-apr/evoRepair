@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import re
 import shutil
@@ -89,6 +90,7 @@ class Configurations:
 
     def print_configuration(self):
         emitter.configuration("log file", values.file_log_main)
+        emitter.configuration("output directory", values.dir_output)
         emitter.configuration("working directory", values.dir_exp)
         emitter.configuration("stack size", values.stack_size)
         emitter.configuration("tag id", values.tag_id)
@@ -143,12 +145,18 @@ class Configurations:
         values.test_gen_timeout = self.__runtime_config_values["test-gen-timeout"]
         values.num_iterations = self.__runtime_config_values["num-iterations"]
         values.total_timeout = self.__runtime_config_values["total-timeout"]
+        if values.total_timeout is not None:
+            values.time_system_end = values.time_system_start + values.total_timeout
+        else:
+            values.time_system_end = None
+
         values.dry_run_test_gen = self.__runtime_config_values["dry-run-test"]
         values.dry_run_repair = self.__runtime_config_values["dry-run-patch"]
         values.passing_tests_partitions = self.__runtime_config_values["passing-tests-partitions"]
         values.valid_population_size = self.__runtime_config_values["valid-population-size"]
         values.source_version = self.__runtime_config_values["source-version"]
         values.random_seed = self.__runtime_config_values["random-seed"]
+        random.seed(values.random_seed)
 
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths
