@@ -74,3 +74,6 @@ count_patch_gen = 0
 dir_info = dict()
 
 # ------------------- Time Durations --------------------
+time_system_start = 0
+time_system_end = 0
+total_timeout = 0

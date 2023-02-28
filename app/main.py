@@ -150,6 +150,12 @@ def run(arg_list):
 
     bootstrap(arg_list)
     random.seed(values.random_seed)
+
+    if values.total_timeout is not None:
+        values.time_system_end = values.time_system_start + values.total_timeout
+    else:
+        values.time_system_end = None
+
     oracle_extractor.extract_oracle_locations()
     oracle_locations_file = Path(values.dir_output, "oracleLocations.json")
     assert os.path.isfile(oracle_locations_file), str(oracle_locations_file)
@@ -189,6 +195,22 @@ def run(arg_list):
     failing_user_i_tests = []
     plausible_i_patches = []
     total_num_killed_patches = 0
+
+    def report():
+        emitter.normal(f"iteration count: {values.iteration_no}")
+        emitter.normal(f"total patches that pass failing user tests: {len(fame_i_patches) + len(perfect_i_patches)}")
+        emitter.normal(f"total patches that pass all user tests: {len(plausible_i_patches)}")
+        emitter.normal(f"total patches that pass all tests: {len(perfect_i_patches)}")
+        emitter.normal(f"total overfitting patches detected: {total_num_killed_patches}")
+        emitter.normal(f"current hall of fame: [{' '.join([x.get_index_str() for x in perfect_i_patches])}]")
+        emitter.normal(f"current plausible patches: [{' '.join([x.get_index_str() for x in plausible_i_patches])}]")
+        emitter.normal(f"current population: [{' '.join([x.get_index_str() for x in fame_i_patches])}]")
+        emitter.normal(f"total test cases generated: {len(generated_i_tests)}")
+        emitter.normal(f"total test cases that killed patch: {len(set(kill_matrix.keys()) & generated_i_tests)}")
+        with open(Path(values.dir_output, f"kill_matrix_{values.iteration_no}.json"), 'w') as f:
+            json.dump({i_test.get_index_str(): [x.get_index_str() for x in i_patches]
+                       for i_test, i_patches in kill_matrix.items()},
+                      f)
 
     dir_perfect_patches = Path(values.dir_output, "perfect-patches")
     os.makedirs(dir_perfect_patches, exist_ok=True)
@@ -339,6 +361,10 @@ def run(arg_list):
         else:
             additional_i_tests = [*passing_user_i_tests, *generated_i_tests]
 
+        if utilities.timed_out():
+            report()
+            break
+
         patches, fame_patches, failed_i_tests = repair.generate(
             values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"], dir_patches,
@@ -399,6 +425,10 @@ def run(arg_list):
             emitter.information(f"Will validate perfect patches with {len(delta_passing_user_i_tests)} user tests")
             indexed_tests = delta_passing_user_i_tests
         else:
+            if utilities.timed_out():
+                report()
+                break
+
             phase = "Test Generation"
             if num_partitions == values.passing_tests_partitions:
                 timer.start_phase(phase)
@@ -421,6 +451,10 @@ def run(arg_list):
 
             timer.pause_phase(phase)
             emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
+
+        if utilities.timed_out():
+            report()
+            break
 
         phase = "Validation"
         if values.iteration_no == 0:
@@ -470,20 +504,9 @@ def run(arg_list):
         timer.pause_phase(phase)
         emitter.normal(f"Used {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
 
-        emitter.normal(f"iteration count: {values.iteration_no}")
-        emitter.normal(f"total patches that pass failing user tests: {len(fame_i_patches) + len(perfect_i_patches)}")
-        emitter.normal(f"total patches that pass all user tests: {len(plausible_i_patches)}")
-        emitter.normal(f"total patches that pass all tests: {len(perfect_i_patches)}")
-        emitter.normal(f"total overfitting patches detected: {total_num_killed_patches}")
-        emitter.normal(f"current hall of fame: [{' '.join([x.get_index_str() for x in perfect_i_patches])}]")
-        emitter.normal(f"current plausible patches: [{' '.join([x.get_index_str() for x in plausible_i_patches])}]")
-        emitter.normal(f"current population: [{' '.join([x.get_index_str() for x in fame_i_patches])}]")
-        emitter.normal(f"total test cases generated: {len(generated_i_tests)}")
-        emitter.normal(f"total test cases that killed patch: {len(set(kill_matrix.keys()) & generated_i_tests)}")
-        with open(Path(values.dir_output, f"kill_matrix_{values.iteration_no}.json"), 'w') as f:
-            json.dump({i_test.get_index_str(): [x.get_index_str() for x in i_patches]
-                       for i_test, i_patches in kill_matrix.items()},
-                      f)
+        report()
+        if utilities.timed_out():
+            break
 
         values.iteration_no = values.iteration_no + 1
 
@@ -538,6 +561,9 @@ def parse_args():
     optional.add_argument('--num-iterations', help='number of co-evolution iterations to run',
                           type=int,
                           default=10)
+    optional.add_argument('--total-timeout', help='total timeout for running this tool',
+                          type=int,
+                          default=None)
     optional.add_argument('--dry-run-test', help='enable dry run for test',
                           action='store_true',
                           default=False)
@@ -566,6 +592,7 @@ def parse_args():
     return args
 
 def main():
+    values.time_system_start = time.time()
     parsed_args = parse_args()
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)

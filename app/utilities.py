@@ -89,6 +89,10 @@ def raise_timeout(signum, frame):
 #                return False
 #        return True
 
+def timed_out():
+    return (values.time_system_end is not None
+            and time.time() >= values.time_system_end)
+
 
 def __dir_is_empty(path):
     assert os.path.isdir(path)

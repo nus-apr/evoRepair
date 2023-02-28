@@ -1,3 +1,4 @@
+import time
 from app import emitter, utilities, values
 from app.uniapr import run_uniapr
 
@@ -137,7 +138,11 @@ def plain_validate(indexed_patches, indexed_tests, work_dir, use_d4j_instr):
 
     validator_run_count = 0
 
-    for i_patch in indexed_patches:
+    indexed_patches_list = list(indexed_patches)
+    for index, i_patch in enumerate(indexed_patches_list):
+        if utilities.timed_out():
+            result.extend([(i_patch, [], []) for i_patch in indexed_patches_list[index:]])
+            break
 
         passing_i_tests = []
         failing_i_tests = []
@@ -235,14 +240,26 @@ async def run_plain_validator(patch_bin_dir, suites_bin_dirs, suites_runtime_dep
                     f' -f {str(test_names_file)}'
                     )
 
+        empty_result = json.dumps({"passingTests": [], "failingTests": []})
+
+        if utilities.timed_out():
+            return empty_result
+
         emitter.command(command)
         emitter.normal(f"running {len(full_test_names)} test cases")
 
         process = await asyncio.create_subprocess_shell(command, stdout=DEVNULL, stderr=PIPE)
-        return_code = await process.wait()
-        if return_code != 0:
-            stderr = await process.stderr.read()
-            utilities.error_exit("PlainValidator did not exit normally", stderr.decode("utf-8"),
-                                 f"exit code is {return_code}")
+        try:
+            timeout = (values.time_system_end - time.time()) if values.time_system_end is not None else None
+            async with asyncio.timeout(timeout):
+                return_code = await process.wait()
+                if return_code != 0:
+                    stderr = await process.stderr.read()
+                    utilities.error_exit("PlainValidator did not exit normally", stderr.decode("utf-8"),
+                                    f"exit code is {return_code}")
+        except asyncio.TimeoutError:
+            process.kill()
+            emitter.normal("stopped test running because of global timeout")
+            return empty_result
 
     return result[0]

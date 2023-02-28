@@ -1,4 +1,5 @@
 import re
+import time
 from typing import List
 
 from app import emitter, utilities, values
@@ -111,17 +112,23 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
                 json.dump(seeds_info, f)
 
     result = []
-    for classname in classes:
+    while classes:
+        classname = classes.pop()
         dir_output_this_class = Path(dir_output, classname)
         os.makedirs(dir_output_this_class, exist_ok=True)
         if not dry_run:
             assert utilities.is_empty_dir(dir_output_this_class)
-        result.extend(
-            generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
-                                     dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
-                                     seeds_file=seeds_file, target_patches_file=target_patches_file,
-                                     random_seed=random_seed)
-        )
+        if not utilities.timed_out:
+            result.extend(
+                generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
+                                        dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
+                                        seeds_file=seeds_file, target_patches_file=target_patches_file,
+                                        random_seed=random_seed)
+            )
+        else:
+            emitter.normal(f"\tskipping test generation for these classes due to global timeout:"
+                           f" {', '.join(classes | set([classname]))}")
+            break
 
     return result
 
@@ -175,6 +182,9 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     test_names_file = Path(dir_test_src, "test_names.txt")
 
     if not dry_run:
+        if utilities.timed_out():
+            return []
+
         emitter.normal(f"\trunning evosuite for {classname}")
 
         popen = subprocess.Popen(shlex.split(evosuite_command), stdout=DEVNULL, stderr=PIPE)
@@ -187,12 +197,16 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
             emitter.normal("\t\twaiting for EvoSuite to terminate automatically")
 
         # trust EvoSuite always terminates
-        popen.wait()
-        return_code = popen.poll()
-
-        if return_code != 0:
-            utilities.error_exit("EvoSuite did not exit normally",
-                                 popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
+        try:
+            popen.wait(timeout=(values.time_system_end - time.time()) if values.time_system_end is not None else None)
+            return_code = popen.poll()
+            if return_code != 0:
+                utilities.error_exit("EvoSuite did not exit normally",
+                                    popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
+        except subprocess.TimeoutExpired:
+            popen.kill()
+            emitter.normal("\t\tkilled EvoSuite due to global timeout")
+            return []
 
         out_file_prefix = str(Path(dir_test_src, *classname.split('.')))
         out1 = f"{out_file_prefix}{junit_suffix}.java"

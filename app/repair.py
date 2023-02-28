@@ -257,9 +257,20 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             repair_log_fp = open(Path(values.dir_output, f"repair_log_{values.iteration_no}.txt"), 'w')
             popen = subprocess.Popen(shlex.split(repair_command), stdout=repair_log_fp, stderr=PIPE)
 
+            def terminate_repair(timeout):
+                popen.terminate()
+                try:
+                    popen.wait(timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    utilities.error_exit(
+                        f"repair did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
+                        f" repair aborted")
+
+            termination_timeout = 10
+
             time_to_stop = time.time() + timeout_in_seconds
-            stopped_early = False
-            while time.time() < time_to_stop or not timeout_in_seconds:
+            in_extension = False
+            while True:
                 return_code = popen.poll()
 
                 # Arja writes the Patch_{n}.txt files lastly. If these are ready, then other patch files must have also
@@ -267,64 +278,47 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                 num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
                 num_fames = len([entry for entry in os.scandir(dir_fames) if entry.is_file()])
 
-                if return_code == 0:
-                    stopped_early = True
+                patch_count_msg = (f"got {num_patches} plausible patches" +
+                                   (f" and {num_fames} valid patches" if expecting_fames else ""))
 
-                    msg = (f"\trepair terminated normally after {max_generations} generations;"
-                           f" got {num_patches} plausible patches")
-                    if expecting_fames:
-                        msg += f" and {num_fames} valid patches"
+                if return_code == 0:
+                    msg = (f"\trepair terminated normally after {max_generations} generations; {patch_count_msg}")
                     emitter.normal(msg)
                     break
                 elif return_code is not None:
                     utilities.error_exit("repair did not exit normally",
                                         popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
-                elif (num_patches >= num_patches_wanted
-                      and ((not expecting_fames) or num_patches + num_fames >= num_patches_wanted + num_fames_wanted)):
-                    stopped_early = True
-                    popen.terminate()
-                    try:
-                        timeout = 10
-                        popen.wait(timeout=timeout)
-                    except subprocess.TimeoutExpired:
-                        utilities.error_exit(
-                            f"repair did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
-                            f" repair aborted")
+                else:
+                    if utilities.timed_out():
+                        msg = (f"\tstopping repair due to global timeout... {patch_count_msg}")
+                        emitter.normal(msg)
 
-                    msg = f"\tTerminated repair because there are enough patches;  got {num_patches} plausible patches"
-                    if expecting_fames:
-                        msg += f" and {num_fames} valid patches"
-                    emitter.normal(msg)
-                    break
-            if not stopped_early:
-                msg_emitted = False
-                while True:
-                    num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
-                    if num_patches >= num_patches_forced:
+                        terminate_repair(termination_timeout)
                         break
-                    if not msg_emitted:
-                        emitter.normal(f"\ttime is out but there are only {num_patches} plausible patches;"
-                                       f" will wait for {num_patches_forced} plausible patches before exiting")
-                        msg_emitted = True
-                if msg_emitted:
-                    emitter.normal(
-                        f"\treached the minimum requirement of {num_patches_forced} plausible patches; exiting")
+                    elif timeout_in_seconds and time.time() >= time_to_stop:
+                        if not in_extension:
+                            if num_patches >= num_patches_forced:
+                                msg = f"\tstopping repair due to timeout... {patch_count_msg}"
+                                emitter.normal(msg)
 
-                popen.terminate()
-                try:
-                    timeout = 10
-                    popen.wait(timeout=timeout)
-                except subprocess.TimeoutExpired:
-                    utilities.error_exit(
-                        f"repair did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
-                        f" repair aborted")
-                num_patches = len([entry for entry in os.scandir(dir_patches) if entry.is_file()])
-                num_fames = len([entry for entry in os.scandir(dir_fames) if entry.is_file()])
+                                terminate_repair(termination_timeout)
+                                break
+                            emitter.normal(f"\ttime is out but there are only {num_patches} plausible patches;"
+                                        f" will wait for {num_patches_forced} plausible patches before exiting")
+                            in_extension = True
+                        elif num_patches >= num_patches_forced:
+                            emitter.normal(
+                                f"\treached the minimum requirement of {num_patches_forced} plausible patches; stopping...")
 
-                msg = f"\trepair stopped due to timeout; got {num_patches} plausible patches"
-                if expecting_fames:
-                    msg += f" and {num_fames} valid patches"
-                emitter.normal(msg)
+                            terminate_repair(termination_timeout)
+                            break
+                    elif (num_patches >= num_patches_wanted and
+                          ((not expecting_fames) or num_patches + num_fames >= num_patches_wanted + num_fames_wanted)):
+                        msg = (f"\tterminating repair because there are enough patches... {patch_count_msg}")
+                        emitter.normal(msg)
+
+                        terminate_repair(termination_timeout)
+                        break
         finally:
             repair_log_fp.close()
             for symlink in symlinks:

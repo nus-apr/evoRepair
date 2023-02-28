@@ -42,6 +42,7 @@ class Configurations:
         self.__runtime_config_values["patch-gen-timeout"] = arg_list.patch_gen_timeout
         self.__runtime_config_values["test-gen-timeout"] = arg_list.test_gen_timeout
         self.__runtime_config_values["num-iterations"] = arg_list.num_iterations
+        self.__runtime_config_values["total-timeout"] = arg_list.total_timeout
         self.__runtime_config_values["dry-run-patch"] = arg_list.dry_run_patch
         self.__runtime_config_values["dry-run-test"] = arg_list.dry_run_test
         self.__runtime_config_values["dir-test"] = arg_list.dir_test
@@ -103,6 +104,7 @@ class Configurations:
         emitter.configuration("patch generation timeout", values.patch_gen_timeout)
         emitter.configuration("test generation timeout", values.test_gen_timeout)
         emitter.configuration("number of iterations to run", values.num_iterations)
+        emitter.configuration("total timeout", values.total_timeout)
         emitter.configuration("dry run for patch generation", values.dry_run_repair)
         emitter.configuration("dry run for test generation", values.dry_run_test_gen)
         emitter.configuration("number of partitions of passing user test cases", values.passing_tests_partitions)
@@ -140,6 +142,7 @@ class Configurations:
         values.patch_gen_timeout = self.__runtime_config_values["patch-gen-timeout"]
         values.test_gen_timeout = self.__runtime_config_values["test-gen-timeout"]
         values.num_iterations = self.__runtime_config_values["num-iterations"]
+        values.total_timeout = self.__runtime_config_values["total-timeout"]
         values.dry_run_test_gen = self.__runtime_config_values["dry-run-test"]
         values.dry_run_repair = self.__runtime_config_values["dry-run-patch"]
         values.passing_tests_partitions = self.__runtime_config_values["passing-tests-partitions"]
