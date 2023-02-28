@@ -118,7 +118,7 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
         os.makedirs(dir_output_this_class, exist_ok=True)
         if not dry_run:
             assert utilities.is_empty_dir(dir_output_this_class)
-        if not utilities.timed_out:
+        if not utilities.timed_out():
             result.extend(
                 generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
                                         dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
