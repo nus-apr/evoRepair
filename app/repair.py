@@ -190,7 +190,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     if dir_deps:
         dependences = ":".join([*[entry.path for entry in os.scandir(dir_deps)], *suites_runtime_deps])
     else:
-        dependences = ""
+        dependences = ":".join(suites_runtime_deps)
     repair_command += f' -Ddependences "{dependences}" '
 
     if source_version:
