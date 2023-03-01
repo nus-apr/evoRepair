@@ -237,7 +237,11 @@ def run(arg_list):
     dir_deps = values.dir_info["deps"]
     orig_tests_file = Path(values.dir_output, "passing_user_tests.txt")
     final_tests_file = Path(values.dir_output, "relevant_user_tests.txt")
-    spectra_file = Path(values.dir_output, "spectra", "spectra_user_tests.csv")
+
+    dir_spectra_base = Path(values.dir_output, "spectra")
+    os.makedirs(dir_spectra_base, exist_ok=True)
+    assert utilities.is_empty_dir(dir_spectra_base), str(dir_spectra_base)
+    spectra_file = Path(dir_spectra_base, "spectra_user_tests.csv")
 
     passing_user_tests, failing_user_tests, relevant_passing_user_tests = repair.arja_scan_and_filter_tests(
         values.dir_info["source"], values.dir_info["classes"], values.dir_info["tests"], values.dir_info["deps"],
