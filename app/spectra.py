@@ -58,6 +58,8 @@ class Spectra:
             tmp.append(test)
             tmp.append(",")
             tmp.append(result)
+            tmp.extend([f",{loc.class_name}:{loc.line_number}"
+                        for loc in self.locations_for_test[test]])
 
         return "".join(tmp)
 
