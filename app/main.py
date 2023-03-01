@@ -21,6 +21,7 @@ from app.patch import Patch, IndexedPatch
 import random
 import json
 from app.test_suite import USER_TEST_GENERATION
+from app.spectra import Spectra
 
 
 class Interval:
@@ -236,11 +237,15 @@ def run(arg_list):
     dir_deps = values.dir_info["deps"]
     orig_tests_file = Path(values.dir_output, "passing_user_tests.txt")
     final_tests_file = Path(values.dir_output, "relevant_user_tests.txt")
+    spectra_file = Path(values.dir_output, "spectra", "spectra_user_tests.csv")
 
     passing_user_tests, failing_user_tests, relevant_passing_user_tests = repair.arja_scan_and_filter_tests(
         values.dir_info["source"], values.dir_info["classes"], values.dir_info["tests"], values.dir_info["deps"],
-        orig_tests_file, final_tests_file, source_version=values.source_version
+        orig_tests_file, final_tests_file, spectra_file, source_version=values.source_version
     )
+
+    spectra = Spectra()
+    spectra.update(spectra_file)
 
     dir_test_src = "N/A"
     dump_file = None
@@ -331,10 +336,11 @@ def run(arg_list):
         fame_summary_path = Path(values.dir_info["patches"], f"fame_summary_gen{values.iteration_no}.txt")
         target_patches_file = Path(values.dir_info["gen-test"], f"target_patches_gen{values.iteration_no}.json")
         seed_tests_file = Path(values.dir_info["gen-test"], f"seed_tests_gen{values.iteration_no}.json")
+        dir_gzoltar_data = Path(values.dir_info["patches"], f"gzoltar-data-gen{values.iteration_no}")
 
-        directories = (dir_patches, dir_fames, dir_tests, dir_validation)
+        directories = (dir_patches, dir_fames, dir_tests, dir_validation, dir_gzoltar_data)
         non_empty_conditions = (dry_run_repair, dry_run_repair, dry_run_test_gen,
-                                not compile_patches and not compile_tests)
+                                not compile_patches and not compile_tests, dry_run_repair)
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
         for condition, directory in zip(non_empty_conditions, directories):
@@ -399,7 +405,9 @@ def run(arg_list):
             num_patches_forced=1,
 
             arja_random_seed=random.randint(INT_MIN, INT_MAX),
-            evo_random_seed=random.randint(INT_MIN, INT_MAX)
+            evo_random_seed=random.randint(INT_MIN, INT_MAX),
+
+            spectra=spectra, dir_gzoltar_data=dir_gzoltar_data
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
@@ -507,6 +515,23 @@ def run(arg_list):
             total_num_killed_patches += num_killed_patches
 
         emitter.normal(f"{num_killed_patches} perfect patch(es) are killed")
+
+        spectra_dir = Path(values.dir_output, "spectra", f"gen{values.iteration_no}")
+        os.makedirs(spectra_dir, exist_ok=True)
+        test_names_path = Path(spectra_dir, "test_names.txt")
+        spectra_file = Path(spectra_dir, "spectra.csv")
+        log_file = Path(spectra_dir, "log")
+        assert not os.path.exists(test_names_path), str(test_names_path)
+        assert not os.path.exists(spectra_file), str(spectra_file)
+        assert not os.path.exists(log_file), str(log_file)
+
+        emitter.information("Retriving spectra of generated tests")
+        repair.arja_get_tests_spectra(
+            values.dir_info["source"], values.dir_info["classes"],
+            values.dir_info["tests"], values.dir_info["deps"],
+            indexed_tests, test_names_path, spectra_file, log_file,
+            values.source_version)
+        spectra.update(spectra_file)
 
         timer.pause_phase(phase)
         emitter.normal(f"\n\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")

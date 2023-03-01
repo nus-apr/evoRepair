@@ -49,7 +49,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              fame_i_patches=None, init_ratio_fame=None, fame_summary_path=None,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
              use_arja=False, source_version=None, num_patches_forced=0,
-             arja_random_seed=0, evo_random_seed=0
+             arja_random_seed=0, evo_random_seed=0,
+             spectra=None, dir_gzoltar_data=None
              ):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -61,6 +62,15 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     assert os.path.isdir(dir_patches), dir_patches
     assert os.path.isabs(test_names_path), test_names_path
     assert os.path.isabs(additional_tests_info_path), additional_tests_info_path
+    assert (spectra is None and dir_gzoltar_data is None) or (spectra is not None and dir_gzoltar_data is not None)
+    if dir_gzoltar_data is not None:
+        assert os.path.isabs(dir_gzoltar_data), dir_gzoltar_data
+        if not dry_run:
+            assert utilities.is_empty_dir(dir_gzoltar_data), dir_gzoltar_data
+        all_test_names = set()
+        all_test_names.update([it.get_full_test_name() for it in basic_i_tests])
+        all_test_names.update([it.get_full_test_name() for it in additional_i_tests])
+        assert all_test_names == set(spectra.test_results.keys())
     if not dry_run:
         utilities.check_is_empty_dir(dir_patches)
         assert Path(dir_patches) not in Path(test_names_path).parents
@@ -202,6 +212,15 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     if oracle_locations_file is not None:
         repair_command += f' -DoracleLocationsFile {str(oracle_locations_file)}'
+
+    if dir_gzoltar_data is not None:
+        if not dry_run:
+            with open(Path(dir_gzoltar_data, "tests"), 'w') as f:
+                f.write(spectra.dump_tests_str())
+            with open(Path(dir_gzoltar_data, "spectra"), 'w') as f:
+                f.write(spectra.dump_susp_values_str())
+
+        repair_command += f' -DgzoltarDataDir {str(dir_gzoltar_data)}'
 
     # -DmaxTime is in minutes; set maxTime to be double timeout_in_seconds to be safe
     max_time = math.ceil(timeout_in_seconds / 60 * 2)
@@ -454,14 +473,14 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps, class_names_file):
 
 
 def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_pos_tests_file, final_tests_file,
-                               source_version=None):
+                               spectra_file, source_version=None):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
         assert utilities.is_nonempty_dir(x), x
     if dir_deps:
         assert os.path.isabs(dir_deps), dir_deps
         assert os.path.isdir(dir_deps), dir_deps
-    for x in orig_pos_tests_file, final_tests_file:
+    for x in orig_pos_tests_file, final_tests_file, spectra_file:
         assert os.path.isabs(x), x
         assert not os.path.exists(x), x
 
@@ -497,6 +516,7 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
                           f' -DorgPosTestsInfoPath {str(orig_pos_tests_file)}'
                           f' -DfinalTestsInfoPath {str(final_tests_file)}'
                           f' -DfilterTestsOnly true'
+                          f' -DspectraPath {spectra_file}'
                           )
         if dir_deps:
             dependences = ":".join([entry.path for entry in os.scandir(dir_deps)])
@@ -529,3 +549,95 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
         failing_tests = final_tests - relevant_passing_tests
 
         return passing_tests, failing_tests, relevant_passing_tests
+
+
+def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, test_names_path,
+                           spectra_file, log_file, source_version=None):
+    for x in dir_src, dir_bin, dir_test_bin:
+        assert os.path.isabs(x), x
+        assert utilities.is_nonempty_dir(x), x
+    if dir_deps:
+        assert os.path.isabs(dir_deps), dir_deps
+        assert os.path.isdir(dir_deps), dir_deps
+    for x in test_names_path, spectra_file, log_file:
+        assert os.path.isabs(x), x
+        assert not os.path.exists(x), x
+    indexed_suites = set([it.indexed_suite for it in i_tests if it.indexed_suite.generation != USER_TEST_GENERATION])
+    for i_suite in indexed_suites:
+        assert i_suite in indexed_suite_to_bin_dir, f"{str(i_suite)} has not been compiled"
+
+    suites_runtime_deps = set()
+    for i_suite in indexed_suites:
+        suites_runtime_deps.update([str(dep) for dep in i_suite.suite.runtime_deps])
+
+    java_executable = shutil.which("java")
+    if java_executable is None:
+        raise RuntimeError("Java executable not found")
+
+    dir_arja = Path(values._dir_root, "extern", "arja").resolve()
+    assert os.path.isdir(dir_arja), dir_arja
+
+    arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
+    assert os.path.isfile(arja_jar), arja_jar
+
+    dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
+    assert os.path.isdir(dir_evosuite), dir_evosuite
+
+    evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0.jar")
+    assert os.path.isfile(evosuite_client_jar), evosuite_client_jar
+
+    evosuite_standalone_rt_jar = Path(dir_evosuite, "standalone_runtime", "target",
+                                        "evosuite-standalone-runtime-1.2.0.jar")
+    assert os.path.isfile(evosuite_standalone_rt_jar), evosuite_standalone_rt_jar
+
+    dummy_dir_patches = values.dir_output
+
+    with open(test_names_path, 'w') as f:
+        f.write("\n".join(
+            [i_test.get_full_test_name() for i_test in i_tests]))
+
+    repair_command = (f'{java_executable}'
+                        f' -cp "{str(arja_jar)}:{str(evosuite_client_jar)}:{str(evosuite_standalone_rt_jar)}"'
+                        f' org.evosuite.patch.ERepairMain'
+                        f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
+                        f' -DbinTestDir "{str(dir_test_bin)}"'
+                        f' -DpatchOutputRoot "{str(dummy_dir_patches)}"'
+                        f' -DexternalProjRoot {str(dir_arja)}/external'
+                        f' -DtestNamesPath {str(test_names_path)}'
+                        f' -DspectraPath {spectra_file}'
+                        f' -DspectraOnly true'
+                        )
+    if dir_deps:
+        dependences = ":".join([*[entry.path for entry in os.scandir(dir_deps)], *suites_runtime_deps])
+    else:
+        dependences = ":".join(suites_runtime_deps)
+    repair_command += f' -Ddependences "{dependences}"'
+
+    if source_version:
+        repair_command += f' -DsrcVersion {source_version}'
+
+    # put additional tests in binTestDir
+    symlinks = []
+    for i_suite in indexed_suites:
+        i_test_bin_dir = indexed_suite_to_bin_dir[i_suite]
+        class_files = glob.glob(os.path.join(str(i_test_bin_dir), "**", "*.class"), recursive=True)
+        for class_file in class_files:
+            dst = Path(dir_test_bin, os.path.relpath(class_file, start=i_test_bin_dir))
+            assert dst.parent.is_dir(), f"{str(dst.parent)} is not an existing directory"
+            assert not dst.exists(), f"{str(dst)} already exists"
+            os.symlink(class_file, dst)
+            symlinks.append(dst)
+
+    try:
+        with open(log_file, 'w') as f:
+            emitter.command(repair_command)
+            process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE)
+        if process.returncode != 0:
+            utilities.error_exit("spectra retrieval did not exit normally",
+                                    process.stderr.decode("utf-8"), f"return code: {process.returncode}")
+        if not os.path.isfile(spectra_file):
+            utilities.error_exit(f"spectra retrieval exited normally without generating expected file {str(x)}",
+                                    f" see logs in {str(log_file)}")
+    finally:
+        for symlink in symlinks:
+            os.unlink(symlink)
