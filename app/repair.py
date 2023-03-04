@@ -127,7 +127,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
         assert os.path.isdir(dir_evosuite), dir_evosuite
 
-        evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0.jar")
+        evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0-jar-with-dependencies.jar")
         assert os.path.isfile(evosuite_client_jar), evosuite_client_jar
 
         evosuite_standalone_rt_jar = Path(dir_evosuite, "standalone_runtime", "target",
