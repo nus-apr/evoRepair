@@ -274,7 +274,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
         try:
             repair_log_fp = open(Path(values.dir_output, f"repair_log_{values.iteration_no}.txt"), 'w')
-            popen = subprocess.Popen(shlex.split(repair_command), stdout=repair_log_fp, stderr=PIPE)
+            popen = subprocess.Popen(shlex.split(repair_command), stdout=repair_log_fp, stderr=PIPE,
+                                     cwd=values.dir_info["project"])
 
             def terminate_repair(timeout):
                 popen.terminate()
