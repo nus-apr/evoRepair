@@ -37,6 +37,7 @@ public class StandardToStringStyleTest extends TestCase {
     private final Integer base = new Integer(5);
     private final String baseStr = "Integer";
     
+    private static final ToStringStyle OLD_STYLE = ToStringBuilder.getDefaultStyle();
     private static final StandardToStringStyle STYLE = new StandardToStringStyle();
     
     static {
@@ -75,7 +76,7 @@ public class StandardToStringStyleTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        ToStringBuilder.setDefaultStyle(STYLE);
+        ToStringBuilder.setDefaultStyle(OLD_STYLE);
     }
 
     //----------------------------------------------------------------
