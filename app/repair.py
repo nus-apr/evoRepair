@@ -38,6 +38,7 @@ Each patch objects has the following
         
 """
 
+ARJA_ENV = {"TZ": "America/Los_Angeles"}
 
 def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              basic_i_tests, test_names_path,
@@ -275,7 +276,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         try:
             repair_log_fp = open(Path(values.dir_output, f"repair_log_{values.iteration_no}.txt"), 'w')
             popen = subprocess.Popen(shlex.split(repair_command), stdout=repair_log_fp, stderr=PIPE,
-                                     cwd=values.dir_info["project"])
+                                     cwd=values.dir_info["project"], env=ARJA_ENV)
 
             def terminate_repair(timeout):
                 popen.terminate()
@@ -531,7 +532,8 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
         emitter.command(repair_command)
         log_file = Path(values.dir_output, "test_scanning_log.txt")
         with open(log_file, 'w') as f:
-            process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE)
+            process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE, cwd=values.dir_info["project"],
+                                     env=ARJA_ENV)
         if process.returncode != 0:
             utilities.error_exit("test scanning did not exit normally",
                                  process.stderr.decode("utf-8"), f"return code: {process.returncode}")
@@ -632,7 +634,8 @@ def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, te
     try:
         with open(log_file, 'w') as f:
             emitter.command(repair_command)
-            process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE)
+            process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE, cwd=values.dir_info["project"],
+                                     env=ARJA_ENV)
         if process.returncode != 0:
             utilities.error_exit("spectra retrieval did not exit normally",
                                     process.stderr.decode("utf-8"), f"return code: {process.returncode}")
