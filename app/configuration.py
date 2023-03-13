@@ -75,8 +75,8 @@ class Configurations:
             self.__runtime_config_values["classes-dir"] = project_info["class-directory"]
             self.__runtime_config_values["source-version"] = project_info.get("source-version", None)
 
-            localization_info = config_json["localization"]
-            self.__runtime_config_values["fix-locations"] = localization_info["fix-locations"]
+            #localization_info = config_json["localization"]
+            #self.__runtime_config_values["fix-locations"] = localization_info["fix-locations"]
 
             build_info = config_json["build"]
             command_info = build_info["commands"]
