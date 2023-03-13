@@ -14,6 +14,7 @@ import shutil
 import pprint
 from collections import defaultdict, OrderedDict
 import itertools
+import traceback
 
 
 """
@@ -64,6 +65,7 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
     compilable_i_patches = set(indexed_patches)
 
     if compile_patches:
+        emitter.normal("Compiling patches")
         for i_patch in indexed_patches:
             if i_patch not in indexed_patch_to_bin_dir:
                 index = i_patch.get_index()
@@ -78,6 +80,7 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
                     non_compilable_i_patches.append(i_patch)
                     compilable_i_patches.remove(i_patch)
                     emitter.warning(f"{str(i_patch)} does not compile")
+                    emitter.warning(traceback.format_exc())
                     continue
 
                 indexed_patch_to_bin_dir[i_patch] = str(out_dir)
@@ -85,6 +88,7 @@ def validate(indexed_patches, indexed_tests, work_dir, compile_patches=True, com
     if compile_tests:
         indexed_suites = set([it.indexed_suite for it in indexed_tests])
 
+        emitter.normal("Compiling test suites")
         for i_suite in indexed_suites:
             if i_suite not in indexed_suite_to_bin_dir:
                 index = i_suite.get_index()

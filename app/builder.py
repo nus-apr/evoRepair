@@ -20,7 +20,6 @@ def config_project(project_path, custom_config_command=None):
 
 
 def build_project(project_path, build_command=None):
-    emitter.normal("compiling program")
     dir_command = "cd " + project_path + ";"
 
     build_command = dir_command + build_command

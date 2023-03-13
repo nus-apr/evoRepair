@@ -221,6 +221,8 @@ def run(arg_list):
     emitter.sub_title("Build Project")
     builder.clean_project(values.dir_exp, values.cmd_clean)
     builder.config_project(values.dir_exp, values.cmd_pre_build)
+
+    emitter.normal("compiling program")
     builder.build_project(values.dir_exp, values.cmd_build)
 
     timer.pause_phase(phase)

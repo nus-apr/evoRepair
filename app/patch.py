@@ -8,6 +8,7 @@ from pathlib import Path
 import time
 from collections import namedtuple
 from unidiff import PatchSet
+import shlex
 
 
 class Patch:
@@ -36,29 +37,37 @@ class Patch:
         dir_project = values.dir_info["project"]
         shutil.copytree(dir_project, tmp_dir, dirs_exist_ok=True)
 
+        patched_dir_src = Path(tmp_dir, os.path.relpath(values.dir_info["source"], start=dir_project))
+
+        # assuming the patch file uses unix line endings
+        dos2unix_executable = shutil.which("dos2unix")
+        if dos2unix_executable is None:
+            raise RuntimeError('"dos2unix" utility not found')
+        emitter.normal("\ttransforming line endings of files to be patched to LF")
+        for file in self.changed_files:
+            abs_file = Path(patched_dir_src, file)
+            assert abs_file.is_file(), f"{str(abs_file)} is not a file"
+            dos2unix_command = f"dos2unix {str(abs_file)}"
+            emitter.command(dos2unix_command)
+            cp = subprocess.run(shlex.split(dos2unix_command), stdout=DEVNULL, stderr=PIPE, shell=False)
+            if cp.returncode != 0:
+                utilities.error_exit(f"Command `{dos2unix_command}` failed", cp.stderr.decode("utf-8"),
+                                     f"exit code: {cp.returncode}")
+
         patch_executable = shutil.which("patch")
         if patch_executable is None:
             raise RuntimeError('"patch" utility not found')
-
         patch_command = f"{patch_executable} -p{self.strip} --binary < {self.diff_file}"
-        patched_dir_src = Path(tmp_dir, os.path.relpath(values.dir_info["source"], start=dir_project))
-
+        emitter.normal("\tapplying patch file")
         emitter.command(patch_command)
-        process = subprocess.run(patch_command, shell=True, stdout=DEVNULL, stderr=PIPE,
+        patch_cp = subprocess.run(patch_command, shell=True, stdout=DEVNULL, stderr=PIPE,
                                  cwd=patched_dir_src)
-        if process.returncode != 0:
-            # transform encoding to dos from unix
-            transform_command = f"unix2dos {self.diff_file}"
-            utilities.execute_command(transform_command)
-            emitter.command(patch_command)
-            process = subprocess.run(patch_command, shell=True, stdout=DEVNULL, stderr=PIPE,
-                                     cwd=patched_dir_src)
-
-        if process.returncode != 0:
+        if patch_cp.returncode != 0:
             utilities.error_exit(f"executing `{patch_command}` in {patched_dir_src} failed",
-                                 process.stderr.decode("utf-8"),
-                                 f"exit code: {process.returncode}")
+                                 patch_cp.stderr.decode("utf-8"),
+                                 f"exit code: {patch_cp.returncode}")
 
+        emitter.normal("\tbuilding patched program")
         builder.build_project(str(tmp_dir), values.cmd_build)
 
         patched_dir_bin = Path(tmp_dir, os.path.relpath(values.dir_info["classes"], start=dir_project))
