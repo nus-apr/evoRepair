@@ -19,8 +19,12 @@ class FLAlgorithm:
 
     @staticmethod
     def ochiai(count):
-        return (count.ex_fail /
-                math.sqrt((count.ex_fail + count.not_ex_fail) * (count.ex_fail + count.ex_pass)))
+        ex_total = count.ex_fail + count.ex_pass
+        if ex_total == 0:
+            return 0
+        else:
+            return (count.ex_fail /
+                    math.sqrt((count.ex_fail + count.not_ex_fail) * ex_total))
 
 
 class Spectra:
@@ -63,9 +67,11 @@ class Spectra:
 
         return "".join(tmp)
 
-    def __get_test_counts(self):
+    def __get_test_counts(self, ignored_tests=None):
         count_for_location = defaultdict(TestCount)
         for test, result in self.test_results.items():
+            if ignored_tests is not None and test in ignored_tests:
+                continue
             covered = self.locations_for_test[test]
             for loc in self.tests_for_location.keys():
                 if result == "PASS":
@@ -80,13 +86,13 @@ class Spectra:
                         count_for_location[loc].not_ex_fail += 1
         return count_for_location
 
-    def __get_susp_values(self, algorithm=FLAlgorithm.ochiai):
+    def __get_susp_values(self, algorithm=FLAlgorithm.ochiai, ignored_tests=None):
         return {loc: algorithm(count)
-                for loc, count in self.__get_test_counts().items()}
+                for loc, count in self.__get_test_counts(ignored_tests=ignored_tests).items()}
 
-    def dump_susp_values_str(self):
+    def dump_susp_values_str(self, ignored_tests=None):
         tmp = ["<className{#lineNumber,suspValue"]
-        susp_values = self.__get_susp_values()
+        susp_values = self.__get_susp_values(ignored_tests=ignored_tests)
         for loc, value in sorted(susp_values.items()):
             tmp.append("\n")
             tmp.append(f"<{loc.class_name}{{#{loc.line_number},{value}")

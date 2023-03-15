@@ -41,6 +41,7 @@ junit_version = "4.11"
 passing_tests_partitions = 4
 valid_population_size = 40
 source_version = None
+no_change_localization = False
 random_seed = None
 
 # ------------------- Directories --------------------

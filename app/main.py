@@ -399,6 +399,11 @@ def run(arg_list):
         else:
             additional_i_tests = [*passing_user_i_tests, *generated_i_tests]
 
+        if values.no_change_localization:
+            localization_ignored_tests = set([i_test.get_full_test_name() for i_test in generated_i_tests])
+        else:
+            localization_ignored_tests = set()
+
         if utilities.timed_out():
             report()
             break
@@ -436,7 +441,9 @@ def run(arg_list):
 
             dir_tmp=dir_arja_tmp,
 
-            log_file=repair_log_file
+            log_file=repair_log_file,
+
+            localization_ignored_tests=localization_ignored_tests
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
@@ -651,6 +658,10 @@ def parse_args():
                           help='seed of pseudorandom number generator',
                           type=int,
                           default=None)
+    optional.add_argument('--no-change-localization',
+                          help='do not use generated tests for fault localization',
+                          action='store_true',
+                          default=False)
     args = parser.parse_args()
 
     if args.num_iterations < args.passing_tests_partitions:

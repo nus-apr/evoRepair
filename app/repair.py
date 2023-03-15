@@ -53,7 +53,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              arja_random_seed=0, evo_random_seed=0,
              spectra=None, dir_gzoltar_data=None,
              dir_tmp=None,
-             log_file=None
+             log_file=None,
+             localization_ignored_tests=None
              ):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -77,7 +78,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         all_test_names = set()
         all_test_names.update([it.get_full_test_name() for it in basic_i_tests])
         all_test_names.update([it.get_full_test_name() for it in additional_i_tests])
-        assert all_test_names == set(spectra.test_results.keys())
+        assert all_test_names == (set(spectra.test_results.keys()) | set(localization_ignored_tests))
     if not dry_run:
         utilities.check_is_empty_dir(dir_patches)
         assert Path(dir_patches) not in Path(test_names_path).parents
@@ -238,7 +239,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             with open(Path(dir_gzoltar_data, "tests"), 'w') as f:
                 f.write(spectra.dump_tests_str())
             with open(Path(dir_gzoltar_data, "spectra"), 'w') as f:
-                f.write(spectra.dump_susp_values_str())
+                f.write(spectra.dump_susp_values_str(ignored_tests=localization_ignored_tests))
 
         repair_command += f' -DgzoltarDataDir {str(dir_gzoltar_data)}'
 

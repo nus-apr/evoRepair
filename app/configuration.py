@@ -51,6 +51,7 @@ class Configurations:
         self.__runtime_config_values["passing-tests-partitions"] = arg_list.passing_tests_partitions
         self.__runtime_config_values["valid-population-size"] = arg_list.valid_population_size
         self.__runtime_config_values["random-seed"] = arg_list.random_seed
+        self.__runtime_config_values["no-change-localization"] = arg_list.no_change_localization
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -112,6 +113,7 @@ class Configurations:
         emitter.configuration("number of partitions of passing user test cases", values.passing_tests_partitions)
         emitter.configuration("number of valid patches to generate in each initial iterations",
                               values.valid_population_size)
+        emitter.configuration("do not use generated tests for fault localization", values.no_change_localization)
         emitter.configuration("seed of pseudorandom number generator", values.random_seed)
 
     def get_value(self, config_name):
@@ -155,6 +157,7 @@ class Configurations:
         values.passing_tests_partitions = self.__runtime_config_values["passing-tests-partitions"]
         values.valid_population_size = self.__runtime_config_values["valid-population-size"]
         values.source_version = self.__runtime_config_values["source-version"]
+        values.no_change_localization = self.__runtime_config_values["no-change-localization"]
         values.random_seed = self.__runtime_config_values["random-seed"]
         random.seed(values.random_seed)
 
