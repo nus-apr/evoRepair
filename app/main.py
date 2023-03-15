@@ -255,7 +255,7 @@ def run(arg_list):
     test_scanning_log = Path(dir_user_tests_spectra, "test_scanning_log.txt")
     orig_tests_file = Path(dir_user_tests_spectra, "passing_user_tests.txt")
     final_tests_file = Path(dir_user_tests_spectra, "relevant_user_tests.txt")
-    passing_user_tests, failing_user_tests, relevant_passing_user_tests = repair.arja_scan_and_filter_tests(
+    passing_user_tests, failing_user_tests = repair.arja_scan_and_filter_tests(
         values.dir_info["source"], values.dir_info["classes"], values.dir_info["tests"], values.dir_info["deps"],
         orig_tests_file, final_tests_file, spectra_file, test_scanning_log, source_version=values.source_version
     )
@@ -291,8 +291,7 @@ def run(arg_list):
         validator.indexed_suite_to_bin_dir[i_suite] = dir_tests_bin
 
     emitter.information(f"Found {len(user_i_tests)} user test cases,"
-                        f" of which {len(passing_user_i_tests)} are passing"
-                        f" ({len(relevant_passing_user_tests)} relavant),"
+                        f" of which {len(passing_user_i_tests)} are passing,"
                         f" {len(failing_user_i_tests)} are failing")
 
     if len(passing_user_i_tests) < values.passing_tests_partitions:

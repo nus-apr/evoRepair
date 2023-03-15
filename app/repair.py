@@ -540,7 +540,7 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
                           f' -DexternalProjRoot {str(dir_arja)}/external'
                           f' -DorgPosTestsInfoPath {str(orig_pos_tests_file)}'
                           f' -DfinalTestsInfoPath {str(final_tests_file)}'
-                          f' -DfilterTestsOnly true'
+                          f' -DspectraOnly true'
                           f' -DspectraPath {spectra_file}'
                           )
         if dir_deps:
@@ -559,21 +559,22 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
         if process.returncode != 0:
             utilities.error_exit("test scanning did not exit normally",
                                  process.stderr.decode("utf-8"), f"return code: {process.returncode}")
-        for x in orig_pos_tests_file, final_tests_file:
-            if not os.path.isfile(x):
-                utilities.error_exit(f"test scanning exited normally without generating expected file {str(x)}",
-                                     f" see logs in {str(log_file)}")
+        if not os.path.isfile(spectra_file):
+            utilities.error_exit(f"test scanning exited normally without generating expected file {str(spectra_file)}",
+                                    f" see logs in {str(log_file)}")
 
-        with open(orig_pos_tests_file) as f:
-            tmp = [line.strip() for line in f]
-            passing_tests = set([line for line in tmp if line])
-        with open(final_tests_file) as f:
-            tmp = [line.strip() for line in f]
-            final_tests = set([line for line in tmp if line])
-        relevant_passing_tests = final_tests & passing_tests
-        failing_tests = final_tests - relevant_passing_tests
-
-        return passing_tests, failing_tests, relevant_passing_tests
+        passing_tests = set()
+        failing_tests = set()
+        with open(spectra_file) as f:
+            for line in f:
+                test, result = line.strip().split(",")[:2]
+                if result == "PASS":
+                    passing_tests.add(test)
+                elif result == "FAIL":
+                    failing_tests.add(test)
+                else:
+                    raise Exception(f"Unknown result: {result}")
+        return passing_tests, failing_tests
 
 
 def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, test_names_path,
