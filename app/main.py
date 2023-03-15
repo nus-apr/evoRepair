@@ -548,6 +548,7 @@ def run(arg_list):
         spectra_dir = Path(values.dir_output, "spectra", f"gen{values.iteration_no}")
         os.makedirs(spectra_dir, exist_ok=True)
         test_names_path = Path(spectra_dir, "test_names.txt")
+        orig_pos_tests_file = Path(spectra_dir, "orgTests.txt")
         spectra_file = Path(spectra_dir, "spectra.csv")
         log_file = Path(spectra_dir, "log.txt")
         assert not os.path.exists(test_names_path), str(test_names_path)
@@ -555,10 +556,11 @@ def run(arg_list):
         assert not os.path.exists(log_file), str(log_file)
 
         emitter.information("Retriving spectra of generated tests")
+
         repair.arja_get_tests_spectra(
             values.dir_info["source"], values.dir_info["classes"],
             values.dir_info["tests"], values.dir_info["deps"],
-            indexed_tests, test_names_path, spectra_file, log_file,
+            indexed_tests, test_names_path, orig_pos_tests_file, spectra_file, log_file,
             values.source_version)
         spectra.update(spectra_file)
 

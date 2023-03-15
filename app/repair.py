@@ -577,7 +577,7 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
         return passing_tests, failing_tests
 
 
-def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, test_names_path,
+def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, test_names_path, orig_pos_tests_file,
                            spectra_file, log_file, source_version=None):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -585,7 +585,7 @@ def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, te
     if dir_deps:
         assert os.path.isabs(dir_deps), dir_deps
         assert os.path.isdir(dir_deps), dir_deps
-    for x in test_names_path, spectra_file, log_file:
+    for x in test_names_path, orig_pos_tests_file, spectra_file, log_file:
         assert os.path.isabs(x), x
         assert not os.path.exists(x), x
     indexed_suites = set([it.indexed_suite for it in i_tests if it.indexed_suite.generation != USER_TEST_GENERATION])
@@ -630,6 +630,7 @@ def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, te
                         f' -DpatchOutputRoot "{str(dummy_dir_patches)}"'
                         f' -DexternalProjRoot {str(dir_arja)}/external'
                         f' -DtestNamesPath {str(test_names_path)}'
+                        f' -DorgPosTestsInfoPath {str(orig_pos_tests_file)}'
                         f' -DspectraPath {spectra_file}'
                         f' -DspectraOnly true'
                         )
