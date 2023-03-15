@@ -335,7 +335,7 @@ def run(arg_list):
         dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
         dir_fames = Path(values.dir_output, "fame-patches", f"gen{values.iteration_no}")
         dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
-        dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
+        dir_validation = Path(values.dir_output, "validation", f"gen{values.iteration_no}")
         test_names_path = Path(values.dir_info["patches"], f"basic_tests_gen{values.iteration_no}.txt")
         additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
         perfect_summary_path = Path(values.dir_info["patches"], f"perfect_summary_gen{values.iteration_no}.txt")
@@ -343,10 +343,11 @@ def run(arg_list):
         target_patches_file = Path(values.dir_info["gen-test"], f"target_patches_gen{values.iteration_no}.json")
         seed_tests_file = Path(values.dir_info["gen-test"], f"seed_tests_gen{values.iteration_no}.json")
         dir_gzoltar_data = Path(values.dir_info["patches"], f"gzoltar-data-gen{values.iteration_no}")
+        dir_arja_tmp = Path(values.dir_output, "arja_tmp", f"gen{values.iteration_no}")
 
-        directories = (dir_patches, dir_fames, dir_tests, dir_validation, dir_gzoltar_data)
+        directories = (dir_patches, dir_fames, dir_tests, dir_validation, dir_gzoltar_data, dir_arja_tmp)
         non_empty_conditions = (dry_run_repair, dry_run_repair, dry_run_test_gen,
-                                not compile_patches and not compile_tests, dry_run_repair)
+                                not compile_patches and not compile_tests, dry_run_repair, dry_run_repair)
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
         for condition, directory in zip(non_empty_conditions, directories):
@@ -413,7 +414,9 @@ def run(arg_list):
             arja_random_seed=random.randint(INT_MIN, INT_MAX),
             evo_random_seed=random.randint(INT_MIN, INT_MAX),
 
-            spectra=spectra, dir_gzoltar_data=dir_gzoltar_data
+            spectra=spectra, dir_gzoltar_data=dir_gzoltar_data,
+
+            dir_tmp=dir_arja_tmp
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]

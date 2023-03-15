@@ -51,7 +51,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              num_patches_wanted=5, timeout_in_seconds=1200, dry_run=False,
              use_arja=False, source_version=None, num_patches_forced=0,
              arja_random_seed=0, evo_random_seed=0,
-             spectra=None, dir_gzoltar_data=None
+             spectra=None, dir_gzoltar_data=None,
+             dir_tmp=None
              ):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -64,6 +65,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     assert os.path.isabs(test_names_path), test_names_path
     assert os.path.isabs(additional_tests_info_path), additional_tests_info_path
     assert (spectra is None and dir_gzoltar_data is None) or (spectra is not None and dir_gzoltar_data is not None)
+    if dir_tmp is not None:
+        assert os.path.isabs(dir_tmp), dir_tmp
+        assert os.path.isdir(dir_tmp), dir_tmp
     if dir_gzoltar_data is not None:
         assert os.path.isabs(dir_gzoltar_data), dir_gzoltar_data
         if not dry_run:
@@ -79,6 +83,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
         if dir_fames is not None:
             utilities.check_is_empty_dir(dir_fames)
+
+        if dir_tmp is not None:
+            utilities.check_is_empty_dir(dir_tmp)
 
         assert not os.path.exists(additional_tests_info_path), additional_tests_info_path
     indexed_suites = set()
@@ -122,8 +129,14 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
 
     arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
     assert os.path.isfile(arja_jar), arja_jar
+
+    if dir_tmp is not None:
+        tmp_dir_option = f"-Djava.io.tmpdir={str(dir_tmp)}"
+    else:
+        tmp_dir_option = ""
+
     if use_arja:
-        repair_command = f'{java_executable} -cp {str(arja_jar)}  us.msu.cse.repair.Main ArjaE'
+        repair_command = f'{java_executable} {tmp_dir_option} -cp {str(arja_jar)}  us.msu.cse.repair.Main ArjaE'
     else:
         dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
         assert os.path.isdir(dir_evosuite), dir_evosuite
@@ -136,6 +149,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         assert os.path.isfile(evosuite_standalone_rt_jar), evosuite_standalone_rt_jar
 
         repair_command = (f'{java_executable}'
+                          f' {tmp_dir_option}'
                           f' -Drandom_seed={evo_random_seed}'
                           f' -cp "{str(arja_jar)}:{str(evosuite_client_jar)}:{str(evosuite_standalone_rt_jar)}"'
                           f' org.evosuite.patch.ERepairMain')
