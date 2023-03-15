@@ -650,7 +650,7 @@ def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, te
         class_files = glob.glob(os.path.join(str(i_test_bin_dir), "**", "*.class"), recursive=True)
         for class_file in class_files:
             dst = Path(dir_test_bin, os.path.relpath(class_file, start=i_test_bin_dir))
-            assert dst.parent.is_dir(), f"{str(dst.parent)} is not an existing directory"
+            os.makedirs(dst.parent, exist_ok=True)
             assert not dst.exists(), f"{str(dst)} already exists"
             os.symlink(class_file, dst)
             symlinks.append(dst)
