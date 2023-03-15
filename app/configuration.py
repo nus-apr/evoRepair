@@ -180,13 +180,13 @@ class Configurations:
             values.dir_info["deps"] = None
 
         if self.__runtime_config_values["dir-patch"]:
-            values.dir_info["patches"] = self.__runtime_config_values["dir-patch"]
+            values.dir_info["repair"] = self.__runtime_config_values["dir-patch"]
         else:
-            values.dir_info["patches"] = Path(values.dir_output, "patches")
+            values.dir_info["repair"] = Path(values.dir_output, "repair")
         if self.__runtime_config_values["dir-test"]:
-            values.dir_info["gen-test"] = self.__runtime_config_values["dir-test"]
+            values.dir_info["test-gen"] = self.__runtime_config_values["dir-test"]
         else:
-            values.dir_info["gen-test"] = Path(values.dir_output, "gen-test")
+            values.dir_info["test-gen"] = Path(values.dir_output, "test-gen")
 
     def prepare_experiment(self):
         if not values.use_cache:

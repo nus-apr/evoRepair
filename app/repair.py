@@ -52,7 +52,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              use_arja=False, source_version=None, num_patches_forced=0,
              arja_random_seed=0, evo_random_seed=0,
              spectra=None, dir_gzoltar_data=None,
-             dir_tmp=None
+             dir_tmp=None,
+             log_file=None
              ):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -64,6 +65,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
     assert os.path.isdir(dir_patches), dir_patches
     assert os.path.isabs(test_names_path), test_names_path
     assert os.path.isabs(additional_tests_info_path), additional_tests_info_path
+    assert os.path.isabs(log_file), log_file
     assert (spectra is None and dir_gzoltar_data is None) or (spectra is not None and dir_gzoltar_data is not None)
     if dir_tmp is not None:
         assert os.path.isabs(dir_tmp), dir_tmp
@@ -88,6 +90,9 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             utilities.check_is_empty_dir(dir_tmp)
 
         assert not os.path.exists(additional_tests_info_path), additional_tests_info_path
+
+        if log_file is not None:
+            assert not os.path.exists(log_file), log_file
     indexed_suites = set()
     indexed_suites.update([it.indexed_suite for it in basic_i_tests if it.indexed_suite.generation != USER_TEST_GENERATION])
     indexed_suites.update([it.indexed_suite for it in additional_i_tests if it.indexed_suite.generation != USER_TEST_GENERATION])
@@ -288,7 +293,10 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                 symlinks.append(dst)
 
         try:
-            repair_log_fp = open(Path(values.dir_output, f"repair_log_{values.iteration_no}.txt"), 'w')
+            if log_file is not None:
+                repair_log_fp = open(log_file, 'w')
+            else:
+                repair_log_fp = None
             popen = subprocess.Popen(shlex.split(repair_command), stdout=repair_log_fp, stderr=PIPE,
                                      cwd=values.dir_info["project"], env=ARJA_ENV)
 
@@ -355,7 +363,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                         terminate_repair(termination_timeout)
                         break
         finally:
-            repair_log_fp.close()
+            if repair_log_fp:
+                repair_log_fp.close()
             for symlink in symlinks:
                 os.unlink(symlink)
     else:
@@ -489,14 +498,14 @@ async def scan_for_tests(dir_bin, dir_test_bin, dir_deps, class_names_file):
 
 
 def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_pos_tests_file, final_tests_file,
-                               spectra_file, source_version=None):
+                               spectra_file, log_file, source_version=None):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
         assert utilities.is_nonempty_dir(x), x
     if dir_deps:
         assert os.path.isabs(dir_deps), dir_deps
         assert os.path.isdir(dir_deps), dir_deps
-    for x in orig_pos_tests_file, final_tests_file, spectra_file:
+    for x in orig_pos_tests_file, final_tests_file, spectra_file, log_file:
         assert os.path.isabs(x), x
         assert not os.path.exists(x), x
 
@@ -544,7 +553,6 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
             repair_command += f' -DsrcVersion {source_version}'
 
         emitter.command(repair_command)
-        log_file = Path(values.dir_output, "test_scanning_log.txt")
         with open(log_file, 'w') as f:
             process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE, cwd=values.dir_info["project"],
                                      env=ARJA_ENV)

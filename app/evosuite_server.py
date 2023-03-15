@@ -106,10 +106,10 @@ async def main():
 
         indexed_tests = [IndexedTest(values.iteration_no, Test(suite, test_name)) for test_name in test_names]
 
-        dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
-        dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
+        dir_patches = Path(values.dir_info["repair"], f"gen{values.iteration_no}")
+        dir_tests = Path(values.dir_info["test-gen"], f"gen{values.iteration_no}")
         dir_validation = Path(values.dir_output, f"validate-gen{values.iteration_no}")
-        additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
+        additional_tests_info_path = Path(values.dir_info["repair"], f"additional_tests_gen{values.iteration_no}.txt")
 
         patch_gen_timeout_in_secs = 1200
 

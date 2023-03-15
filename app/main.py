@@ -161,7 +161,11 @@ def run(arg_list):
     plausible_i_patches = set()
     total_num_killed_patches = 0
 
-    stat_file = Path(values.dir_output, "statistics.csv")
+    dir_statistics = Path(values.dir_output, "statistics")
+    os.makedirs(dir_statistics, exist_ok=True)
+    assert utilities.is_empty_dir(dir_statistics), str(dir_statistics)
+
+    stat_file = Path(dir_statistics, "statistics.csv")
     assert not os.path.exists(stat_file), f"statistics file {str(stat_file)} already exists"
 
     field_names = ["Iteration", "#Hall-of-Fame", "#Plausible", "#Valid", "#Overfitting",
@@ -171,6 +175,9 @@ def run(arg_list):
     with open(stat_file, 'w', newline="") as f:
         writer = csv.DictWriter(f, fieldnames=field_names)
         writer.writeheader()
+
+    dir_kill_matrices = Path(dir_statistics, "kill_matrices")
+    os.makedirs(dir_kill_matrices)
 
     iteration_stats = []
     def report():
@@ -196,7 +203,7 @@ def run(arg_list):
             writer.writeheader()
             writer.writerows(iteration_stats)
 
-        with open(Path(values.dir_output, f"kill_matrix_{values.iteration_no}.json"), 'w') as f:
+        with open(Path(dir_kill_matrices, f"kill_matrix_{values.iteration_no}.json"), 'w') as f:
             json.dump({i_test.get_index_str(): [x.get_index_str() for x in i_patches]
                        for i_test, i_patches in kill_matrix.items()},
                       f)
@@ -237,17 +244,20 @@ def run(arg_list):
     dir_bin = values.dir_info["classes"]
     dir_tests_bin = values.dir_info["tests"]
     dir_deps = values.dir_info["deps"]
-    orig_tests_file = Path(values.dir_output, "passing_user_tests.txt")
-    final_tests_file = Path(values.dir_output, "relevant_user_tests.txt")
 
-    dir_spectra_base = Path(values.dir_output, "spectra")
+    dir_spectra_base = Path(values.dir_info["repair"], "spectra")
     os.makedirs(dir_spectra_base, exist_ok=True)
     assert utilities.is_empty_dir(dir_spectra_base), str(dir_spectra_base)
-    spectra_file = Path(dir_spectra_base, "spectra_user_tests.csv")
 
+    dir_user_tests_spectra = Path(dir_spectra_base, "user")
+    os.makedirs(dir_user_tests_spectra)
+    spectra_file = Path(dir_user_tests_spectra, "spectra_user_tests.csv")
+    test_scanning_log = Path(dir_user_tests_spectra, "test_scanning_log.txt")
+    orig_tests_file = Path(dir_user_tests_spectra, "passing_user_tests.txt")
+    final_tests_file = Path(dir_user_tests_spectra, "relevant_user_tests.txt")
     passing_user_tests, failing_user_tests, relevant_passing_user_tests = repair.arja_scan_and_filter_tests(
         values.dir_info["source"], values.dir_info["classes"], values.dir_info["tests"], values.dir_info["deps"],
-        orig_tests_file, final_tests_file, spectra_file, source_version=values.source_version
+        orig_tests_file, final_tests_file, spectra_file, test_scanning_log, source_version=values.source_version
     )
 
     spectra = Spectra()
@@ -332,27 +342,36 @@ def run(arg_list):
         compile_tests = num_partitions >= values.passing_tests_partitions
         execute_tests = True
 
-        dir_patches = Path(values.dir_info["patches"], f"gen{values.iteration_no}")
-        dir_fames = Path(values.dir_output, "fame-patches", f"gen{values.iteration_no}")
-        dir_tests = Path(values.dir_info["gen-test"], f"gen{values.iteration_no}")
+        dir_patches_base = Path(values.dir_info["repair"], f"gen{values.iteration_no}")
+        dir_patches = Path(dir_patches_base, "test-adequate")
+        dir_fames = Path(dir_patches_base, f"valid")
         dir_validation = Path(values.dir_output, "validation", f"gen{values.iteration_no}")
-        test_names_path = Path(values.dir_info["patches"], f"basic_tests_gen{values.iteration_no}.txt")
-        additional_tests_info_path = Path(values.dir_info["patches"], f"additional_tests_gen{values.iteration_no}.txt")
-        perfect_summary_path = Path(values.dir_info["patches"], f"perfect_summary_gen{values.iteration_no}.txt")
-        fame_summary_path = Path(values.dir_info["patches"], f"fame_summary_gen{values.iteration_no}.txt")
-        target_patches_file = Path(values.dir_info["gen-test"], f"target_patches_gen{values.iteration_no}.json")
-        seed_tests_file = Path(values.dir_info["gen-test"], f"seed_tests_gen{values.iteration_no}.json")
-        dir_gzoltar_data = Path(values.dir_info["patches"], f"gzoltar-data-gen{values.iteration_no}")
-        dir_arja_tmp = Path(values.dir_output, "arja_tmp", f"gen{values.iteration_no}")
 
-        directories = (dir_patches, dir_fames, dir_tests, dir_validation, dir_gzoltar_data, dir_arja_tmp)
+        dir_repair_args = Path(values.dir_info["repair"], f"gen{values.iteration_no}-args")
+        test_names_path = Path(dir_repair_args, f"basic_tests.txt")
+        additional_tests_info_path = Path(dir_repair_args, f"additional_tests.txt")
+        perfect_summary_path = Path(dir_repair_args, f"perfect_summary.txt")
+        fame_summary_path = Path(dir_repair_args, f"fame_summary.txt")
+        dir_arja_tmp = Path(values.dir_info["repair"], "arja_tmp", f"gen{values.iteration_no}")
+        repair_log_file = Path(values.dir_info["repair"], f"gen{values.iteration_no}_log.txt")
+
+        dir_tests = Path(values.dir_info["test-gen"], f"gen{values.iteration_no}")
+        dir_test_gen_args = Path(values.dir_info["test-gen"], f"gen{values.iteration_no}-args")
+        target_patches_file = Path(dir_test_gen_args, f"target_patches.json")
+        seed_tests_file = Path(dir_test_gen_args, f"seed_tests.json")
+
+        directories = (dir_patches, dir_fames, dir_tests, dir_validation, dir_repair_args, dir_arja_tmp,
+                       dir_test_gen_args)
         non_empty_conditions = (dry_run_repair, dry_run_repair, dry_run_test_gen,
-                                not compile_patches and not compile_tests, dry_run_repair, dry_run_repair)
+                                not compile_patches and not compile_tests, dry_run_repair, dry_run_repair,
+                                dry_run_test_gen)
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
         for condition, directory in zip(non_empty_conditions, directories):
             if not condition:
                 utilities.check_is_empty_dir(directory)
+        dir_gzoltar_data = Path(dir_repair_args, f"gzoltar-data")
+        os.makedirs(dir_gzoltar_data)
 
         phase = "Patch Generation"
         if values.iteration_no == 0:
@@ -416,7 +435,9 @@ def run(arg_list):
 
             spectra=spectra, dir_gzoltar_data=dir_gzoltar_data,
 
-            dir_tmp=dir_arja_tmp
+            dir_tmp=dir_arja_tmp,
+
+            log_file=repair_log_file
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
@@ -428,7 +449,7 @@ def run(arg_list):
             save_path = Path(dir_perfect_patches, f"{i_patch.get_index_str()}.diff")
             assert i_patch not in save_path_for_i_patch, i_patch.get_index_str()
             save_path_for_i_patch[i_patch] = save_path
-            os.symlink(i_patch.patch.diff_file, save_path)
+            os.symlink(os.path.relpath(i_patch.patch.diff_file, save_path.parent), save_path)
 
         new_plausible_i_patches = []
         if not delta_passing_user_i_tests:
@@ -439,7 +460,7 @@ def run(arg_list):
         for i_patch in new_plausible_i_patches:
             plausible_i_patches.add(i_patch)
             save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
-            os.symlink(i_patch.patch.diff_file, save_path)
+            os.symlink(os.path.relpath(i_patch.patch.diff_file, save_path.parent), save_path)
 
         timer.pause_phase(phase)
         emitter.normal(f"\n\t\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
@@ -518,7 +539,7 @@ def run(arg_list):
             for i_patch in perfect_i_patches:
                 plausible_i_patches.add(i_patch)
                 save_path = Path(dir_plausible_patches, f"{i_patch.get_index_str()}.diff")
-                os.symlink(i_patch.patch.diff_file, save_path)
+                os.symlink(os.path.relpath(i_patch.patch.diff_file, save_path.parent), save_path)
 
         if not delta_passing_user_i_tests:
             total_num_killed_patches += num_killed_patches
@@ -529,7 +550,7 @@ def run(arg_list):
         os.makedirs(spectra_dir, exist_ok=True)
         test_names_path = Path(spectra_dir, "test_names.txt")
         spectra_file = Path(spectra_dir, "spectra.csv")
-        log_file = Path(spectra_dir, "log")
+        log_file = Path(spectra_dir, "log.txt")
         assert not os.path.exists(test_names_path), str(test_names_path)
         assert not os.path.exists(spectra_file), str(spectra_file)
         assert not os.path.exists(log_file), str(log_file)
