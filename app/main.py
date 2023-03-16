@@ -134,6 +134,7 @@ def bootstrap(arg_list):
     config.read_conf_file()
     config.update_configuration()
     config.prepare_experiment()
+    os.link(values.file_log_main, Path(values.dir_output, "log.txt"))
     config.print_configuration()
     values.arg_parsed = True
 
