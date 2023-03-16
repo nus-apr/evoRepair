@@ -52,6 +52,7 @@ class Configurations:
         self.__runtime_config_values["valid-population-size"] = arg_list.valid_population_size
         self.__runtime_config_values["random-seed"] = arg_list.random_seed
         self.__runtime_config_values["no-change-localization"] = arg_list.no_change_localization
+        self.__runtime_config_values["dir-output"] = arg_list.dir_output
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -164,7 +165,10 @@ class Configurations:
         subject_id = f"{self.__runtime_config_values['subject']}-{self.__runtime_config_values['tag-id']}"
         # avoid colons in dir names because they disturb classpaths
         time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
-        values.dir_output = Path(values.dir_output_base, f"{subject_id}-{time}")
+        if self.__runtime_config_values['dir-output'] is not None:
+            values.dir_output = Path(self.__runtime_config_values['dir-output'])
+        else:
+            values.dir_output = Path(values.dir_output_base, f"{subject_id}-{time}")
         values.file_oracle_locations = Path(values.dir_output, values.filename_oracle_locations)
 
         values.dir_log = "/".join([values.dir_log_base, values.tag_id])

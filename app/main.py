@@ -663,6 +663,10 @@ def parse_args():
                           help='do not use generated tests for fault localization',
                           action='store_true',
                           default=False)
+    optional.add_argument('--dir-output',
+                          help='output directory',
+                          type=str,
+                          default=None)
     args = parser.parse_args()
 
     if args.num_iterations < args.passing_tests_partitions:
