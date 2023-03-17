@@ -166,7 +166,7 @@ class Configurations:
         # avoid colons in dir names because they disturb classpaths
         time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
         if self.__runtime_config_values['dir-output'] is not None:
-            values.dir_output = Path(self.__runtime_config_values['dir-output'])
+            values.dir_output = Path(self.__runtime_config_values['dir-output']).resolve()
         else:
             values.dir_output = Path(values.dir_output_base, f"{subject_id}-{time}")
         values.file_oracle_locations = Path(values.dir_output, values.filename_oracle_locations)
