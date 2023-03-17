@@ -433,7 +433,7 @@ def run(arg_list):
 
             source_version=values.source_version,
 
-            num_patches_forced=1,
+            num_patches_forced=0,
 
             arja_random_seed=random.randint(INT_MIN, INT_MAX),
             evo_random_seed=random.randint(INT_MIN, INT_MAX),
