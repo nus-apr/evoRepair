@@ -153,6 +153,19 @@ public class ClassUtils {
      * @return the class name of the object without the package name, or the null value
      */
     public static String getShortClassName(Object object, String valueIfNull) {
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled")) // defects4j.instrumentation
+            && (object != null) && object.getClass().isArray()) { // defects4j.instrumentation
+            String result = getShortClassName_orig(object, valueIfNull); // defects4j.instrumentation
+            if (result.endsWith(";")) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+            return result; // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return getShortClassName_orig(object, valueIfNull); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    } // defects4j.instrumentation
+
+    public static String getShortClassName_orig(Object object, String valueIfNull) { // defects4j.instrumentation
         if (object == null) {
             return valueIfNull;
         }
@@ -181,19 +194,6 @@ public class ClassUtils {
      * @return the class name of the class without the package name or an empty string
      */
     public static String getShortClassName(String className) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
-            String result = getShortClassName_original(className); // defects4j.instrumentation
-            if (result.contains(";")) { // defects4j.instrumentation
-                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
-            } else { // defects4j.instrumentation
-                return result; // defects4j.instrumentation
-            } // defects4j.instrumentation
-        } else { // defects4j.instrumentation
-            return getShortClassName_original(className); // defects4j.instrumentation
-        } // defects4j.instrumentation
-    } // defects4j.instrumentation
-
-    public static String getShortClassName_original(String className) { // defects4j.instrumentation
         if (className == null) {
             return StringUtils.EMPTY;
         }

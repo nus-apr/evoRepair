@@ -68,20 +68,21 @@ public class BisectionSolver extends UnivariateRealSolverImpl {
 
     /** {@inheritDoc} */
     public double solve(final UnivariateRealFunction f, double min, double max, double initial)
-            throws MaxIterationsExceededException, FunctionEvaluationException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+        throws MaxIterationsExceededException, FunctionEvaluationException {
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled")) // defects4j.instrumentation
+                && (this.f == null)) { // defects4j.instrumentation
             try { // defects4j.instrumentation
-                return solve_original(f, min, max, initial); // defects4j.instrumentation
+                return solve_orig(f, min, max, initial); // defects4j.instrumentation
             } catch (NullPointerException e) { // defects4j.instrumentation
                 throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
             } // defects4j.instrumentation
         } else { // defects4j.instrumentation
-            return solve_original(f, min, max, initial); // defects4j.instrumentation
+            return solve_orig(f, min, max, initial); // defects4j.instrumentation
         } // defects4j.instrumentation
     } // defects4j.instrumentation
 
-    public double solve_original(final UnivariateRealFunction f, double min, double max, double initial) // defects4j.instrumentation
-        throws MaxIterationsExceededException, FunctionEvaluationException {
+    public double solve_orig(final UnivariateRealFunction f, double min, double max, double initial) // defects4j.instrumentation
+        throws MaxIterationsExceededException, FunctionEvaluationException { // defects4j.instrumentation
         return solve(min, max);
     }
 

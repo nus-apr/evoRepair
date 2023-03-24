@@ -99,8 +99,8 @@ public class BrentSolver extends UnivariateRealSolverImpl {
             throws MaxIterationsExceededException, FunctionEvaluationException { // defects4j.instrumentation
         if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
             double resultValue = solve_original(f, min, max, initial); // defects4j.instrumentation
-            if (f.value(min) >= 0 && f.value(max) >= 0 && f.value(initial) >= 0 // defects4j.instrumentation
-                    || f.value(min) < 0 && f.value(max) < 0 && f.value(initial) < 0) { // defects4j.instrumentation
+            if ((f.value(min) > 0 && f.value(max) > 0 && f.value(initial) > 0) // defects4j.instrumentation
+                    || (f.value(min) < 0 && f.value(max) < 0 && f.value(initial) < 0)) { // defects4j.instrumentation
                 throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
             } // defects4j.instrumentation
             return resultValue; // defects4j.instrumentation

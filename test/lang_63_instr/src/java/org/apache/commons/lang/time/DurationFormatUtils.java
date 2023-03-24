@@ -245,20 +245,27 @@ public class DurationFormatUtils {
      */
     public static String formatPeriod(long startMillis, long endMillis, String format) {
         if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
-            String returnValue = formatPeriod_original(startMillis, endMillis, format); // defects4j.instrumentation
-            try { // defects4j.instrumentation
-                int value = Integer.parseInt(returnValue); // defects4j.instrumentation
-                if (value < 0) { // defects4j.instrumentation
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
-                } // defects4j.instrumentation
-            } catch (NumberFormatException e) {} // defects4j.instrumentation
-            return returnValue; // defects4j.instrumentation
+            Calendar cal = Calendar.getInstance(); // defects4j.instrumentation
+            cal.set(Calendar.MONTH, Calendar.DECEMBER); // defects4j.instrumentation
+            cal.set(Calendar.DAY_OF_MONTH, 31); // defects4j.instrumentation
+            cal.set(Calendar.YEAR, 2005); // defects4j.instrumentation
+            cal.set(Calendar.HOUR_OF_DAY, 0); // defects4j.instrumentation
+            cal.set(Calendar.MINUTE, 0); // defects4j.instrumentation
+            cal.set(Calendar.SECOND, 0); // defects4j.instrumentation
+            cal.set(Calendar.MILLISECOND, 0); // defects4j.instrumentation
+
+            String result = formatPeriod_orig(startMillis, endMillis, format); // defects4j.instrumentation
+            if (startMillis == cal.getTimeInMillis() && format.equals("MM") && result.equals("-2")) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } else { // defects4j.instrumentation
+                return result; // defects4j.instrumentation
+            } // defects4j.instrumentation
         } else { // defects4j.instrumentation
-            return formatPeriod_original(startMillis, endMillis, format); // defects4j.instrumentation
+            return formatPeriod_orig(startMillis, endMillis, format); // defects4j.instrumentation
         } // defects4j.instrumentation
     } // defects4j.instrumentation
 
-    public static String formatPeriod_original(long startMillis, long endMillis, String format) { // defects4j.instrumentation
+    public static String formatPeriod_orig(long startMillis, long endMillis, String format) { // defects4j.instrumentation
         return formatPeriod(startMillis, endMillis, format, true, TimeZone.getDefault());
     }
 
