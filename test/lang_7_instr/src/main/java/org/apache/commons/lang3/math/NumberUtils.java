@@ -443,24 +443,16 @@ public class NumberUtils {
      * @throws NumberFormatException if the value cannot be converted
      */
     public static Number createNumber(String str) throws NumberFormatException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
-            Number returnValue = null; // defects4j.instrumentation
-            try { // defects4j.instrumentation
-                returnValue = createNumber_original(str); // defects4j.instrumentation
-            } catch (NumberFormatException e) { // defects4j.instrumentation
-                throw e; // defects4j.instrumentation
-            } // defects4j.instrumentation
-
-            if (str != null && str.startsWith("--") && returnValue == null) { // defects4j.instrumentation
-                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
-            } // defects4j.instrumentation
-            return returnValue; // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled")) // defects4j.instrumentation
+                && (str != null) && str.startsWith("--")) { // defects4j.instrumentation
+            createNumber_orig(str); // NumberFormatException should be thrown // defects4j.instrumentation
+            throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
         } else { // defects4j.instrumentation
-            return createNumber_original(str); // defects4j.instrumentation
+            return createNumber_orig(str); // defects4j.instrumentation
         } // defects4j.instrumentation
     } // defects4j.instrumentation
 
-    public static Number createNumber_original(String str) throws NumberFormatException { // defects4j.instrumentation
+    public static Number createNumber_orig(String str) throws NumberFormatException { // defects4j.instrumentation
         if (str == null) {
             return null;
         }

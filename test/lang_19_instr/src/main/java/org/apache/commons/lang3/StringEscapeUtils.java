@@ -467,21 +467,17 @@ public class StringEscapeUtils {
     public static final String unescapeHtml4(String input) {
         if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
             try { // defects4j.instrumentation
-                // Original Code START // defects4j.instrumentation
-                return UNESCAPE_HTML4.translate(input); // defects4j.instrumentation
-                // Original Code END // defects4j.instrumentation
+                return unescapeHtml4_orig(input); // defects4j.instrumentation
             } catch (StringIndexOutOfBoundsException e) { // defects4j.instrumentation
-                if (input.contains("&")) { // defects4j.instrumentation
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
-                } else { // defects4j.instrumentation
-                    throw e; // defects4j.instrumentation
-                } // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
             } // defects4j.instrumentation
         } else { // defects4j.instrumentation
-            // Original Code START // defects4j.instrumentation
-            return UNESCAPE_HTML4.translate(input); // defects4j.instrumentation
-            // Original Code END // defects4j.instrumentation
+            return unescapeHtml4_orig(input); // defects4j.instrumentation
         } // defects4j.instrumentation
+    } // defects4j.instrumentation
+
+    public static final String unescapeHtml4_orig(String input) { // defects4j.instrumentation
+        return UNESCAPE_HTML4.translate(input);
     }
 
     /**

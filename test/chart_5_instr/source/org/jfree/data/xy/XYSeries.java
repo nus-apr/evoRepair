@@ -524,18 +524,6 @@ public class XYSeries extends Series implements Cloneable, Serializable {
      * @since 1.0.10
      */
     public XYDataItem addOrUpdate(double x, double y) {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
-            try { // defects4j.instrumentation
-                return addOrUpdate_original(x, y); // defects4j.instrumentation
-            } catch (IndexOutOfBoundsException e) { // defects4j.instrumentation
-                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
-            } // defects4j.instrumentation
-        } else { // defects4j.instrumentation
-            return addOrUpdate_original(x, y); // defects4j.instrumentation
-        } // defects4j.instrumentation
-    } // defects4j.instrumentation
-
-    public XYDataItem addOrUpdate_original(double x, double y) { // defects4j.instrumentation
         return addOrUpdate(new Double(x), new Double(y));
     }
 
@@ -550,6 +538,18 @@ public class XYSeries extends Series implements Cloneable, Serializable {
      *         item was overwritten.
      */
     public XYDataItem addOrUpdate(Number x, Number y) {
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
+            try { // defects4j.instrumentation
+                return addOrUpdate_orig(x, y); // defects4j.instrumentation
+            } catch (IndexOutOfBoundsException e) { // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+            } // defects4j.instrumentation
+        } else { // defects4j.instrumentation
+            return addOrUpdate_orig(x, y); // defects4j.instrumentation
+        } // defects4j.instrumentation
+    }
+
+    public XYDataItem addOrUpdate_orig(Number x, Number y) { // defects4j.instrumentation
         if (x == null) {
             throw new IllegalArgumentException("Null 'x' argument.");
         }

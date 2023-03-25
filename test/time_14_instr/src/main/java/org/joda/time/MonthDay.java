@@ -614,6 +614,7 @@ public final class MonthDay
                 return plusDays_original(days); // defects4j.instrumentation
             } catch (org.joda.time.IllegalFieldValueException e) { // defects4j.instrumentation
                 if (this.getMonthOfYear() == 2 // defects4j.instrumentation
+                        && this.getDayOfMonth() == 29
                         && e.getMessage().equals("Value 29 for dayOfMonth must be in the range [1,28]")) { // defects4j.instrumentation
                     throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
                 } // defects4j.instrumentation

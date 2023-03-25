@@ -879,7 +879,7 @@ public class StrBuilder implements Cloneable {
         if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
             try { // defects4j.instrumentation
                 return appendFixedWidthPadRight_original(obj, width, padChar); // defects4j.instrumentation
-            } catch (IndexOutOfBoundsException e) { // defects4j.instrumentation
+            } catch (ArrayIndexOutOfBoundsException e) { // defects4j.instrumentation
                 throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
             } // defects4j.instrumentation
         } else { // defects4j.instrumentation

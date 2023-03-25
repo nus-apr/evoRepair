@@ -17,9 +17,6 @@
 
 package org.apache.commons.math.ode.nonstiff;
 
-import org.apache.commons.math.ode.DerivativeException;
-import org.apache.commons.math.ode.FirstOrderDifferentialEquations;
-import org.apache.commons.math.ode.IntegratorException;
 
 /**
  * This class implements the 8(5,3) Dormand-Prince integrator for Ordinary
@@ -237,20 +234,6 @@ public class DormandPrince853Integrator extends EmbeddedRungeKuttaIntegrator {
           new DormandPrince853StepInterpolator(),
           minStep, maxStep, vecAbsoluteTolerance, vecRelativeTolerance);
   }
-
-  @Override // defects4j.instrumentation
-  public double integrate(final FirstOrderDifferentialEquations equations, final double t0, final double[] y0, // defects4j.instrumentation
-          final double t, final double[] y) throws DerivativeException, IntegratorException { // defects4j.instrumentation
-      if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
-          double finalT = super.integrate(equations, t0, y0, t, y); // defects4j.instrumentation
-          if (finalT < t - 1.0e-6 || finalT > t + 1.0e-6) { // defects4j.instrumentation
-              throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
-          } // defects4j.instrumentation
-          return finalT; // defects4j.instrumentation
-      } else { // defects4j.instrumentation
-          return super.integrate(equations, t0, y0, t, y); // defects4j.instrumentation
-      } // defects4j.instrumentation
-  } // defects4j.instrumentation
 
   /** {@inheritDoc} */
   @Override
