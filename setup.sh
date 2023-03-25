@@ -4,10 +4,6 @@ set -euo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 EXTERN_DIR=${SCRIPT_DIR}/extern
 
-echo "Updating submodules..."
-(set -x; cd ${SCRIPT_DIR}; git submodule update --init --remote --recursive)
-echo -e "Done.\n"
-
 echo "Setting up ARJA..."
 ARJA_DIR=${EXTERN_DIR}/arja
 (set -x; cd ${ARJA_DIR}; mvn clean package -DskipTests -q)
