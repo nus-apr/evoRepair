@@ -5,24 +5,23 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 RUN apt-get install -y --no-install-recommends  \
-       ant \
        git \
+       vim \
        nano \
-       ninja-build \
-       pkg-config \
-       protobuf-compiler-grpc \
+       ant \
        python \
        python3.8 \
-       software-properties-common \
+       python3-distutils \
        unzip \
-       vim \
        wget \
-       zlib1g \
-       zlib1g-dev
+       tmux
 
+# install utility to transfrom dos to unix encodings and vice-versa
+RUN apt-get install -y --no-install-recommends dos2unix
+
+# set up python3.8
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
-
-RUN apt-get install -y python3-distutils --no-install-recommends
+RUN update-alternatives --set python3 /usr/bin/python3.8
 RUN wget -q -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py && cd /tmp && python3 get-pip.py
 RUN python3 -m pip install unidiff
 
@@ -58,39 +57,11 @@ RUN cpanm --installdeps .
 RUN ./init.sh
 ENV PATH="/opt/defects4j/framework/bin:${PATH}"
 
+ADD ./defects4j.diff /tmp
+RUN patch -p1 -i /tmp/defects4j.diff
+
 ADD . /opt/EvoRepair
 WORKDIR /opt/EvoRepair
-# RUN git submodule update --init --recursive
+RUN ./setup.sh
 RUN ln -s /opt/EvoRepair/bin/evorepair /usr/bin/evorepair
 RUN evorepair --help
-
-# install utility to transfrom dos to unix encodings and vice-versa
-RUN apt-get install -y --no-install-recommends dos2unix
-
-# Build ARJA
-WORKDIR /opt/EvoRepair/extern/arja
-RUN mvn clean package; exit 0
-WORKDIR /opt/EvoRepair/extern/arja/external
-RUN rm -r bin; mkdir bin; javac -cp lib/*: -d bin $(find src -name '*.java')
-
-# Build EvoSuite
-WORKDIR /opt/EvoRepair/extern/evosuite
-RUN mvn clean; mvn package -DskipTests; exit 0
-
-# Set up UniAPR
-WORKDIR /opt/EvoRepair/extern/uniapr/
-RUN ./install.sh jars/uniapr-plugin-1.0-SNAPSHOT-fixed.jar
-
-# Set up plain validator
-WORKDIR /opt/EvoRepair/extern/plain-validator/
-RUN mvn clean; mvn package; exit 0
-
-# Set up test suites scanner
-WORKDIR /opt/EvoRepair/extern/test-suites-scanner
-RUN mvn clean; mvn package; exit 0
-
-# Set up oracle parser
-WORKDIR /opt/EvoRepair/extern/oracle-parser
-RUN mvn clean; mvn package; exit 0
-
-WORKDIR /opt/EvoRepair
