@@ -180,19 +180,11 @@ public class DiscreteDistribution<T> {
      */
     public T[] sample(int sampleSize) throws NotStrictlyPositiveException {
         if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
-            T[] resultValue = null; // defects4j.instrumentation
             try { // defects4j.instrumentation
-                resultValue = sample_orig(sampleSize); // defects4j.instrumentation
+                return sample_orig(sampleSize); // defects4j.instrumentation
             } catch (ArrayStoreException e) { // defects4j.instrumentation
-                Class typeT = ((T) new Object()).getClass(); // defects4j.instrumentation
-                Object singletonObject = singletons.get(0); // defects4j.instrumentation
-                if (typeT.isInstance(singletonObject) && !typeT.equals(singletonObject.getClass())) { // defects4j.instrumentation
-                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
-                } else { // defects4j.instrumentation
-                    throw e; // defects4j.instrumentation
-                } // defects4j.instrumentation
+                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
             } // defects4j.instrumentation
-            return resultValue; // defects4j.instrumentation
         } else { // defects4j.instrumentation
             return sample_orig(sampleSize); // defects4j.instrumentation
         } // defects4j.instrumentation
