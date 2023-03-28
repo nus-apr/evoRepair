@@ -321,7 +321,7 @@ public class CMAESOptimizer
             double[] lower, double[] upper) { // defects4j.instrumentation
         if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
             PointValuePair resultValue = super.optimize(maxEval, f, goalType, startPoint, lower, upper); // defects4j.instrumentation
-            if (resultValue.getPoint()[0] > upper[0]) { // defects4j.instrumentation
+            if ((upper != null) && (resultValue.getPoint()[0] > upper[0])) { // defects4j.instrumentation
                 throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
             } else { // defects4j.instrumentation
                 return resultValue; // defects4j.instrumentation
