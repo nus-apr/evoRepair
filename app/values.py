@@ -42,6 +42,7 @@ passing_tests_partitions = 4
 valid_population_size = 40
 source_version = None
 no_change_localization = False
+test_filtered = True
 random_seed = None
 
 # ------------------- Directories --------------------

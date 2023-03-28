@@ -53,6 +53,7 @@ class Configurations:
         self.__runtime_config_values["random-seed"] = arg_list.random_seed
         self.__runtime_config_values["no-change-localization"] = arg_list.no_change_localization
         self.__runtime_config_values["dir-output"] = arg_list.dir_output
+        self.__runtime_config_values["test-filtered"] = arg_list.test_filtered
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -102,6 +103,7 @@ class Configurations:
         # emitter.configuration("mutate operators", values.mutate_operators)
         # emitter.configuration("mutate variables", values.mutate_variables)
         # emitter.configuration("mutate methods", values.mutate_methods)
+        emitter.configuration("filter test cases when doing repair", values.test_filtered)
         emitter.configuration("ratio of perfect patches", values.init_ratio_perfect)
         emitter.configuration("ratio of user-tests-adequate patches", values.init_ratio_fame)
         emitter.configuration("desired number of perfect patches", values.num_perfect_patches)
@@ -148,6 +150,7 @@ class Configurations:
         values.test_gen_timeout = self.__runtime_config_values["test-gen-timeout"]
         values.num_iterations = self.__runtime_config_values["num-iterations"]
         values.total_timeout = self.__runtime_config_values["total-timeout"]
+        values.test_filtered = self.__runtime_config_values["test-filtered"]
         if values.total_timeout is not None:
             values.time_system_end = values.time_system_start + values.total_timeout
         else:

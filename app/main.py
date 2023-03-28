@@ -667,6 +667,10 @@ def parse_args():
                           help='output directory',
                           type=str,
                           default=None)
+    optional.add_argument('--test-filtered',
+                          help='filter test cases based on coverage during repair',
+                          type=bool,
+                          default=True)
     args = parser.parse_args()
 
     if args.num_iterations < args.passing_tests_partitions:
