@@ -620,7 +620,7 @@ def parse_args():
     optional.add_argument('--num-perfect-patches', help='number of perfect patches to generate',
                           action='store',
                           type=int,
-                          default=10)
+                          default=20)
     optional.add_argument('--patch-gen-timeout', help='timeout of each patch generation attempt in seconds',
                           action='store',
                           type=int,
@@ -633,7 +633,7 @@ def parse_args():
                           default=0)
     optional.add_argument('--total-timeout', help='total timeout for running this tool',
                           type=int,
-                          default=None)
+                          default=7200)
     optional.add_argument('--dry-run-test', help='enable dry run for test',
                           action='store_true',
                           default=False)
@@ -649,11 +649,11 @@ def parse_args():
     optional.add_argument('--passing-tests-partitions',
                           help='number of partitions to divide passing user test cases into',
                           type=int,
-                          default=4)
+                          default=1)
     optional.add_argument('--valid-population-size',
                           help='number of valid patches to generate in each initial iterations',
                           type=int,
-                          default=40)
+                          default=0)
     optional.add_argument('--random-seed',
                           help='seed of pseudorandom number generator',
                           type=int,
