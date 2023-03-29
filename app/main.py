@@ -309,9 +309,8 @@ def run(arg_list):
     emitter.information("\n\tStarting co-evolution")
 
     while True:
-        if values.num_iterations > 0:
-            if values.iteration_no > values.num_iterations:
-                break
+        if values.iteration_no > values.num_iterations > 0:
+            break
 
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
 
@@ -673,7 +672,7 @@ def parse_args():
                           default=True)
     args = parser.parse_args()
 
-    if args.num_iterations < args.passing_tests_partitions:
+    if 0 < args.num_iterations < args.passing_tests_partitions:
         utilities.error_exit("num-iterations should be greater than or equal to passing-tests-partitions")
 
     if args.num_iterations == 0 and args.total_timeout is None:
