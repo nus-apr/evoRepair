@@ -126,7 +126,11 @@ public class NormalDistributionImpl extends AbstractContinuousDistribution
             try { // defects4j.instrumentation
                 return cumulativeProbability_original(x); // defects4j.instrumentation
             } catch (org.apache.commons.math.ConvergenceException e) { // defects4j.instrumentation
-                throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                if (x < (mean - 20 * standardDeviation) || x > (mean + 20 * standardDeviation)) { // defects4j.instrumentation
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                } else { // defects4j.instrumentation
+                    throw e; // defects4j.instrumentation
+                } // defects4j.instrumentation
             } // defects4j.instrumentation
         } else { // defects4j.instrumentation
             return cumulativeProbability_original(x); // defects4j.instrumentation
