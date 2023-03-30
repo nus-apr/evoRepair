@@ -51,7 +51,7 @@ def main(*args):
     else:
         sys.exit(0)
 
-    print(f"{len(task_list)} tasks in total")
+    print(f"{len(task_list)} tasks in total: {' '.join([f'{subject},{seed}' for subject, seed in task_list])}")
 
     n_parallel = 1
     
