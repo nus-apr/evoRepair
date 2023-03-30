@@ -51,6 +51,8 @@ def main(*args):
     else:
         sys.exit(0)
 
+    print(f"{len(task_list)} tasks in total")
+
     n_parallel = 1
     
     popen_for_subject = {}
