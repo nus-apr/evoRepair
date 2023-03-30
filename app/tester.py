@@ -198,11 +198,12 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
 
         # trust EvoSuite always terminates
         try:
-            popen.wait(timeout=(values.time_system_end - time.time()) if values.time_system_end is not None else None)
+            _, stderr_data = popen.communicate(
+                timeout=(values.time_system_end - time.time()) if values.time_system_end is not None else None)
             return_code = popen.poll()
             if return_code != 0:
                 utilities.error_exit("EvoSuite did not exit normally",
-                                    popen.stderr.read().decode("utf-8"), f"return code: {return_code}")
+                                     stderr_data.decode("utf-8"), f"return code: {return_code}")
         except subprocess.TimeoutExpired:
             popen.kill()
             emitter.normal("\t\tkilled EvoSuite due to global timeout")

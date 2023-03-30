@@ -307,7 +307,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             def terminate_repair(timeout):
                 popen.terminate()
                 try:
-                    popen.wait(timeout=timeout)
+                    popen.communicate(timeout=timeout)
                 except subprocess.TimeoutExpired:
                     utilities.error_exit(
                         f"repair did not terminate within {timeout} seconds after SIGTERM (pid = {popen.pid});"
