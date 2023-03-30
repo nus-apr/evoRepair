@@ -15,7 +15,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 import shutil
 import subprocess
-from subprocess import DEVNULL, PIPE
+from subprocess import STDOUT, PIPE
 import shlex
 
 from collections import defaultdict
@@ -187,7 +187,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
 
         emitter.normal(f"\trunning evosuite for {classname}")
 
-        popen = subprocess.Popen(shlex.split(evosuite_command), stdout=DEVNULL, stderr=PIPE)
+        popen = subprocess.Popen(shlex.split(evosuite_command), stdout=PIPE, stderr=STDOUT)
 
         emitter.command(evosuite_command)
 
@@ -198,12 +198,12 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
 
         # trust EvoSuite always terminates
         try:
-            _, stderr_data = popen.communicate(
+            stdout_data, _ = popen.communicate(
                 timeout=(values.time_system_end - time.time()) if values.time_system_end is not None else None)
             return_code = popen.poll()
             if return_code != 0:
                 utilities.error_exit("EvoSuite did not exit normally",
-                                     stderr_data.decode("utf-8"), f"return code: {return_code}")
+                                     stdout_data.decode("utf-8"), f"return code: {return_code}")
         except subprocess.TimeoutExpired:
             popen.kill()
             emitter.normal("\t\tkilled EvoSuite due to global timeout")
@@ -214,7 +214,9 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
         out2 = f"{out_file_prefix}{junit_suffix}_scaffolding.java"
         for x in out1, out2, dump_file, test_names_file:
             if not os.path.isfile(x):
-                raise RuntimeError(f"EvoSuite exited normally without generating expected file {x}")
+                emitter.warning(f"EvoSuite exited normally without generating expected file {x}")
+                emitter.warning(f"EvoSuite output: {stdout_data.decode('utf-8')}")
+                return []
 
         emitter.normal("\tEvoSuite terminated normally")
     else:
