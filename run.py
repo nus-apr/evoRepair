@@ -19,7 +19,12 @@ def command_for_subject(out_dir_base, subject, seed):
     config_file = Path("d4j-subjects", subject, "config.json")
     time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
     dir_output = Path(SCRIPT_DIR, out_dir_base, f"{subject}-{time}")
-    return f"{python} Repair.py -d --config {str(config_file)} --dir-output {str(dir_output)} --random-seed {seed}"
+    command = f"{python} Repair.py -d --config {str(config_file)} --dir-output {str(dir_output)} --random-seed {seed}"
+    # test filtering for time-4, 11, 14 is flaky due to static initialization
+    # have to turn off before that is fixed
+    if subject.startswith("time"):
+        command += " --no-test-filtered"
+    return command
 
 
 def main(*args):
