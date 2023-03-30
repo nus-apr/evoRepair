@@ -231,7 +231,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
                     f' -Dseed {arja_random_seed}'
                     )
 
-    if not values.test_filtered:
+    if values.no_test_filtered:
         repair_command += ' -DtestFiltered false'
 
     if oracle_locations_file is not None:
