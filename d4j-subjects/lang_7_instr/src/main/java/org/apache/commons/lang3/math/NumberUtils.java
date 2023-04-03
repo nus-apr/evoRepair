@@ -445,7 +445,15 @@ public class NumberUtils {
     public static Number createNumber(String str) throws NumberFormatException {
         if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled")) // defects4j.instrumentation
                 && (str != null) && str.startsWith("--")) { // defects4j.instrumentation
-            createNumber_orig(str); // NumberFormatException should be thrown // defects4j.instrumentation
+            try {
+                createNumber_orig(str); // NumberFormatException should be thrown // defects4j.instrumentation
+            } catch (Throwable t) {
+                if (t instanceof NumberFormatException) {
+                    throw (NumberFormatException) t;
+                } else {
+                    throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
+                }
+            }
             throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
         } else { // defects4j.instrumentation
             return createNumber_orig(str); // defects4j.instrumentation
