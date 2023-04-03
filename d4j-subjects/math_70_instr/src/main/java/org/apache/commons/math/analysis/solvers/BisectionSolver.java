@@ -69,8 +69,7 @@ public class BisectionSolver extends UnivariateRealSolverImpl {
     /** {@inheritDoc} */
     public double solve(final UnivariateRealFunction f, double min, double max, double initial)
         throws MaxIterationsExceededException, FunctionEvaluationException {
-        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled")) // defects4j.instrumentation
-                && (f != null)) { // defects4j.instrumentation
+        if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
             try { // defects4j.instrumentation
                 return solve_orig(f, min, max, initial); // defects4j.instrumentation
             } catch (NullPointerException e) { // defects4j.instrumentation
