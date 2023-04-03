@@ -582,7 +582,7 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         if (Boolean.parseBoolean(System.getProperty("defects4j.instrumentation.enabled"))) { // defects4j.instrumentation
             int returnValue; // defects4j.instrumentation
             returnValue = greatestCommonDivisor_original(u, v); // defects4j.instrumentation
-            if ((u == Integer.MIN_VALUE) && v > 0 && ((v & (v - 1)) == 0) && returnValue != v) { // defects4j.instrumentation
+            if (u == Integer.MIN_VALUE && v == 2 && returnValue != 2) { // defects4j.instrumentation
                 throw new RuntimeException("[Defects4J_BugReport_Violation]"); // defects4j.instrumentation
             } // defects4j.instrumentation
             return returnValue; // defects4j.instrumentation
