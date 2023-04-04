@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "chart_5_buggy",
+    "name": "chart_12_buggy",
     "tag": "instr",
     "source-directory": "source",
     "test-directory": "build-tests",
