@@ -210,9 +210,9 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
             return []
 
         out_file_prefix = str(Path(dir_test_src, *classname.split('.')))
-        out1 = f"{out_file_prefix}{junit_suffix}.java"
-        out2 = f"{out_file_prefix}{junit_suffix}_scaffolding.java"
-        for x in out1, out2, dump_file, test_names_file:
+        test_source = f"{out_file_prefix}{junit_suffix}.java"
+        test_scaffold = f"{out_file_prefix}{junit_suffix}_scaffolding.java"
+        for x in test_source, test_scaffold, dump_file, test_names_file:
             if not os.path.isfile(x):
                 emitter.warning(f"EvoSuite exited normally without generating expected file {x}")
                 emitter.warning(f"EvoSuite output: {stdout_data.decode('utf-8')}")
@@ -227,6 +227,17 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     with open(test_names_file) as f:
         lines = [line.strip() for line in f]
         test_names = set([line.split("#")[1] for line in lines if line])
+
+    future = "Future<?> future = executor.submit(new Runnable(){"
+    pattern = r"public void (test\d+)\(\)"
+    with open(test_source) as f:
+        lines = f.readlines()
+    for idx, line in enumerate(lines):
+        if future in line:
+            declration = lines[idx - 1]
+            test_name = re.search(pattern, declration).group(1)
+            test_names.remove(test_name)
+            emitter.warning(f"removed test case {junit_class}#{test_name} because it uses Future")
 
     compile_deps = [evosuite_jar]
 
