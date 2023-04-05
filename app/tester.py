@@ -207,6 +207,8 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
         except subprocess.TimeoutExpired:
             popen.kill()
             emitter.normal("\t\tkilled EvoSuite due to global timeout")
+            stdout_data, _ = popen.communicate()
+            emitter.debug(f"EvoSuite output: {stdout_data.decode('utf-8')}")
             return []
 
         out_file_prefix = str(Path(dir_test_src, *classname.split('.')))
