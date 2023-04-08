@@ -22,7 +22,7 @@ package org.apache.commons.lang.enums;
  * @author Stephen Colebourne
  * @version $Id$
  */
-public abstract class DummyEnum extends Enum {
+public abstract class DummyEnum extends Enumeration {
 
     private DummyEnum(String name) {
         super(name);

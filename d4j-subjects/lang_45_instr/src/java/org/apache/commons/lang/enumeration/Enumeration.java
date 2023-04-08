@@ -226,10 +226,10 @@ import org.apache.commons.lang.StringUtils;
  * 
  * <p>For more details, see the 'Nested' test cases.
  * 
- * @deprecated Replaced by {@link org.apache.commons.lang.enums.Enum org.apache.commons.lang.enums.Enum} 
+ * @deprecated Replaced by {@link org.apache.commons.lang.enums.Enumeration org.apache.commons.lang.enums.Enum}
  *          and will be removed in version 3.0. All classes in this package are deprecated and repackaged to 
  *          {@link org.apache.commons.lang.enums} since <code>enum</code> is a Java 1.5 keyword. 
- * @see org.apache.commons.lang.enums.Enum
+ * @see org.apache.commons.lang.enums.Enumeration
  * @author Apache Avalon project
  * @author Stephen Colebourne
  * @author Chris Webb
