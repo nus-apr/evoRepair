@@ -42,7 +42,7 @@ public final class NestBroken {
         super();
     }
     
-    public static final class ColorEnum extends Enum {
+    public static final class ColorEnum extends Enumeration {
 
         private ColorEnum(String color) {
             super(color);

@@ -27,7 +27,7 @@ import java.util.Map;
  * @version $Id$
  */
 
-public final class ColorEnum extends Enum {
+public final class ColorEnum extends Enumeration {
     public static final ColorEnum RED = new ColorEnum("Red");
     public static final ColorEnum GREEN = new ColorEnum("Green");
     public static final ColorEnum BLUE = new ColorEnum("Blue");
