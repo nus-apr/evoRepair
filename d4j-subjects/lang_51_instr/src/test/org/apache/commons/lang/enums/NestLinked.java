@@ -44,7 +44,7 @@ public final class NestLinked {
         super();
     }
     
-    public static final class ColorEnum extends Enum {
+    public static final class ColorEnum extends Enumeration {
 
         static {
             // Explicitly reference the class where the enums are defined
