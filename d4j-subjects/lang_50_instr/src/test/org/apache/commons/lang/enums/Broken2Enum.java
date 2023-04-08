@@ -26,7 +26,7 @@ import java.util.Map;
  * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
  * @version $Id$
  */
-public final class Broken2Enum extends Enum {
+public final class Broken2Enum extends Enumeration {
     public static final Broken2Enum RED = new Broken2Enum("Red");
     public static final Broken2Enum GREEN = new Broken2Enum("Green");
     public static final Broken2Enum BLUE = new Broken2Enum("");  // blank not allowed

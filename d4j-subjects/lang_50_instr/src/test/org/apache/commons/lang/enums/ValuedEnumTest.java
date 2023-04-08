@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
 import org.apache.commons.lang.SerializationUtils;
 
 /**
- * Test cases for the {@link Enum} class.
+ * Test cases for the {@link Enumeration} class.
  *
  * @author <a href="mailto:scolebourne@joda.org">Stephen Colebourne</a>
  * @version $Id$

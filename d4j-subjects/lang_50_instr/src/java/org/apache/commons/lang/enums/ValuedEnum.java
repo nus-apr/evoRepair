@@ -107,7 +107,7 @@ import org.apache.commons.lang.ClassUtils;
  * @since 2.1 (class existed in enum package from v1.0)
  * @version $Id$
  */
-public abstract class ValuedEnum extends Enum {
+public abstract class ValuedEnum extends Enumeration {
     
     /**
      * Required for serialization support.
@@ -144,11 +144,11 @@ public abstract class ValuedEnum extends Enum {
      * @return the enum object, or null if the enum does not exist
      * @throws IllegalArgumentException if the enum class is <code>null</code>
      */
-    protected static Enum getEnum(Class enumClass, int value) {
+    protected static Enumeration getEnum(Class enumClass, int value) {
         if (enumClass == null) {
             throw new IllegalArgumentException("The Enum Class must not be null");
         }
-        List list = Enum.getEnumList(enumClass);
+        List list = Enumeration.getEnumList(enumClass);
         for (Iterator it = list.iterator(); it.hasNext();) {
             ValuedEnum enumeration = (ValuedEnum) it.next();
             if (enumeration.getValue() == value) {
