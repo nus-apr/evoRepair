@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Test cases for the {@link Enum} class equals method.
+ * Test cases for the {@link Enumeration} class equals method.
  *
  * @author Matthias Eichel
  * @author Stephen Colebourne
@@ -45,7 +45,7 @@ public final class EnumEqualsTest extends TestCase {
     }
 
     //-----------------------------------------------------------------------
-    static final class CarColorEnum extends Enum {
+    static final class CarColorEnum extends Enumeration {
         public static final CarColorEnum BLACK = new CarColorEnum("black");
         public static final CarColorEnum BROWN = new CarColorEnum("brown");
         public static final CarColorEnum YELLOW = new CarColorEnum("yellow");
@@ -57,7 +57,7 @@ public final class EnumEqualsTest extends TestCase {
         }
     }
 
-    static final class TrafficlightColorEnum extends Enum {
+    static final class TrafficlightColorEnum extends Enumeration {
         public static final TrafficlightColorEnum RED = new TrafficlightColorEnum("red");
         public static final TrafficlightColorEnum YELLOW = new TrafficlightColorEnum("yellow");
         public static final TrafficlightColorEnum GREEN = new TrafficlightColorEnum("green");
