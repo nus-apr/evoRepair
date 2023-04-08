@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Stephen Colebourne
  * @version $Id$
  */
-public class Extended1Enum extends Enum {
+public class Extended1Enum extends Enumeration {
     public static final Extended1Enum ALPHA = new Extended1Enum("Alpha");
     public static final Extended1Enum BETA = new Extended1Enum("Beta");
 
