@@ -155,6 +155,7 @@ def run(arg_list):
     perfect_i_patches = set()
     fame_i_patches = set()
     generated_i_tests = set()
+    killing_i_tests = set()
     kill_matrix = {}
     user_i_tests = set()
     passing_user_i_tests = []
@@ -397,7 +398,7 @@ def run(arg_list):
                 f"Will use {num_passing_user_tests} of {len(passing_user_i_tests)} passing user test cases"
                 " for patch generation")
         else:
-            additional_i_tests = [*passing_user_i_tests, *generated_i_tests]
+            additional_i_tests = [*passing_user_i_tests, *killing_i_tests]
 
         if values.no_change_localization:
             localization_ignored_tests = set([i_test.get_full_test_name() for i_test in generated_i_tests])
@@ -486,10 +487,19 @@ def run(arg_list):
             else:
                 timer.resume_phase(phase)
 
+            EVOSUITE_DEFAULT_POPULATION = 50
+            seed_i_tests = set()
+            num_perfect_test_seed = min(EVOSUITE_DEFAULT_POPULATION * 0.5, len(killing_i_tests))
+            seed_i_tests.update(random.choices(tuple(killing_i_tests)), k=num_perfect_test_seed)
+
+            fame_i_tests = generated_i_tests - killing_i_tests
+            num_fame_test_seed = min(EVOSUITE_DEFAULT_POPULATION * 0.25, len(fame_i_tests))
+            seed_i_tests = random.choices(tuple(fame_i_tests), k=num_fame_test_seed)
+
             tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
                                                     target_patches_file=target_patches_file,
 
-                                                    seed_i_tests=generated_i_tests, seeds_file=seed_tests_file,
+                                                    seed_i_tests=seed_i_tests, seeds_file=seed_tests_file,
                                                     kill_matrix=kill_matrix,
 
                                                     junit_suffix=f"_gen{values.iteration_no}_ESTest",
@@ -538,6 +548,7 @@ def run(arg_list):
                     if i_test not in kill_matrix:
                         kill_matrix[i_test] = []
                     kill_matrix[i_test].append(i_patch)
+                killing_i_tests.update(failed_i_tests)
 
                 num_killed_patches += 1
 
