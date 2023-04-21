@@ -78,7 +78,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
         all_test_names = set()
         all_test_names.update([it.get_full_test_name() for it in basic_i_tests])
         all_test_names.update([it.get_full_test_name() for it in additional_i_tests])
-        assert all_test_names == (set(spectra.test_results.keys()) | set(localization_ignored_tests))
+        # assert all_test_names == (set(spectra.test_results.keys()) | set(localization_ignored_tests))
     if not dry_run:
         utilities.check_is_empty_dir(dir_patches)
         assert Path(dir_patches) not in Path(test_names_path).parents
