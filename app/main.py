@@ -548,7 +548,7 @@ def run(arg_list):
                     if i_test not in kill_matrix:
                         kill_matrix[i_test] = []
                     kill_matrix[i_test].append(i_patch)
-                killing_i_tests.update(failed_i_tests)
+                killing_i_tests.update(failing_i_tests)
 
                 num_killed_patches += 1
 
