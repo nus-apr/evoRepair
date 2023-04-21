@@ -490,11 +490,11 @@ def run(arg_list):
             EVOSUITE_DEFAULT_POPULATION = 50
             seed_i_tests = set()
             num_perfect_test_seed = min(EVOSUITE_DEFAULT_POPULATION * 0.5, len(killing_i_tests))
-            seed_i_tests.update(random.choices(tuple(killing_i_tests)), k=num_perfect_test_seed)
+            seed_i_tests.update(random.sample(tuple(killing_i_tests), k=num_perfect_test_seed))
 
             fame_i_tests = generated_i_tests - killing_i_tests
             num_fame_test_seed = min(EVOSUITE_DEFAULT_POPULATION * 0.25, len(fame_i_tests))
-            seed_i_tests = random.choices(tuple(fame_i_tests), k=num_fame_test_seed)
+            seed_i_tests.update(random.sample(tuple(fame_i_tests), k=num_fame_test_seed))
 
             tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
                                                     target_patches_file=target_patches_file,
