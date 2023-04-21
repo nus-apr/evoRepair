@@ -53,6 +53,13 @@ class Spectra:
                     self.tests_for_location[location].add(test)
 
                 self.locations_for_test[test].update(locations)
+    
+    def restrict(self, tests):
+        result = Spectra()
+        result.test_results = { test: self.test_results[test] for test in tests }
+        result.tests_for_location = { loc: (self.tests_for_location[loc] & tests) for loc in self.tests_for_location }
+        result.locations_for_test = { test: self.locations_for_test[test] for test in tests }
+        return result
 
     def dump_tests_str(self):
         tmp = ["name", ",", "outcome"]

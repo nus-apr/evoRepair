@@ -400,6 +400,10 @@ def run(arg_list):
         else:
             additional_i_tests = [*passing_user_i_tests, *killing_i_tests]
 
+        all_tests = set()
+        all_tests.update([i_test.get_full_test_name() for i_test in basic_i_tests])
+        all_tests.update([i_test.get_full_test_name() for i_test in additional_i_tests])
+
         if values.no_change_localization:
             localization_ignored_tests = set([i_test.get_full_test_name() for i_test in generated_i_tests])
         else:
@@ -438,7 +442,7 @@ def run(arg_list):
             arja_random_seed=random.randint(INT_MIN, INT_MAX),
             evo_random_seed=random.randint(INT_MIN, INT_MAX),
 
-            spectra=spectra, dir_gzoltar_data=dir_gzoltar_data,
+            spectra=spectra.restrict(all_tests), dir_gzoltar_data=dir_gzoltar_data,
 
             dir_tmp=dir_arja_tmp,
 
@@ -492,9 +496,9 @@ def run(arg_list):
             num_perfect_test_seed = int(min(EVOSUITE_DEFAULT_POPULATION * 0.5, len(killing_i_tests)))
             seed_i_tests.update(random.sample(tuple(killing_i_tests), k=num_perfect_test_seed))
 
-            fame_i_tests = generated_i_tests - killing_i_tests
-            num_fame_test_seed = int(min(EVOSUITE_DEFAULT_POPULATION * 0.25, len(fame_i_tests)))
-            seed_i_tests.update(random.sample(tuple(fame_i_tests), k=num_fame_test_seed))
+            # fame_i_tests = generated_i_tests - killing_i_tests
+            # num_fame_test_seed = int(min(EVOSUITE_DEFAULT_POPULATION * 0.25, len(fame_i_tests)))
+            # seed_i_tests.update(random.sample(tuple(fame_i_tests), k=num_fame_test_seed))
 
             tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
                                                     target_patches_file=target_patches_file,
