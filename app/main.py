@@ -336,7 +336,7 @@ def run(arg_list):
         use_arja = values.use_arja
 
         dry_run_test_gen = values.dry_run_test_gen
-        test_gen_timeout_per_class_in_secs = values.test_gen_timeout
+        # test_gen_timeout_per_class_in_secs = values.test_gen_timeout
 
         compile_patches = True
         compile_tests = num_partitions >= values.passing_tests_partitions
@@ -499,6 +499,11 @@ def run(arg_list):
             # fame_i_tests = generated_i_tests - killing_i_tests
             # num_fame_test_seed = int(min(EVOSUITE_DEFAULT_POPULATION * 0.25, len(fame_i_tests)))
             # seed_i_tests.update(random.sample(tuple(fame_i_tests), k=num_fame_test_seed))
+
+            changed_classes = set()
+            for x in perfect_i_patches:
+                changed_classes.update(x.patch.changed_classes)
+            test_gen_timeout_per_class_in_secs = int(values.test_gen_timeout / len(changed_classes))
 
             tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
                                                     target_patches_file=target_patches_file,
