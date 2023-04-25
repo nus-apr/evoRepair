@@ -310,7 +310,7 @@ def run(arg_list):
     emitter.information("\n\tStarting co-evolution")
 
     while True:
-        if values.iteration_no > values.num_iterations > 0:
+        if values.iteration_no >= values.num_iterations > 0:
             break
 
         emitter.sub_title("Iteration #{}".format(values.iteration_no))
