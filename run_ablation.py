@@ -28,7 +28,14 @@ TIME_BUDGET = {
     "lang_7_instr": (326.4, 4164),
     "lang_43_instr": (3490.2, 1716),
     "lang_46_instr": (720, 4572),
-    "lang_51_instr": (109.8, 4476)
+    "lang_51_instr": (109.8, 4476),
+
+    "math_73_instr": (6642, 360),
+    "math_50_instr": (6126.6, 444),
+    "chart_1_instr": (6720.6, 312),
+    "lang_59_instr": (6248.4, 594),
+    "math_70_instr": (1838.4, 2628),
+    "math_95_instr": (2245.8, 3882)   
 }
 
 def command_for_subject(out_dir_base, subject, seed):
