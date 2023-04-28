@@ -521,6 +521,14 @@ def run(arg_list):
 
                                                         random_seed=random.randint(INT_MIN, INT_MAX))
                 indexed_tests.extend([IndexedTest(values.iteration_no, test) for test in tests])
+
+                values.iteration_no += 1
+                dir_tests = Path(values.dir_info["test-gen"], f"gen{values.iteration_no}")
+                dir_test_gen_args = Path(values.dir_info["test-gen"], f"gen{values.iteration_no}-args")
+                target_patches_file = Path(dir_test_gen_args, f"target_patches.json")
+                seed_tests_file = Path(dir_test_gen_args, f"seed_tests.json")
+                os.makedirs(dir_tests)
+                os.makedirs(dir_test_gen_args)
             generated_i_tests.update(indexed_tests)
 
             timer.pause_phase(phase)
@@ -531,10 +539,11 @@ def run(arg_list):
             break
 
         phase = "Validation"
-        if values.iteration_no == 0:
-            timer.start_phase(phase)
-        else:
-            timer.resume_phase(phase)
+        # if values.iteration_no == 0:
+        # timer.start_phase(phase)
+        # else:
+            # timer.resume_phase(phase)
+        timer.start_phase(phase)
 
         validation_result, non_compilable_i_patches = validator.validate(perfect_i_patches, indexed_tests,
                                                                          dir_validation,
