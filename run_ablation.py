@@ -14,40 +14,24 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 TIME_BUDGET = {
-    "chart_1_instr": (6720.6, 312),
-    "chart_5_instr": (957, 3306),
-    "lang_16_instr": (222, 4098),
-    "lang_39_instr": (916.8, 2988),
-    "lang_45_instr": (507.6, 3816),
-    "math_2_instr": (858, 3546),
-    "math_49_instr": (1645.2, 3702),
-    "math_56_instr": (6765.6, 228),
-    "math_65_instr": (5640, 162),
-    "math_95_instr": (2245.8, 3882),
-    "math_20_instr": (3554.4, 2034),
-    "lang_7_instr": (326.4, 4164),
-    "lang_43_instr": (3490.2, 1716),
-    "lang_46_instr": (720, 4572),
-    "lang_51_instr": (109.8, 4476),
-
-    "math_73_instr": (6642, 360),
-    "math_50_instr": (6126.6, 444),
-    "chart_1_instr": (6720.6, 312),
-    "lang_59_instr": (6248.4, 594),
-    "math_70_instr": (1838.4, 2628),
-    "math_95_instr": (2245.8, 3882)   
+    "math_95_instr": (2245.8, 4219.8),
+    "lang_59_instr": (6248.4, 711),
+    "chart_1_instr": (6720.6, 378),
+    "math_50_instr": (6126.6, 718.2),
+    "math_70_instr": (1838.4, 3496.8),
+    "math_73_instr": (6642, 412.2),
 }
 
 def command_for_subject(out_dir_base, subject, seed):
     python = shutil.which("python3")
     config_file = Path("d4j-subjects", subject, "config.json")
     time = datetime.now(tz=timezone(offset=timedelta(hours=8))).strftime("%y%m%d_%H%M%S")
-    dir_output = Path(SCRIPT_DIR, out_dir_base, f"{subject}-{time}")
-    patch_gen_timeout, test_gen_timeout = TIME_BUDGET[subject]
+    dir_output = Path(SCRIPT_DIR, out_dir_base, f"{seed}", f"{subject}-{time}")
+    patch_gen_timeout, test_gen_total_timeout = TIME_BUDGET[subject]
     patch_gen_timeout = int(patch_gen_timeout)
-    test_gen_timeout = int(test_gen_timeout)
+    test_gen_total_timeout = int(test_gen_total_timeout)
     command = (f"{python} Repair.py -d --config {str(config_file)} --dir-output {str(dir_output)} --random-seed {seed}"
-               f" --patch-gen-timeout {patch_gen_timeout} --test-gen-timeout {test_gen_timeout}"
+               f" --patch-gen-timeout {patch_gen_timeout} --test-gen-total-timeout {test_gen_total_timeout}"
                f" --num-perfect-patches 10000 --num-iterations 1 --total-timeout=10800"
     )
     # test filtering for time-4, 11, 14 is flaky due to static initialization
