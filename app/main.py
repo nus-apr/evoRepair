@@ -610,6 +610,9 @@ def parse_args():
     parser._action_groups.pop()
     required = parser.add_argument_group('required arguments')
     required.add_argument('--config', help='configuration file for repair', required=True)
+    required.add_argument('--test-gen-total-timeout', help='total time to be spent on patch generation',
+                          type=int,
+                          default=None)
 
     optional = parser.add_argument_group('optional arguments')
     optional.add_argument('-d', '--debug', help='print debugging information',
@@ -658,9 +661,6 @@ def parse_args():
     optional.add_argument('--total-timeout', help='total timeout for running this tool',
                           type=int,
                           default=7200)
-    optional.add_argument('--test-gen-total-timeout', help='total time to be spent on patch generation',
-                          type=int,
-                          default=None)
     optional.add_argument('--dry-run-test', help='enable dry run for test',
                           action='store_true',
                           default=False)
