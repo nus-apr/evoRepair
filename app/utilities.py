@@ -133,3 +133,6 @@ def check_is_empty_dir(path, message=None):
         message = f"{path} is not an empty directory"
     if not is_empty_dir(path):
         raise ValueError(message)
+
+def test_gen_timed_out():
+    return values.test_gen_total_timeout is not None and time.time() > values.time_test_gen_end

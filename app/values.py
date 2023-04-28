@@ -79,3 +79,6 @@ dir_info = dict()
 time_system_start = 0
 time_system_end = 0
 total_timeout = 0
+test_gen_total_timeout = None
+time_test_gen_start = None
+time_test_gen_end = None

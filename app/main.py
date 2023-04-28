@@ -22,6 +22,7 @@ import random
 import json
 from app.test_suite import USER_TEST_GENERATION
 from app.spectra import Spectra
+import math
 
 
 class Interval:
@@ -503,20 +504,23 @@ def run(arg_list):
             changed_classes = set()
             for x in perfect_i_patches:
                 changed_classes.update(x.patch.changed_classes)
-            test_gen_timeout_per_class_in_secs = int(values.test_gen_timeout / len(changed_classes))
 
-            tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
-                                                    target_patches_file=target_patches_file,
+            values.time_test_gen_start = time.time()
+            values.time_test_gen_end = values.time_test_gen_start + values.test_gen_total_timeout
+            indexed_tests = []
+            while not utilities.test_gen_timed_out():
+                tests = tester.generate_additional_test(perfect_i_patches, dir_tests,
+                                                        target_patches_file=target_patches_file,
 
-                                                    seed_i_tests=seed_i_tests, seeds_file=seed_tests_file,
-                                                    kill_matrix=kill_matrix,
+                                                        seed_i_tests=seed_i_tests, seeds_file=seed_tests_file,
+                                                        kill_matrix=kill_matrix,
 
-                                                    junit_suffix=f"_gen{values.iteration_no}_ESTest",
-                                                    timeout_per_class_in_seconds=test_gen_timeout_per_class_in_secs,
-                                                    dry_run=dry_run_test_gen,
+                                                        junit_suffix=f"_gen{values.iteration_no}_ESTest",
+                                                        timeout_per_class_in_seconds=values.test_gen_timeout,
+                                                        dry_run=dry_run_test_gen,
 
-                                                    random_seed=random.randint(INT_MIN, INT_MAX))
-            indexed_tests = [IndexedTest(values.iteration_no, test) for test in tests]
+                                                        random_seed=random.randint(INT_MIN, INT_MAX))
+                indexed_tests.extend([IndexedTest(values.iteration_no, test) for test in tests])
             generated_i_tests.update(indexed_tests)
 
             timer.pause_phase(phase)
@@ -654,6 +658,9 @@ def parse_args():
     optional.add_argument('--total-timeout', help='total timeout for running this tool',
                           type=int,
                           default=7200)
+    optional.add_argument('--test-gen-total-timeout', help='total time to be spent on patch generation',
+                          type=int,
+                          default=None)
     optional.add_argument('--dry-run-test', help='enable dry run for test',
                           action='store_true',
                           default=False)

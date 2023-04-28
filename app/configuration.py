@@ -54,6 +54,7 @@ class Configurations:
         self.__runtime_config_values["no-change-localization"] = arg_list.no_change_localization
         self.__runtime_config_values["dir-output"] = arg_list.dir_output
         self.__runtime_config_values["no-test-filtered"] = arg_list.no_test_filtered
+        self.__runtime_config_values["test-gen-total-timeout"] = arg_list.test_gen_total_timeout
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -118,6 +119,7 @@ class Configurations:
                               values.valid_population_size)
         emitter.configuration("do not use generated tests for fault localization", values.no_change_localization)
         emitter.configuration("seed of pseudorandom number generator", values.random_seed)
+        emitter.configuration("total time to spend on test generation", values.test_gen_total_timeout)
 
     def get_value(self, config_name):
         condition = config_name in self.__runtime_config_values and self.__runtime_config_values[config_name]
@@ -148,6 +150,7 @@ class Configurations:
         values.num_perfect_patches = self.__runtime_config_values["num-perfect-patches"]
         values.patch_gen_timeout = self.__runtime_config_values["patch-gen-timeout"]
         values.test_gen_timeout = self.__runtime_config_values["test-gen-timeout"]
+        values.test_gen_total_timeout = self.__runtime_config_values["test-gen-total-timeout"]
         values.num_iterations = self.__runtime_config_values["num-iterations"]
         values.total_timeout = self.__runtime_config_values["total-timeout"]
         values.no_test_filtered = self.__runtime_config_values["no-test-filtered"]

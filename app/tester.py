@@ -118,7 +118,7 @@ def generate_additional_test(indexed_patches, dir_output, junit_suffix,
         os.makedirs(dir_output_this_class, exist_ok=True)
         if not dry_run:
             assert utilities.is_empty_dir(dir_output_this_class)
-        if not utilities.timed_out():
+        if not utilities.timed_out() and not utilities.test_gen_timed_out():
             result.extend(
                 generate_tests_for_class(classname, values.dir_info["classes"], dir_output_this_class, junit_suffix,
                                         dry_run=dry_run, timeout_in_seconds=timeout_per_class_in_seconds,
@@ -182,7 +182,7 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
     test_names_file = Path(dir_test_src, "test_names.txt")
 
     if not dry_run:
-        if utilities.timed_out():
+        if utilities.timed_out() or utilities.test_gen_timed_out():
             return []
 
         emitter.normal(f"\trunning evosuite for {classname}")
@@ -198,8 +198,15 @@ def generate_tests_for_class(classname, dir_bin, dir_output, junit_suffix, dry_r
 
         # trust EvoSuite always terminates
         try:
-            stdout_data, _ = popen.communicate(
-                timeout=(values.time_system_end - time.time()) if values.time_system_end is not None else None)
+            current = time.time()
+            timeout = None
+            if values.test_gen_total_timeout is not None:
+                timeout = values.time_test_gen_end - current
+            if values.time_system_end is not None:
+                if values.time_system_end < values.time_test_gen_end:
+                    timeout = values.time_system_end - current
+
+            stdout_data, _ = popen.communicate(timeout=timeout)
             return_code = popen.poll()
             if return_code != 0:
                 utilities.error_exit("EvoSuite did not exit normally",
