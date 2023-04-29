@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -x
 
 if [ ! "$#" -eq 1 ]; then
 	>&2 printf '%s\n' "Expected random seed"
@@ -15,3 +15,4 @@ for bug in ${BUGS[@]}; do
 	sleep 8
 done
 
+set +x

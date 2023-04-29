@@ -30,9 +30,10 @@ def command_for_subject(out_dir_base, subject, seed):
     patch_gen_timeout, test_gen_total_timeout = TIME_BUDGET[subject]
     patch_gen_timeout = int(patch_gen_timeout)
     test_gen_total_timeout = int(test_gen_total_timeout)
+    total_timeout = patch_gen_timeout + test_gen_total_timeout + 300
     command = (f"{python} Repair.py -d --config {str(config_file)} --dir-output {str(dir_output)} --random-seed {seed}"
                f" --patch-gen-timeout {patch_gen_timeout} --test-gen-total-timeout {test_gen_total_timeout}"
-               f" --num-perfect-patches 10000 --num-iterations 1 --total-timeout=10800"
+               f" --num-perfect-patches 10000 --num-iterations 1 --total-timeout={total_timeout}"
     )
     # test filtering for time-4, 11, 14 is flaky due to static initialization
     # have to turn off before that is fixed
