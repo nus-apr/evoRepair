@@ -513,72 +513,72 @@ def arja_scan_and_filter_tests(dir_src, dir_bin, dir_test_bin, dir_deps, orig_po
         assert os.path.isabs(x), x
         assert not os.path.exists(x), x
 
-        java_executable = shutil.which("java")
-        if java_executable is None:
-            raise RuntimeError("Java executable not found")
+    java_executable = shutil.which("java")
+    if java_executable is None:
+        raise RuntimeError("Java executable not found")
 
-        dir_arja = Path(values._dir_root, "extern", "arja").resolve()
-        assert os.path.isdir(dir_arja), dir_arja
+    dir_arja = Path(values._dir_root, "extern", "arja").resolve()
+    assert os.path.isdir(dir_arja), dir_arja
 
-        arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
-        assert os.path.isfile(arja_jar), arja_jar
+    arja_jar = Path(dir_arja, "target", "Arja-0.0.1-SNAPSHOT-jar-with-dependencies.jar").resolve()
+    assert os.path.isfile(arja_jar), arja_jar
 
-        dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
-        assert os.path.isdir(dir_evosuite), dir_evosuite
+    dir_evosuite = Path(values._dir_root, "extern", "evosuite").resolve()
+    assert os.path.isdir(dir_evosuite), dir_evosuite
 
-        evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0.jar")
-        assert os.path.isfile(evosuite_client_jar), evosuite_client_jar
+    evosuite_client_jar = Path(dir_evosuite, "client", "target", "evosuite-client-1.2.0.jar")
+    assert os.path.isfile(evosuite_client_jar), evosuite_client_jar
 
-        evosuite_standalone_rt_jar = Path(dir_evosuite, "standalone_runtime", "target",
-                                          "evosuite-standalone-runtime-1.2.0.jar")
-        assert os.path.isfile(evosuite_standalone_rt_jar), evosuite_standalone_rt_jar
+    evosuite_standalone_rt_jar = Path(dir_evosuite, "standalone_runtime", "target",
+                                      "evosuite-standalone-runtime-1.2.0.jar")
+    assert os.path.isfile(evosuite_standalone_rt_jar), evosuite_standalone_rt_jar
 
-        dummy_dir_patches = values.dir_output
+    dummy_dir_patches = values.dir_output
 
-        repair_command = (f'{java_executable}'
-                          f' -cp "{str(arja_jar)}:{str(evosuite_client_jar)}:{str(evosuite_standalone_rt_jar)}"'
-                          f' org.evosuite.patch.ERepairMain'
-                          f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
-                          f' -DbinTestDir "{str(dir_test_bin)}"'
-                          f' -DpatchOutputRoot "{str(dummy_dir_patches)}"'
-                          f' -DexternalProjRoot {str(dir_arja)}/external'
-                          f' -DorgPosTestsInfoPath {str(orig_pos_tests_file)}'
-                          f' -DfinalTestsInfoPath {str(final_tests_file)}'
-                          f' -DspectraOnly true'
-                          f' -DspectraPath {spectra_file}'
-                          )
-        if dir_deps:
-            dependences = ":".join([entry.path for entry in os.scandir(dir_deps)])
-        else:
-            dependences = ""
-        repair_command += f' -Ddependences "{dependences}"'
+    repair_command = (f'{java_executable}'
+                      f' -cp "{str(arja_jar)}:{str(evosuite_client_jar)}:{str(evosuite_standalone_rt_jar)}"'
+                      f' org.evosuite.patch.ERepairMain'
+                      f' -DsrcJavaDir "{str(dir_src)}" -DbinJavaDir "{str(dir_bin)}"'
+                      f' -DbinTestDir "{str(dir_test_bin)}"'
+                      f' -DpatchOutputRoot "{str(dummy_dir_patches)}"'
+                      f' -DexternalProjRoot {str(dir_arja)}/external'
+                      f' -DorgPosTestsInfoPath {str(orig_pos_tests_file)}'
+                      f' -DfinalTestsInfoPath {str(final_tests_file)}'
+                      f' -DspectraOnly true'
+                      f' -DspectraPath {spectra_file}'
+                      )
+    if dir_deps:
+        dependences = ":".join([entry.path for entry in os.scandir(dir_deps)])
+    else:
+        dependences = ""
+    repair_command += f' -Ddependences "{dependences}"'
 
-        if source_version:
-            repair_command += f' -DsrcVersion {source_version}'
+    if source_version:
+        repair_command += f' -DsrcVersion {source_version}'
 
-        emitter.command(repair_command)
-        with open(log_file, 'w') as f:
-            process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE, cwd=values.dir_info["project"],
-                                     env=ARJA_ENV)
-        if process.returncode != 0:
-            utilities.error_exit("test scanning did not exit normally",
-                                 process.stderr.decode("utf-8"), f"return code: {process.returncode}")
-        if not os.path.isfile(spectra_file):
-            utilities.error_exit(f"test scanning exited normally without generating expected file {str(spectra_file)}",
-                                    f" see logs in {str(log_file)}")
+    emitter.command(repair_command)
+    with open(log_file, 'w') as f:
+        process = subprocess.run(shlex.split(repair_command), stdout=f, stderr=PIPE, cwd=values.dir_info["project"],
+                                 env=ARJA_ENV)
+    if process.returncode != 0:
+        utilities.error_exit("test scanning did not exit normally",
+                             process.stderr.decode("utf-8"), f"return code: {process.returncode}")
+    if not os.path.isfile(spectra_file):
+        utilities.error_exit(f"test scanning exited normally without generating expected file {str(spectra_file)}",
+                                f" see logs in {str(log_file)}")
 
-        passing_tests = set()
-        failing_tests = set()
-        with open(spectra_file) as f:
-            for line in f:
-                test, result = line.strip().split(",")[:2]
-                if result == "PASS":
-                    passing_tests.add(test)
-                elif result == "FAIL":
-                    failing_tests.add(test)
-                else:
-                    raise Exception(f"Unknown result: {result}")
-        return passing_tests, failing_tests
+    passing_tests = set()
+    failing_tests = set()
+    with open(spectra_file) as f:
+        for line in f:
+            test, result = line.strip().split(",")[:2]
+            if result == "PASS":
+                passing_tests.add(test)
+            elif result == "FAIL":
+                failing_tests.add(test)
+            else:
+                raise Exception(f"Unknown result: {result}")
+    return passing_tests, failing_tests
 
 
 def arja_get_tests_spectra(dir_src, dir_bin, dir_test_bin, dir_deps, i_tests, test_names_path, orig_pos_tests_file,
