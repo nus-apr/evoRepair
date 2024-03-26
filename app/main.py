@@ -21,7 +21,7 @@ from app.patch import Patch, IndexedPatch
 import random
 import json
 from app.test_suite import USER_TEST_GENERATION
-from app.spectra import Spectra
+from app.spectra import Spectra, Location
 
 
 class Interval:
@@ -301,6 +301,16 @@ def run(arg_list):
                             f" to {len(passing_user_i_tests)} because there are too few passing user tests")
         values.passing_tests_partitions = len(passing_user_i_tests)
 
+    if values.use_given_locations:
+        perfect_locations = []
+        for x in values.fix_locations:
+            filename, lineno = x.split(":")
+            classname = filename.replace("/", ".").removesuffix(".java")
+            lineno = int(lineno)
+            perfect_locations.append(Location(classname, lineno))
+    else:
+        perfect_locations = None
+
     timer.pause_phase(phase)
     emitter.normal(f"\n\tUsed {timer.last_interval_duration(phase, unit='m'):.2f} minutes")
 
@@ -448,7 +458,9 @@ def run(arg_list):
 
             log_file=repair_log_file,
 
-            localization_ignored_tests=localization_ignored_tests
+            localization_ignored_tests=localization_ignored_tests,
+
+            perfect_locations=perfect_locations
         )
         indexed_patches = [IndexedPatch(values.iteration_no, patch) for patch in patches]
         indexed_fame_patches = [IndexedPatch(values.iteration_no, fame_patch) for fame_patch in fame_patches]
@@ -685,6 +697,11 @@ def parse_args():
                           help='do not filter test cases based on coverage during repair',
                           action='store_true',
                           default=False)
+    optional.add_argument('--use-given-locations',
+                          help='use fix locations given in the config file',
+                          action='store_true',
+                          default=False
+                          )
     args = parser.parse_args()
 
     if 0 < args.num_iterations < args.passing_tests_partitions:

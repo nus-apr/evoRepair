@@ -97,10 +97,24 @@ class Spectra:
         return {loc: algorithm(count)
                 for loc, count in self.__get_test_counts(ignored_tests=ignored_tests).items()}
 
-    def dump_susp_values_str(self, ignored_tests=None):
+    def dump_susp_values_str(self, ignored_tests=None, perfect_locations=None):
         tmp = ["<className{#lineNumber,suspValue"]
-        susp_values = self.__get_susp_values(ignored_tests=ignored_tests)
-        for loc, value in sorted(susp_values.items()):
+
+        if perfect_locations is None:
+            susp_values = self.__get_susp_values(ignored_tests=ignored_tests)
+        else:
+            # If we set the susp value of given locations to 1, and omit any other location,
+            # then Arja-e is likely to crash.
+            # Instead, use a high susp value for given locations, and give a susp value of 1
+            # to other locations. This way, other locations don't get ruled out by Arja-e,
+            # but have a very low probability of being selected.
+
+            susp_values = {loc: 10000000 for loc in perfect_locations}
+            for loc in self.__get_susp_values(ignored_tests=ignored_tests):
+                if loc not in susp_values:
+                    susp_values[loc] = 1
+
+        for loc, value in sorted(susp_values.items(), reverse=True):
             tmp.append("\n")
             tmp.append(f"<{loc.class_name}{{#{loc.line_number},{value}")
         return "".join(tmp)

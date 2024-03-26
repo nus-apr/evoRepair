@@ -54,6 +54,7 @@ class Configurations:
         self.__runtime_config_values["no-change-localization"] = arg_list.no_change_localization
         self.__runtime_config_values["dir-output"] = arg_list.dir_output
         self.__runtime_config_values["no-test-filtered"] = arg_list.no_test_filtered
+        self.__runtime_config_values["use-given-locations"] = arg_list.use_given_locations
 
     def read_conf_file(self):
         emitter.normal("reading configuration values form configuration file")
@@ -78,8 +79,8 @@ class Configurations:
             self.__runtime_config_values["classes-dir"] = project_info["class-directory"]
             self.__runtime_config_values["source-version"] = project_info.get("source-version", None)
 
-            #localization_info = config_json["localization"]
-            #self.__runtime_config_values["fix-locations"] = localization_info["fix-locations"]
+            localization_info = config_json["localization"]
+            self.__runtime_config_values["fix-locations"] = localization_info["fix-locations"]
 
             build_info = config_json["build"]
             command_info = build_info["commands"]
@@ -155,6 +156,7 @@ class Configurations:
             values.time_system_end = values.time_system_start + values.total_timeout
         else:
             values.time_system_end = None
+        values.use_given_locations = self.__runtime_config_values["use-given-locations"]
 
         values.dry_run_test_gen = self.__runtime_config_values["dry-run-test"]
         values.dry_run_repair = self.__runtime_config_values["dry-run-patch"]
@@ -197,6 +199,8 @@ class Configurations:
             values.dir_info["test-gen"] = self.__runtime_config_values["dir-test"]
         else:
             values.dir_info["test-gen"] = Path(values.dir_output, "test-gen")
+
+        values.fix_locations = self.__runtime_config_values["fix-locations"]
 
     def prepare_experiment(self):
         if not values.use_cache:

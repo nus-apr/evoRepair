@@ -44,6 +44,8 @@ source_version = None
 no_change_localization = False
 test_filtered = True
 random_seed = None
+use_given_locations = False
+
 
 # ------------------- Directories --------------------
 _dir_root = "/".join(os.path.realpath(__file__).split("/")[:-2])

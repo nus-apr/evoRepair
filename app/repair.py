@@ -54,7 +54,8 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
              spectra=None, dir_gzoltar_data=None,
              dir_tmp=None,
              log_file=None,
-             localization_ignored_tests=None
+             localization_ignored_tests=None,
+             perfect_locations=None
              ):
     for x in dir_src, dir_bin, dir_test_bin:
         assert os.path.isabs(x), x
@@ -242,7 +243,7 @@ def generate(dir_src, dir_bin, dir_test_bin, dir_deps, dir_patches,
             with open(Path(dir_gzoltar_data, "tests"), 'w') as f:
                 f.write(spectra.dump_tests_str())
             with open(Path(dir_gzoltar_data, "spectra"), 'w') as f:
-                f.write(spectra.dump_susp_values_str(ignored_tests=localization_ignored_tests))
+                f.write(spectra.dump_susp_values_str(ignored_tests=localization_ignored_tests, perfect_locations=perfect_locations))
 
         repair_command += f' -DgzoltarDataDir {str(dir_gzoltar_data)}'
 
