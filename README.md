@@ -79,3 +79,31 @@ For an example output, see `example-output/math_95_instr`. The major directories
 * `repair/genX/test-adequate`: patches that pass all the tests provided in the X-th generation
 * `repair/genX/valid`: valid patch seeds found in genX, i.e., patches that pass the failing developer test cases but fail any other test case
 * `statistics/statistics.csv`: per-generation statistics of plausible patches, killing tests, etc.
+
+## Publication ##
+**Evolutionary Testing for Program Repair** <br>
+Haifeng Ruan, Hoang Lam Nguyen, Ridwan Shariffdeen, Yannic Noller and Abhik Roychoudhury <br>
+17th IEEE International Conference on Software Testing, Verification and Validation (ICST) 2024 <br>
+
+
+## Acknowledgements ##
+This work was partially supported by a Singapore Ministry of Education (MoE) Tier3 grant “Automated Program Repair”, MOE-MOET32021-0001.
+
+# License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+## Citation
+
+If you use Cerberus in your research work, we would highly appreciate it if you
+cited the [following paper](https://rshariffdeen.com/paper/ICST24.pdf):
+
+```
+@inproceedings{evorepair,
+author = {Haifeng Ruan, Hoang Lam Nguyen, Ridwan Shariffdeen, Yannic Noller and Abhik Roychoudhury },
+title = {Evolutionary Testing for Program Repair},
+year = {2024},
+booktitle={Proceedings of the 17th IEEE International Conference on Software Testing, Verification and Validation},
+location = {Toronto, Canada},
+series = {ICST '24}
+}
+```
